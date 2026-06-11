@@ -10,13 +10,23 @@ export async function fetchFlights(params = {}) {
   return response.data
 }
 
+export async function fetchFlight(id) {
+  const response = await http.get(`/api/flights/${id}`)
+  return response.data
+}
+
+export async function fetchPriceHistory(id) {
+  const response = await http.get(`/api/flights/${id}/price-history`)
+  return response.data
+}
+
 export async function fetchLatestJob() {
   const response = await http.get('/api/crawl/latest')
   return response.data
 }
 
-export async function runCrawler() {
-  const response = await http.post('/api/crawl/run')
+export async function runCrawler(payload = {}) {
+  const response = await http.post('/api/crawl/run', payload)
   return response.data
 }
 
@@ -25,3 +35,7 @@ export async function requestAdvice(message) {
   return response.data
 }
 
+export async function requestTiming(message) {
+  const response = await http.post('/api/ai/timing', { message })
+  return response.data
+}

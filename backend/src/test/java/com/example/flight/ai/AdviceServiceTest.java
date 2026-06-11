@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,6 +41,20 @@ class AdviceServiceTest {
 
         assertThat(advice.recommendedFlight()).isNull();
         assertThat(advice.summary()).contains("暂未找到", "上海", "北京");
+    }
+
+    @Test
+    void usesDeepSeekTextWhenAiClientReturnsContent() {
+        var searchPort = new StubFlightSearchPort(List.of(
+                flight("MU5101", "上海", "北京", "虹桥机场", "首都机场", "980")
+        ));
+        AiTextClient aiTextClient = (systemPrompt, userPrompt) -> Optional.of("DeepSeek 推荐 MU5101，并建议提前一周购票。");
+        var service = new AdviceService(searchPort, aiTextClient);
+
+        var advice = service.generate(new AdviceRequest("2026-06-19 上海到北京，预算1200元"));
+
+        assertThat(advice.summary()).isEqualTo("DeepSeek 推荐 MU5101，并建议提前一周购票。");
+        assertThat(advice.recommendedFlight().flightNo()).isEqualTo("MU5101");
     }
 
     private static Flight flight(String flightNo,
@@ -84,4 +99,3 @@ class AdviceServiceTest {
         }
     }
 }
-

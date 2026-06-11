@@ -14,4 +14,7 @@ app:
   crawler:
     command: docker compose -f ../infra/docker-compose.yml run --rm crawler
     timeout-seconds: 120
-
+  deepseek:
+    api-key: ${DEEPSEEK_API_KEY:}
+    base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com}
+    model: ${DEEPSEEK_MODEL:deepseek-v4-flash}

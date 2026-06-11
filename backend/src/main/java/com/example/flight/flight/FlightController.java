@@ -24,8 +24,9 @@ public class FlightController {
     public List<Flight> search(@RequestParam(required = false) String fromCity,
                                @RequestParam(required = false) String toCity,
                                @RequestParam(required = false)
-                               @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return flightRepository.search(new FlightSearchCriteria(fromCity, toCity, date));
+                               @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                               @RequestParam(required = false) String dataSource) {
+        return flightRepository.search(new FlightSearchCriteria(fromCity, toCity, date, dataSource));
     }
 
     @GetMapping("/{id}")
@@ -34,5 +35,12 @@ public class FlightController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
-}
 
+    @GetMapping("/{id}/price-history")
+    public ResponseEntity<List<FlightPriceSnapshot>> priceHistory(@PathVariable Long id) {
+        if (flightRepository.findById(id).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(flightRepository.findPriceHistory(id));
+    }
+}

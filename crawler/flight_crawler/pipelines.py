@@ -15,15 +15,18 @@ class MysqlPipeline:
             charset="utf8mb4",
             autocommit=False,
         )
+        self._ensure_schema()
         self.success_count = 0
         self.failed_count = 0
+        self.source = getattr(spider, "source", getattr(spider, "name", "sample"))
+        self.request_params = getattr(spider, "request_params", f"source={self.source}")
         with self.connection.cursor() as cursor:
             cursor.execute(
                 """
-                insert into crawl_job(status, started_at, success_count, failed_count)
-                values (%s, %s, %s, %s)
+                insert into crawl_job(status, started_at, success_count, failed_count, source, request_params)
+                values (%s, %s, %s, %s, %s, %s)
                 """,
-                ("RUNNING", datetime.now(), 0, 0),
+                ("RUNNING", datetime.now(), 0, 0, self.source, self.request_params),
             )
             self.job_id = cursor.lastrowid
         self.connection.commit()
@@ -64,6 +67,38 @@ class MysqlPipeline:
                         datetime.now(),
                     ),
                 )
+                cursor.execute(
+                    """
+                    select id from flight
+                    where flight_no = %s and depart_time = %s and data_source = %s
+                    """,
+                    (
+                        item["flight_no"],
+                        item["depart_time"].replace("T", " "),
+                        item["data_source"],
+                    ),
+                )
+                flight_id = cursor.fetchone()[0]
+                cursor.execute(
+                    """
+                    insert into flight_price_snapshot(
+                        flight_id, flight_no, from_city, to_city, depart_time,
+                        price, seats_left, data_source, observed_at
+                    )
+                    values (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    (
+                        flight_id,
+                        item["flight_no"],
+                        item["from_city"],
+                        item["to_city"],
+                        item["depart_time"].replace("T", " "),
+                        item["price"],
+                        item["seats_left"],
+                        item["data_source"],
+                        datetime.now(),
+                    ),
+                )
             self.success_count += 1
             self.connection.commit()
         except Exception:
@@ -87,3 +122,32 @@ class MysqlPipeline:
         self.connection.commit()
         self.connection.close()
 
+    def _ensure_schema(self):
+        with self.connection.cursor() as cursor:
+            for statement in [
+                "alter table crawl_job add column source varchar(32) null",
+                "alter table crawl_job add column request_params varchar(500) null",
+            ]:
+                try:
+                    cursor.execute(statement)
+                except Exception:
+                    pass
+            cursor.execute(
+                """
+                create table if not exists flight_price_snapshot (
+                    id bigint primary key auto_increment,
+                    flight_id bigint not null,
+                    flight_no varchar(20) not null,
+                    from_city varchar(32) not null,
+                    to_city varchar(32) not null,
+                    depart_time datetime not null,
+                    price decimal(10, 2) not null,
+                    seats_left int not null default 0,
+                    data_source varchar(32) not null,
+                    observed_at datetime not null,
+                    key idx_snapshot_flight (flight_id, observed_at),
+                    key idx_snapshot_route (from_city, to_city, depart_time)
+                ) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci
+                """
+            )
+        self.connection.commit()

@@ -7,6 +7,9 @@ services:
       MYSQL_DATABASE: flight_demo
       MYSQL_USER: flight
       MYSQL_PASSWORD: flight123
+      AMADEUS_CLIENT_ID: ${AMADEUS_CLIENT_ID:-}
+      AMADEUS_CLIENT_SECRET: ${AMADEUS_CLIENT_SECRET:-}
+      AMADEUS_BASE_URL: ${AMADEUS_BASE_URL:-https://test.api.amadeus.com}
       TZ: Asia/Shanghai
     ports:
       - "3306:3306"
@@ -35,4 +38,3 @@ services:
 
 volumes:
   flight_mysql_data:
-

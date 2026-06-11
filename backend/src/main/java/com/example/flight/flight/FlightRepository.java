@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class FlightRepository implements FlightSearchPort {
+public class FlightRepository implements FlightSearchPort, PriceHistoryPort {
     private final JdbcTemplate jdbcTemplate;
 
     private final RowMapper<Flight> rowMapper = (rs, rowNum) -> new Flight(
@@ -29,6 +29,19 @@ public class FlightRepository implements FlightSearchPort {
             rs.getInt("seats_left"),
             rs.getString("data_source"),
             rs.getTimestamp("collected_at").toLocalDateTime()
+    );
+
+    private final RowMapper<FlightPriceSnapshot> snapshotRowMapper = (rs, rowNum) -> new FlightPriceSnapshot(
+            rs.getLong("id"),
+            rs.getLong("flight_id"),
+            rs.getString("flight_no"),
+            rs.getString("from_city"),
+            rs.getString("to_city"),
+            rs.getTimestamp("depart_time").toLocalDateTime(),
+            rs.getInt("price"),
+            rs.getInt("seats_left"),
+            rs.getString("data_source"),
+            rs.getTimestamp("observed_at").toLocalDateTime()
     );
 
     public FlightRepository(JdbcTemplate jdbcTemplate) {
@@ -54,6 +67,10 @@ public class FlightRepository implements FlightSearchPort {
             args.add(Timestamp.valueOf(date.atStartOfDay()));
             args.add(Timestamp.valueOf(date.plusDays(1).atStartOfDay()));
         }
+        if (StringUtils.hasText(criteria.dataSource())) {
+            sql.append(" and data_source = ?");
+            args.add(criteria.dataSource());
+        }
 
         sql.append(" order by price asc, depart_time asc");
         return jdbcTemplate.query(sql.toString(), rowMapper, args.toArray());
@@ -68,5 +85,13 @@ public class FlightRepository implements FlightSearchPort {
         Long count = jdbcTemplate.queryForObject("select count(*) from flight", Long.class);
         return count == null ? 0 : count;
     }
-}
 
+    @Override
+    public List<FlightPriceSnapshot> findPriceHistory(Long flightId) {
+        return jdbcTemplate.query("""
+                select * from flight_price_snapshot
+                where flight_id = ?
+                order by observed_at asc
+                """, snapshotRowMapper, flightId);
+    }
+}

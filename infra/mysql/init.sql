@@ -25,6 +25,22 @@ create table if not exists crawl_job (
     success_count int not null default 0,
     failed_count int not null default 0,
     error_message varchar(1000) null,
+    source varchar(32) null,
+    request_params varchar(500) null,
     key idx_started_at (started_at)
 ) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
 
+create table if not exists flight_price_snapshot (
+    id bigint primary key auto_increment,
+    flight_id bigint not null,
+    flight_no varchar(20) not null,
+    from_city varchar(32) not null,
+    to_city varchar(32) not null,
+    depart_time datetime not null,
+    price decimal(10, 2) not null,
+    seats_left int not null default 0,
+    data_source varchar(32) not null,
+    observed_at datetime not null,
+    key idx_snapshot_flight (flight_id, observed_at),
+    key idx_snapshot_route (from_city, to_city, depart_time)
+) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;

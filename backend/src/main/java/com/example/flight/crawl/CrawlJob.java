@@ -9,7 +9,17 @@ public record CrawlJob(
         LocalDateTime finishedAt,
         Integer successCount,
         Integer failedCount,
-        String errorMessage
+        String errorMessage,
+        String source,
+        String requestParams
 ) {
+    public CrawlJob(Long id,
+                    String status,
+                    LocalDateTime startedAt,
+                    LocalDateTime finishedAt,
+                    Integer successCount,
+                    Integer failedCount,
+                    String errorMessage) {
+        this(id, status, startedAt, finishedAt, successCount, failedCount, errorMessage, null, null);
+    }
 }
-
