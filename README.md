@@ -17,6 +17,8 @@
 
 ## 快速启动
 
+需要先确保 Docker Desktop 或 Docker Engine 正常运行。
+
 ```powershell
 docker compose -f infra/docker-compose.yml up -d mysql
 
@@ -30,6 +32,16 @@ npm.cmd run dev
 
 前端默认访问 `http://localhost:5173`，后端默认访问 `http://localhost:8080`。
 
+手动运行样例爬虫：
+
+```powershell
+docker compose -f infra/docker-compose.yml run --rm crawler
+```
+
+GitHub Pages：
+
+https://hb0121.github.io/flight-ticket-system/
+
 ## 主要接口
 
 - `POST /api/crawl/run`
@@ -41,4 +53,3 @@ npm.cmd run dev
 ## 阶段说明
 
 第一版不做小程序、Redis、真实网页爬取、RAG 购票时机预测和公网服务器部署。这些内容放到第二阶段扩展。
-
