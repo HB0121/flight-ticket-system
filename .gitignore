@@ -1,0 +1,27 @@
+# Java
+backend/target/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Python
+crawler/.venv/
+crawler/__pycache__/
+crawler/.pytest_cache/
+crawler/**/*.pyc
+
+# Local data
+data/
+logs/
+*.log
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+
