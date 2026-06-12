@@ -2,10 +2,8 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import * as echarts from 'echarts'
 import {
-  Connection,
   DataAnalysis,
   MagicStick,
-  Refresh,
   Search,
   User,
   SwitchButton,
@@ -43,7 +41,7 @@ const registerForm = ref({ username: '', password: '' })
 const authLoading = ref(false)
 
 // === App state ===
-const activeView = ref('dashboard')
+const activeView = ref('flights')
 const flights = ref([])
 const latestJob = ref(null)
 const selectedFlight = ref(null)
@@ -67,23 +65,15 @@ const defaultDate = () => {
   return date.toISOString().slice(0, 10)
 }
 
-const collectionForm = ref({
+// 航班查询表单（合并采集+查询为一个表单）
+const searchForm = ref({
   source: 'sample',
   fromCity: '上海',
   toCity: '北京',
   date: defaultDate(),
-  adults: 1,
-  maxResults: 5
 })
-
-const filters = ref({
-  fromCity: '上海',
-  toCity: '北京',
-  date: collectionForm.value.date,
-  dataSource: ''
-})
-const adviceInput = ref(`${collectionForm.value.date} 上海到北京，预算1200元`)
-const timingInput = ref(`${collectionForm.value.date} 上海到北京，预算1200元，什么时候买更合适？`)
+const adviceInput = ref(`${searchForm.value.date} 上海到北京，预算1200元`)
+const timingInput = ref(`${searchForm.value.date} 上海到北京，预算1200元，什么时候买更合适？`)
 const adviceResult = ref(null)
 const timingResult = ref(null)
 
@@ -185,10 +175,9 @@ async function loadFlights() {
   loadingFlights.value = true
   try {
     flights.value = await fetchFlights({
-      fromCity: filters.value.fromCity || undefined,
-      toCity: filters.value.toCity || undefined,
-      date: filters.value.date || undefined,
-      dataSource: filters.value.dataSource || undefined
+      fromCity: searchForm.value.fromCity || undefined,
+      toCity: searchForm.value.toCity || undefined,
+      date: searchForm.value.date || undefined
     })
     apiOnline.value = true
     await nextTick()
@@ -224,22 +213,37 @@ async function loadPriceHistory(row = selectedFlight.value) {
   } finally { loadingHistory.value = false }
 }
 
-async function handleRunCrawler() {
+// 点击"查询航班"：先触发爬虫采集 → 再查询数据库刷新页面
+async function handleSearch() {
+  const source = searchForm.value.source
   runningCrawler.value = true
+  let crawlSuccess = false
   try {
-    const payload = buildCrawlerPayload(collectionForm.value)
-    latestJob.value = await runCrawler(payload)
+    const payload = buildCrawlerPayload(searchForm.value)
+    latestJob.value = await runCrawler(payload)       // ① 触发爬虫
     apiOnline.value = true
-    filters.value.fromCity = collectionForm.value.fromCity
-    filters.value.toCity = collectionForm.value.toCity
-    filters.value.date = collectionForm.value.date
-    filters.value.dataSource = payload.source === 'amadeus' ? 'amadeus' : ''
-    await loadFlights()
-    ElMessage.success('采集任务已完成')
+    // 即使 HTTP 200，status 可能仍是 FAILED（爬虫命令执行失败）
+    crawlSuccess = latestJob.value?.status === 'SUCCESS'
   } catch (error) {
     if (!error.response) apiOnline.value = false
-    ElMessage.error(error?.response?.data?.message || error?.message || '采集任务失败')
   } finally { runningCrawler.value = false }
+
+  await loadFlights()               // ② 从数据库查询并渲染
+
+  // ③ 根据采集结果和已有数据显示反馈
+  if (crawlSuccess) {
+    ElMessage.success(source === 'amadeus'
+      ? 'Amadeus 真实票价采集成功，数据已更新'
+      : '本地样例数据采集成功')
+  } else if (flights.value.length > 0) {
+    ElMessage.warning(source === 'amadeus'
+      ? 'Amadeus 采集失败（请检查 API 密钥和 Docker 环境），正在显示已有数据'
+      : '本地样例采集未成功（需 Docker 环境），正在显示已缓存数据')
+  } else {
+    ElMessage.error(source === 'amadeus'
+      ? 'Amadeus 采集失败且数据库无数据，请检查 API 密钥和网络连接'
+      : '本地样例采集失败且数据库无数据，请确认后端和 Docker 已启动')
+  }
 }
 
 async function handleAdvice() {
@@ -258,7 +262,8 @@ async function handleTiming() {
   try {
     timingResult.value = await requestTiming(timingInput.value)
     apiOnline.value = true
-    await nextTick(); renderTimingChart()
+    // v-if 渲染需要时间，延迟确保 DOM 元素已创建
+    setTimeout(() => renderTimingChart(), 150)
   } catch (error) {
     if (!error.response) apiOnline.value = false
     ElMessage.error(error?.message || '购票时机分析失败')
@@ -270,24 +275,30 @@ function renderPriceChart() {
   if (!priceChartEl.value) return
   if (!priceChart) priceChart = echarts.init(priceChartEl.value)
   priceChart.setOption(chartOption.value, true)
+  priceChart.resize()  // 强制重绘，避免容器尺寸变化导致挤压
 }
 
 function renderHistoryChart() {
   if (!historyChartEl.value) return
   if (!historyChart) historyChart = echarts.init(historyChartEl.value)
   historyChart.setOption(historyOption.value, true)
+  historyChart.resize()
 }
 
 function renderTimingChart() {
   if (!timingChartEl.value) return
   if (!timingChart) timingChart = echarts.init(timingChartEl.value)
   timingChart.setOption(timingChartOption.value, true)
+  timingChart.resize()
 }
 
 function switchView(view) {
   activeView.value = view
   nextTick(() => {
-    renderPriceChart(); renderHistoryChart()
+    // 切换到航班视图时，延迟一下确保 DOM 渲染完成再初始化图表
+    setTimeout(() => {
+      renderPriceChart(); renderHistoryChart()
+    }, 100)
     if (view === 'ai') { renderTimingChart() }
   })
 }
@@ -348,7 +359,6 @@ onBeforeUnmount(() => {
   <main v-else class="app-shell">
     <header class="topbar">
       <div>
-        <p class="eyebrow">综合课程设计 III · 3.1.7 · 第二版</p>
         <h1>机票抓取与自动更新系统</h1>
       </div>
       <div class="topbar-actions">
@@ -356,7 +366,6 @@ onBeforeUnmount(() => {
           <el-icon><User /></el-icon>
           {{ currentUser?.nickname || currentUser?.username }}
         </span>
-        <el-button :loading="runningCrawler" type="primary" :icon="Refresh" @click="handleRunCrawler">采集</el-button>
         <el-button :icon="SwitchButton" @click="handleLogout">登出</el-button>
       </div>
     </header>
@@ -364,9 +373,6 @@ onBeforeUnmount(() => {
     <el-alert v-if="!apiOnline" title="后端服务未连接" type="error" description="请确认后端已启动 (localhost:8080) 并重试" show-icon closable @close="apiOnline = true" />
 
     <nav class="nav-tabs" aria-label="主功能">
-      <button :class="{ active: activeView === 'dashboard' }" @click="switchView('dashboard')">
-        <el-icon><DataAnalysis /></el-icon> 总览
-      </button>
       <button :class="{ active: activeView === 'flights' }" @click="switchView('flights')">
         <el-icon><Search /></el-icon> 航班
       </button>
@@ -376,51 +382,32 @@ onBeforeUnmount(() => {
     </nav>
 
     <!-- Dashboard -->
-    <section v-if="activeView === 'dashboard'" class="view-grid">
-      <article class="metric-panel"><span>航班数量</span><strong>{{ totalFlights }}</strong></article>
-      <article class="metric-panel accent"><span>最低票价</span><strong>{{ lowestPrice === '-' ? '-' : `${lowestPrice} 元` }}</strong></article>
-      <article class="metric-panel"><span>采集状态</span><strong>{{ latestJob?.status || 'EMPTY' }}</strong></article>
-      <article class="metric-panel"><span>采集来源</span><strong>{{ latestJob?.source || '-' }}</strong></article>
-      <section class="wide-panel">
-        <div class="panel-title"><el-icon><Connection /></el-icon> 最近采集</div>
-        <dl class="status-list">
-          <div><dt>开始时间</dt><dd>{{ formatDateTime(latestJob?.startedAt) }}</dd></div>
-          <div><dt>结束时间</dt><dd>{{ formatDateTime(latestJob?.finishedAt) }}</dd></div>
-          <div><dt>成功数量</dt><dd>{{ latestJob?.successCount ?? 0 }}</dd></div>
-          <div><dt>失败数量</dt><dd>{{ latestJob?.failedCount ?? 0 }}</dd></div>
-          <div v-if="latestJob?.rejectedCount !== undefined"><dt>校验拒绝</dt><dd>{{ latestJob?.rejectedCount ?? 0 }}</dd></div>
-        </dl>
-        <p class="job-params">{{ latestJob?.requestParams || latestJob?.errorMessage || '暂无采集参数' }}</p>
-      </section>
-    </section>
-
     <!-- Flights -->
     <section v-show="activeView === 'flights'" class="work-panel">
-      <div class="panel-title">采集配置</div>
-      <div class="collect-grid">
-        <el-select v-model="collectionForm.source" placeholder="数据源">
-          <el-option label="样例兜底" value="sample" />
-          <el-option label="Amadeus" value="amadeus" />
-        </el-select>
-        <el-input v-model="collectionForm.fromCity" placeholder="出发城市" clearable />
-        <el-input v-model="collectionForm.toCity" placeholder="到达城市" clearable />
-        <el-date-picker v-model="collectionForm.date" value-format="YYYY-MM-DD" type="date" placeholder="出发日期" />
-        <el-input-number v-model="collectionForm.adults" :min="1" :max="9" controls-position="right" />
-        <el-input-number v-model="collectionForm.maxResults" :min="1" :max="20" controls-position="right" />
-        <el-button :loading="runningCrawler" type="primary" :icon="Refresh" @click="handleRunCrawler">执行采集</el-button>
-      </div>
-
-      <div class="panel-title section-title">航班查询</div>
-      <div class="filters">
-        <el-input v-model="filters.fromCity" placeholder="出发城市" clearable />
-        <el-input v-model="filters.toCity" placeholder="到达城市" clearable />
-        <el-date-picker v-model="filters.date" value-format="YYYY-MM-DD" type="date" placeholder="出发日期" />
-        <el-select v-model="filters.dataSource" placeholder="数据源" clearable>
-          <el-option label="全部" value="" />
-          <el-option label="样例" value="sample" />
-          <el-option label="Amadeus" value="amadeus" />
-        </el-select>
-        <el-button :loading="loadingFlights" type="primary" :icon="Search" @click="loadFlights">查询</el-button>
+      <div class="panel-title">航班查询</div>
+      <div class="search-grid">
+        <div class="field-with-label">
+          <span class="field-label">数据来源</span>
+          <el-select v-model="searchForm.source">
+            <el-option label="本地样例" value="sample" />
+            <el-option label="真实票价" value="amadeus" />
+          </el-select>
+        </div>
+        <div class="field-with-label">
+          <span class="field-label">出发城市</span>
+          <el-input v-model="searchForm.fromCity" placeholder="如：上海" clearable />
+        </div>
+        <div class="field-with-label">
+          <span class="field-label">到达城市</span>
+          <el-input v-model="searchForm.toCity" placeholder="如：北京" clearable />
+        </div>
+        <div class="field-with-label">
+          <span class="field-label">出发日期</span>
+          <el-date-picker v-model="searchForm.date" value-format="YYYY-MM-DD" type="date" placeholder="选择日期" />
+        </div>
+        <div class="field-with-label" style="justify-content:flex-end">
+          <el-button :loading="runningCrawler || loadingFlights" type="primary" :icon="Search" @click="handleSearch">查询航班</el-button>
+        </div>
       </div>
 
       <div ref="priceChartEl" class="price-chart"></div>

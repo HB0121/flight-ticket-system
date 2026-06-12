@@ -1,4 +1,21 @@
 <!doctype html>
+<!--
+  本地样例机票数据 —— Amadeus API 不可用时的兜底数据源
+
+  数据分布（共 20 条）：
+  ┌──────────────┬────────┬──────────────┐
+  │ 航线          │ 航班数  │ 价格区间      │
+  ├──────────────┼────────┼──────────────┤
+  │ 上海 → 北京   │   4    │ 760 - 1280   │
+  │ 北京 → 上海   │   4    │ 880 - 1150   │
+  │ 广州 → 北京   │   4    │ 650 - 1350   │
+  │ 深圳 → 上海   │   4    │ 680 - 950    │
+  │ 成都 → 北京   │   4    │ 960 - 1450   │
+  └──────────────┴────────┴──────────────┘
+
+  每条航班包含：航班号、航司名称、出发/到达城市、出发/到达机场、起飞/到达时间、票价、余票
+  解析逻辑：parser.py 通过 .flight-card CSS 选择器提取各字段
+-->
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
@@ -6,6 +23,7 @@
 </head>
 <body>
   <main>
+    <!-- ===== 上海 → 北京（4班） ===== -->
     <article class="flight-card" data-flight-no="MU5101">
       <span class="airline">东方航空</span>
       <span class="from-city">上海</span>
@@ -28,6 +46,76 @@
       <strong class="price">1280</strong>
       <span class="seats-left">8</span>
     </article>
+    <article class="flight-card" data-flight-no="HU7605">
+      <span class="airline">海南航空</span>
+      <span class="from-city">上海</span>
+      <span class="to-city">北京</span>
+      <span class="from-airport">虹桥机场</span>
+      <span class="to-airport">首都机场</span>
+      <time class="depart-time" datetime="2026-06-19T15:00:00">15:00</time>
+      <time class="arrive-time" datetime="2026-06-19T17:15:00">17:15</time>
+      <strong class="price">890</strong>
+      <span class="seats-left">5</span>
+    </article>
+    <article class="flight-card" data-flight-no="MF8120">
+      <span class="airline">厦门航空</span>
+      <span class="from-city">上海</span>
+      <span class="to-city">北京</span>
+      <span class="from-airport">浦东机场</span>
+      <span class="to-airport">大兴机场</span>
+      <time class="depart-time" datetime="2026-06-19T19:40:00">19:40</time>
+      <time class="arrive-time" datetime="2026-06-19T21:55:00">21:55</time>
+      <strong class="price">760</strong>
+      <span class="seats-left">15</span>
+    </article>
+
+    <!-- ===== 北京 → 上海（4班） ===== -->
+    <article class="flight-card" data-flight-no="CA1831">
+      <span class="airline">中国国航</span>
+      <span class="from-city">北京</span>
+      <span class="to-city">上海</span>
+      <span class="from-airport">首都机场</span>
+      <span class="to-airport">虹桥机场</span>
+      <time class="depart-time" datetime="2026-06-19T07:00:00">07:00</time>
+      <time class="arrive-time" datetime="2026-06-19T09:15:00">09:15</time>
+      <strong class="price">1050</strong>
+      <span class="seats-left">6</span>
+    </article>
+    <article class="flight-card" data-flight-no="MU5166">
+      <span class="airline">东方航空</span>
+      <span class="from-city">北京</span>
+      <span class="to-city">上海</span>
+      <span class="from-airport">大兴机场</span>
+      <span class="to-airport">浦东机场</span>
+      <time class="depart-time" datetime="2026-06-19T14:30:00">14:30</time>
+      <time class="arrive-time" datetime="2026-06-19T16:45:00">16:45</time>
+      <strong class="price">920</strong>
+      <span class="seats-left">11</span>
+    </article>
+    <article class="flight-card" data-flight-no="ZH9152">
+      <span class="airline">深圳航空</span>
+      <span class="from-city">北京</span>
+      <span class="to-city">上海</span>
+      <span class="from-airport">首都机场</span>
+      <span class="to-airport">虹桥机场</span>
+      <time class="depart-time" datetime="2026-06-19T18:00:00">18:00</time>
+      <time class="arrive-time" datetime="2026-06-19T20:10:00">20:10</time>
+      <strong class="price">1150</strong>
+      <span class="seats-left">9</span>
+    </article>
+    <article class="flight-card" data-flight-no="3U8960">
+      <span class="airline">四川航空</span>
+      <span class="from-city">北京</span>
+      <span class="to-city">上海</span>
+      <span class="from-airport">首都机场</span>
+      <span class="to-airport">浦东机场</span>
+      <time class="depart-time" datetime="2026-06-19T21:00:00">21:00</time>
+      <time class="arrive-time" datetime="2026-06-19T23:10:00">23:10</time>
+      <strong class="price">880</strong>
+      <span class="seats-left">13</span>
+    </article>
+
+    <!-- ===== 广州 → 北京（4班） ===== -->
     <article class="flight-card" data-flight-no="CZ3105">
       <span class="airline">南方航空</span>
       <span class="from-city">广州</span>
@@ -39,6 +127,41 @@
       <strong class="price">860</strong>
       <span class="seats-left">20</span>
     </article>
+    <article class="flight-card" data-flight-no="CA1310">
+      <span class="airline">中国国航</span>
+      <span class="from-city">广州</span>
+      <span class="to-city">北京</span>
+      <span class="from-airport">白云机场</span>
+      <span class="to-airport">首都机场</span>
+      <time class="depart-time" datetime="2026-06-19T13:30:00">13:30</time>
+      <time class="arrive-time" datetime="2026-06-19T16:40:00">16:40</time>
+      <strong class="price">1350</strong>
+      <span class="seats-left">3</span>
+    </article>
+    <article class="flight-card" data-flight-no="HU7803">
+      <span class="airline">海南航空</span>
+      <span class="from-city">广州</span>
+      <span class="to-city">北京</span>
+      <span class="from-airport">白云机场</span>
+      <span class="to-airport">大兴机场</span>
+      <time class="depart-time" datetime="2026-06-19T20:00:00">20:00</time>
+      <time class="arrive-time" datetime="2026-06-19T23:10:00">23:10</time>
+      <strong class="price">650</strong>
+      <span class="seats-left">25</span>
+    </article>
+    <article class="flight-card" data-flight-no="ZH9450">
+      <span class="airline">深圳航空</span>
+      <span class="from-city">广州</span>
+      <span class="to-city">北京</span>
+      <span class="from-airport">白云机场</span>
+      <span class="to-airport">首都机场</span>
+      <time class="depart-time" datetime="2026-06-19T06:30:00">06:30</time>
+      <time class="arrive-time" datetime="2026-06-19T09:40:00">09:40</time>
+      <strong class="price">780</strong>
+      <span class="seats-left">18</span>
+    </article>
+
+    <!-- ===== 深圳 → 上海（4班） ===== -->
     <article class="flight-card" data-flight-no="ZH9103">
       <span class="airline">深圳航空</span>
       <span class="from-city">深圳</span>
@@ -50,7 +173,85 @@
       <strong class="price">720</strong>
       <span class="seats-left">16</span>
     </article>
+    <article class="flight-card" data-flight-no="CZ6752">
+      <span class="airline">南方航空</span>
+      <span class="from-city">深圳</span>
+      <span class="to-city">上海</span>
+      <span class="from-airport">宝安机场</span>
+      <span class="to-airport">浦东机场</span>
+      <time class="depart-time" datetime="2026-06-20T08:30:00">08:30</time>
+      <time class="arrive-time" datetime="2026-06-20T10:50:00">10:50</time>
+      <strong class="price">680</strong>
+      <span class="seats-left">14</span>
+    </article>
+    <article class="flight-card" data-flight-no="MU5342">
+      <span class="airline">东方航空</span>
+      <span class="from-city">深圳</span>
+      <span class="to-city">上海</span>
+      <span class="from-airport">宝安机场</span>
+      <span class="to-airport">虹桥机场</span>
+      <time class="depart-time" datetime="2026-06-20T19:10:00">19:10</time>
+      <time class="arrive-time" datetime="2026-06-20T21:25:00">21:25</time>
+      <strong class="price">810</strong>
+      <span class="seats-left">7</span>
+    </article>
+    <article class="flight-card" data-flight-no="HU7721">
+      <span class="airline">海南航空</span>
+      <span class="from-city">深圳</span>
+      <span class="to-city">上海</span>
+      <span class="from-airport">宝安机场</span>
+      <span class="to-airport">浦东机场</span>
+      <time class="depart-time" datetime="2026-06-20T12:00:00">12:00</time>
+      <time class="arrive-time" datetime="2026-06-20T14:15:00">14:15</time>
+      <strong class="price">950</strong>
+      <span class="seats-left">8</span>
+    </article>
+
+    <!-- ===== 成都 → 北京（4班） ===== -->
+    <article class="flight-card" data-flight-no="3U8881">
+      <span class="airline">四川航空</span>
+      <span class="from-city">成都</span>
+      <span class="to-city">北京</span>
+      <span class="from-airport">双流机场</span>
+      <span class="to-airport">首都机场</span>
+      <time class="depart-time" datetime="2026-06-19T10:00:00">10:00</time>
+      <time class="arrive-time" datetime="2026-06-19T12:40:00">12:40</time>
+      <strong class="price">1100</strong>
+      <span class="seats-left">10</span>
+    </article>
+    <article class="flight-card" data-flight-no="CA4185">
+      <span class="airline">中国国航</span>
+      <span class="from-city">成都</span>
+      <span class="to-city">北京</span>
+      <span class="from-airport">天府机场</span>
+      <span class="to-airport">大兴机场</span>
+      <time class="depart-time" datetime="2026-06-19T16:20:00">16:20</time>
+      <time class="arrive-time" datetime="2026-06-19T19:00:00">19:00</time>
+      <strong class="price">1450</strong>
+      <span class="seats-left">4</span>
+    </article>
+    <article class="flight-card" data-flight-no="CZ8857">
+      <span class="airline">南方航空</span>
+      <span class="from-city">成都</span>
+      <span class="to-city">北京</span>
+      <span class="from-airport">双流机场</span>
+      <span class="to-airport">大兴机场</span>
+      <time class="depart-time" datetime="2026-06-19T07:30:00">07:30</time>
+      <time class="arrive-time" datetime="2026-06-19T10:10:00">10:10</time>
+      <strong class="price">1150</strong>
+      <span class="seats-left">12</span>
+    </article>
+    <article class="flight-card" data-flight-no="MU5843">
+      <span class="airline">东方航空</span>
+      <span class="from-city">成都</span>
+      <span class="to-city">北京</span>
+      <span class="from-airport">天府机场</span>
+      <span class="to-airport">首都机场</span>
+      <time class="depart-time" datetime="2026-06-19T22:00:00">22:00</time>
+      <time class="arrive-time" datetime="2026-06-19T00:40:00">00:40</time>
+      <strong class="price">960</strong>
+      <span class="seats-left">22</span>
+    </article>
   </main>
 </body>
 </html>
-

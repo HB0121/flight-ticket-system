@@ -94,26 +94,151 @@ create table if not exists user_token (
     expires_at timestamp not null
 );
 
--- Seed sample flights
+-- ============================================================
+-- 本地种子航班数据 —— H2 内存数据库启动时自动加载
+--
+-- 数据分布（共 20 条）：
+-- ┌──────────────┬────────┬──────────────┐
+-- │ 航线          │ 航班数  │ 价格区间      │
+-- ├──────────────┼────────┼──────────────┤
+-- │ 上海 → 北京   │   4    │ 760 - 1280   │
+-- │ 北京 → 上海   │   4    │ 880 - 1150   │
+-- │ 广州 → 北京   │   4    │ 650 - 1350   │
+-- │ 深圳 → 上海   │   4    │ 680 - 950    │
+-- │ 成都 → 北京   │   4    │ 960 - 1450   │
+-- └──────────────┴────────┴──────────────┘
+-- ============================================================
+-- 上海 → 北京 (4班)
 insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
 values ('MU5101', '东方航空', '上海', '北京', '虹桥机场', '首都机场', '2026-06-19 08:30:00', '2026-06-19 10:45:00', 980, 12, 'sample', '2026-06-12 09:00:00');
 insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
 values ('CA1502', '中国国航', '上海', '北京', '浦东机场', '大兴机场', '2026-06-19 11:20:00', '2026-06-19 13:35:00', 1280, 8, 'sample', '2026-06-12 09:00:00');
 insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
+values ('HU7605', '海南航空', '上海', '北京', '虹桥机场', '首都机场', '2026-06-19 15:00:00', '2026-06-19 17:15:00', 890, 5, 'sample', '2026-06-12 09:00:00');
+insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
+values ('MF8120', '厦门航空', '上海', '北京', '浦东机场', '大兴机场', '2026-06-19 19:40:00', '2026-06-19 21:55:00', 760, 15, 'sample', '2026-06-12 09:00:00');
+-- 北京 → 上海 (4班)
+insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
+values ('CA1831', '中国国航', '北京', '上海', '首都机场', '虹桥机场', '2026-06-19 07:00:00', '2026-06-19 09:15:00', 1050, 6, 'sample', '2026-06-12 09:00:00');
+insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
+values ('MU5166', '东方航空', '北京', '上海', '大兴机场', '浦东机场', '2026-06-19 14:30:00', '2026-06-19 16:45:00', 920, 11, 'sample', '2026-06-12 09:00:00');
+insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
+values ('ZH9152', '深圳航空', '北京', '上海', '首都机场', '虹桥机场', '2026-06-19 18:00:00', '2026-06-19 20:10:00', 1150, 9, 'sample', '2026-06-12 09:00:00');
+insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
+values ('3U8960', '四川航空', '北京', '上海', '首都机场', '浦东机场', '2026-06-19 21:00:00', '2026-06-19 23:10:00', 880, 13, 'sample', '2026-06-12 09:00:00');
+-- 广州 → 北京 (4班)
+insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
 values ('CZ3105', '南方航空', '广州', '北京', '白云机场', '大兴机场', '2026-06-19 09:10:00', '2026-06-19 12:10:00', 860, 20, 'sample', '2026-06-12 09:00:00');
+insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
+values ('CA1310', '中国国航', '广州', '北京', '白云机场', '首都机场', '2026-06-19 13:30:00', '2026-06-19 16:40:00', 1350, 3, 'sample', '2026-06-12 09:00:00');
+insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
+values ('HU7803', '海南航空', '广州', '北京', '白云机场', '大兴机场', '2026-06-19 20:00:00', '2026-06-19 23:10:00', 650, 25, 'sample', '2026-06-12 09:00:00');
+insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
+values ('ZH9450', '深圳航空', '广州', '北京', '白云机场', '首都机场', '2026-06-19 06:30:00', '2026-06-19 09:40:00', 780, 18, 'sample', '2026-06-12 09:00:00');
+-- 深圳 → 上海 (4班)
 insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
 values ('ZH9103', '深圳航空', '深圳', '上海', '宝安机场', '虹桥机场', '2026-06-20 14:20:00', '2026-06-20 16:35:00', 720, 16, 'sample', '2026-06-12 09:00:00');
 insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
-values ('HU7601', '海南航空', '北京', '上海', '首都机场', '虹桥机场', '2026-06-19 07:00:00', '2026-06-19 09:15:00', 1050, 5, 'sample', '2026-06-12 09:00:00');
+values ('CZ6752', '南方航空', '深圳', '上海', '宝安机场', '浦东机场', '2026-06-20 08:30:00', '2026-06-20 10:50:00', 680, 14, 'sample', '2026-06-12 09:00:00');
+insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
+values ('MU5342', '东方航空', '深圳', '上海', '宝安机场', '虹桥机场', '2026-06-20 19:10:00', '2026-06-20 21:25:00', 810, 7, 'sample', '2026-06-12 09:00:00');
+insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
+values ('HU7721', '海南航空', '深圳', '上海', '宝安机场', '浦东机场', '2026-06-20 12:00:00', '2026-06-20 14:15:00', 950, 8, 'sample', '2026-06-12 09:00:00');
+-- 成都 → 北京 (4班)
+insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
+values ('3U8881', '四川航空', '成都', '北京', '双流机场', '首都机场', '2026-06-19 10:00:00', '2026-06-19 12:40:00', 1100, 10, 'sample', '2026-06-12 09:00:00');
+insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
+values ('CA4185', '中国国航', '成都', '北京', '天府机场', '大兴机场', '2026-06-19 16:20:00', '2026-06-19 19:00:00', 1450, 4, 'sample', '2026-06-12 09:00:00');
+insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
+values ('CZ8857', '南方航空', '成都', '北京', '双流机场', '大兴机场', '2026-06-19 07:30:00', '2026-06-19 10:10:00', 1150, 12, 'sample', '2026-06-12 09:00:00');
+insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
+values ('MU5843', '东方航空', '成都', '北京', '天府机场', '首都机场', '2026-06-19 22:00:00', '2026-06-20 00:40:00', 960, 22, 'sample', '2026-06-12 09:00:00');
 
--- Seed price snapshots for trend charts
-insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at)
-values (1, 'MU5101', '上海', '北京', '2026-06-19 08:30:00', 1050, 15, 'sample', '2026-06-10 09:00:00');
-insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at)
-values (1, 'MU5101', '上海', '北京', '2026-06-19 08:30:00', 1020, 14, 'sample', '2026-06-11 09:00:00');
-insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at)
-values (1, 'MU5101', '上海', '北京', '2026-06-19 08:30:00', 980, 12, 'sample', '2026-06-12 09:00:00');
+-- ============================================================
+-- 价格快照（历史价格数据）—— 每个航班 2-3 条，用于价格趋势图
+-- 模拟多次采集的价格变化，日期从 6/10 到 6/12
+-- ============================================================
+-- MU5101（降→ 1050→1020→980）
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (1, 'MU5101', '上海', '北京', '2026-06-19 08:30:00', 1050, 15, 'sample', '2026-06-10 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (1, 'MU5101', '上海', '北京', '2026-06-19 08:30:00', 1020, 14, 'sample', '2026-06-11 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (1, 'MU5101', '上海', '北京', '2026-06-19 08:30:00', 980, 12, 'sample', '2026-06-12 09:00:00');
+-- CA1502（升↑ 1180→1250→1280）
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (2, 'CA1502', '上海', '北京', '2026-06-19 11:20:00', 1180, 12, 'sample', '2026-06-10 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (2, 'CA1502', '上海', '北京', '2026-06-19 11:20:00', 1250, 10, 'sample', '2026-06-11 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (2, 'CA1502', '上海', '北京', '2026-06-19 11:20:00', 1280, 8, 'sample', '2026-06-12 09:00:00');
+-- HU7605（平稳→ 890→880→890）
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (3, 'HU7605', '上海', '北京', '2026-06-19 15:00:00', 890, 8, 'sample', '2026-06-10 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (3, 'HU7605', '上海', '北京', '2026-06-19 15:00:00', 880, 7, 'sample', '2026-06-11 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (3, 'HU7605', '上海', '北京', '2026-06-19 15:00:00', 890, 5, 'sample', '2026-06-12 09:00:00');
+-- MF8120（降↓ 820→780→760）
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (4, 'MF8120', '上海', '北京', '2026-06-19 19:40:00', 820, 18, 'sample', '2026-06-10 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (4, 'MF8120', '上海', '北京', '2026-06-19 19:40:00', 780, 16, 'sample', '2026-06-11 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (4, 'MF8120', '上海', '北京', '2026-06-19 19:40:00', 760, 15, 'sample', '2026-06-12 09:00:00');
+-- CA1831（升↑ 980→1020→1050）
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (5, 'CA1831', '北京', '上海', '2026-06-19 07:00:00', 980, 10, 'sample', '2026-06-10 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (5, 'CA1831', '北京', '上海', '2026-06-19 07:00:00', 1020, 8, 'sample', '2026-06-11 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (5, 'CA1831', '北京', '上海', '2026-06-19 07:00:00', 1050, 6, 'sample', '2026-06-12 09:00:00');
+-- MU5166（降↓ 960→940→920）
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (6, 'MU5166', '北京', '上海', '2026-06-19 14:30:00', 960, 15, 'sample', '2026-06-10 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (6, 'MU5166', '北京', '上海', '2026-06-19 14:30:00', 940, 13, 'sample', '2026-06-11 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (6, 'MU5166', '北京', '上海', '2026-06-19 14:30:00', 920, 11, 'sample', '2026-06-12 09:00:00');
+-- ZH9152（平稳→ 1150→1140→1150）
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (7, 'ZH9152', '北京', '上海', '2026-06-19 18:00:00', 1150, 12, 'sample', '2026-06-10 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (7, 'ZH9152', '北京', '上海', '2026-06-19 18:00:00', 1140, 10, 'sample', '2026-06-11 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (7, 'ZH9152', '北京', '上海', '2026-06-19 18:00:00', 1150, 9, 'sample', '2026-06-12 09:00:00');
+-- 3U8960（降↓ 920→900→880）
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (8, '3U8960', '北京', '上海', '2026-06-19 21:00:00', 920, 16, 'sample', '2026-06-10 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (8, '3U8960', '北京', '上海', '2026-06-19 21:00:00', 900, 14, 'sample', '2026-06-11 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (8, '3U8960', '北京', '上海', '2026-06-19 21:00:00', 880, 13, 'sample', '2026-06-12 09:00:00');
+-- CZ3105（降↓ 920→890→860）
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (9, 'CZ3105', '广州', '北京', '2026-06-19 09:10:00', 920, 25, 'sample', '2026-06-10 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (9, 'CZ3105', '广州', '北京', '2026-06-19 09:10:00', 890, 22, 'sample', '2026-06-11 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (9, 'CZ3105', '广州', '北京', '2026-06-19 09:10:00', 860, 20, 'sample', '2026-06-12 09:00:00');
+-- CA1310（升↑ 1250→1300→1350）
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (10, 'CA1310', '广州', '北京', '2026-06-19 13:30:00', 1250, 8, 'sample', '2026-06-10 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (10, 'CA1310', '广州', '北京', '2026-06-19 13:30:00', 1300, 5, 'sample', '2026-06-11 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (10, 'CA1310', '广州', '北京', '2026-06-19 13:30:00', 1350, 3, 'sample', '2026-06-12 09:00:00');
+-- HU7803（降↓ 700→680→650）
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (11, 'HU7803', '广州', '北京', '2026-06-19 20:00:00', 700, 27, 'sample', '2026-06-10 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (11, 'HU7803', '广州', '北京', '2026-06-19 20:00:00', 680, 26, 'sample', '2026-06-11 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (11, 'HU7803', '广州', '北京', '2026-06-19 20:00:00', 650, 25, 'sample', '2026-06-12 09:00:00');
+-- ZH9450（平稳→ 790→780→780）
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (12, 'ZH9450', '广州', '北京', '2026-06-19 06:30:00', 790, 20, 'sample', '2026-06-10 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (12, 'ZH9450', '广州', '北京', '2026-06-19 06:30:00', 780, 19, 'sample', '2026-06-11 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (12, 'ZH9450', '广州', '北京', '2026-06-19 06:30:00', 780, 18, 'sample', '2026-06-12 09:00:00');
+-- ZH9103（降↓ 760→740→720）
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (13, 'ZH9103', '深圳', '上海', '2026-06-20 14:20:00', 760, 18, 'sample', '2026-06-10 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (13, 'ZH9103', '深圳', '上海', '2026-06-20 14:20:00', 740, 17, 'sample', '2026-06-11 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (13, 'ZH9103', '深圳', '上海', '2026-06-20 14:20:00', 720, 16, 'sample', '2026-06-12 09:00:00');
+-- CZ6752（平稳→ 680→680→680）
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (14, 'CZ6752', '深圳', '上海', '2026-06-20 08:30:00', 680, 16, 'sample', '2026-06-10 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (14, 'CZ6752', '深圳', '上海', '2026-06-20 08:30:00', 680, 15, 'sample', '2026-06-11 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (14, 'CZ6752', '深圳', '上海', '2026-06-20 08:30:00', 680, 14, 'sample', '2026-06-12 09:00:00');
+-- MU5342（升↑ 770→790→810）
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (15, 'MU5342', '深圳', '上海', '2026-06-20 19:10:00', 770, 10, 'sample', '2026-06-10 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (15, 'MU5342', '深圳', '上海', '2026-06-20 19:10:00', 790, 8, 'sample', '2026-06-11 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (15, 'MU5342', '深圳', '上海', '2026-06-20 19:10:00', 810, 7, 'sample', '2026-06-12 09:00:00');
+-- HU7721（降↓ 990→970→950）
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (16, 'HU7721', '深圳', '上海', '2026-06-20 12:00:00', 990, 11, 'sample', '2026-06-10 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (16, 'HU7721', '深圳', '上海', '2026-06-20 12:00:00', 970, 9, 'sample', '2026-06-11 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (16, 'HU7721', '深圳', '上海', '2026-06-20 12:00:00', 950, 8, 'sample', '2026-06-12 09:00:00');
+-- 3U8881（平稳→ 1120→1110→1100）
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (17, '3U8881', '成都', '北京', '2026-06-19 10:00:00', 1120, 14, 'sample', '2026-06-10 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (17, '3U8881', '成都', '北京', '2026-06-19 10:00:00', 1110, 12, 'sample', '2026-06-11 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (17, '3U8881', '成都', '北京', '2026-06-19 10:00:00', 1100, 10, 'sample', '2026-06-12 09:00:00');
+-- CA4185（升↑ 1350→1400→1450）
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (18, 'CA4185', '成都', '北京', '2026-06-19 16:20:00', 1350, 8, 'sample', '2026-06-10 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (18, 'CA4185', '成都', '北京', '2026-06-19 16:20:00', 1400, 6, 'sample', '2026-06-11 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (18, 'CA4185', '成都', '北京', '2026-06-19 16:20:00', 1450, 4, 'sample', '2026-06-12 09:00:00');
+-- CZ8857（降↓ 1200→1180→1150）
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (19, 'CZ8857', '成都', '北京', '2026-06-19 07:30:00', 1200, 15, 'sample', '2026-06-10 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (19, 'CZ8857', '成都', '北京', '2026-06-19 07:30:00', 1180, 14, 'sample', '2026-06-11 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (19, 'CZ8857', '成都', '北京', '2026-06-19 07:30:00', 1150, 12, 'sample', '2026-06-12 09:00:00');
+-- MU5843（降↓ 1000→980→960）
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (20, 'MU5843', '成都', '北京', '2026-06-19 22:00:00', 1000, 25, 'sample', '2026-06-10 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (20, 'MU5843', '成都', '北京', '2026-06-19 22:00:00', 980, 23, 'sample', '2026-06-11 09:00:00');
+insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at) values (20, 'MU5843', '成都', '北京', '2026-06-19 22:00:00', 960, 22, 'sample', '2026-06-12 09:00:00');
 
--- Seed a crawl job for dashboard
+-- Seed a crawl job
 insert into crawl_job(status, started_at, finished_at, success_count, failed_count, error_message, source, request_params, rejected_count)
-values ('SUCCESS', '2026-06-12 09:00:00', '2026-06-12 09:00:05', 5, 0, null, 'sample', 'source=sample, fromCity=上海, toCity=北京, date=2026-06-19', 0);
+values ('SUCCESS', '2026-06-12 09:00:00', '2026-06-12 09:00:05', 20, 0, null, 'sample', 'source=sample, fromCity=上海, toCity=北京, date=2026-06-19', 0);
