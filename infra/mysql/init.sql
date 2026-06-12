@@ -86,3 +86,21 @@ create table if not exists conversation_message (
     created_at datetime not null,
     key idx_cm_session (session_id, created_at)
 ) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
+
+create table if not exists app_user (
+    id bigint primary key auto_increment,
+    username varchar(32) unique not null,
+    password varchar(128) not null,
+    nickname varchar(32),
+    created_at datetime not null
+) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
+
+create table if not exists user_token (
+    id bigint primary key auto_increment,
+    user_id bigint not null,
+    token varchar(64) unique not null,
+    created_at datetime not null,
+    expires_at datetime not null,
+    key idx_token (token),
+    key idx_user (user_id)
+) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;

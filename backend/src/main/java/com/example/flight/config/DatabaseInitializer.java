@@ -71,6 +71,22 @@ public class DatabaseInitializer {
                 " content text not null," +
                 " created_at datetime not null" +
                 " )");
+        ignoreFailure(
+                "create table if not exists app_user (" +
+                " id bigint primary key auto_increment," +
+                " username varchar(32) unique not null," +
+                " password varchar(128) not null," +
+                " nickname varchar(32)," +
+                " created_at datetime not null" +
+                " )");
+        ignoreFailure(
+                "create table if not exists user_token (" +
+                " id bigint primary key auto_increment," +
+                " user_id bigint not null," +
+                " token varchar(64) unique not null," +
+                " created_at datetime not null," +
+                " expires_at datetime not null" +
+                " )");
     }
 
     private void ignoreFailure(String sql) {
