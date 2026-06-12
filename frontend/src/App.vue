@@ -23,7 +23,8 @@ import {
   buildPriceHistoryChartOption,
   formatAdviceSummary,
   formatDateTime,
-  formatTimingReport
+  formatTimingReport,
+  resolveCollectionDataSource
 } from './lib/format.js'
 
 const activeView = ref('dashboard')
@@ -152,8 +153,11 @@ async function handleRunCrawler() {
     filters.value.fromCity = collectionForm.value.fromCity
     filters.value.toCity = collectionForm.value.toCity
     filters.value.date = collectionForm.value.date
-    filters.value.dataSource = payload.source === 'amadeus' ? 'amadeus' : ''
+    filters.value.dataSource = resolveCollectionDataSource(payload, latestJob.value)
     await loadFlights()
+    if (latestJob.value?.fallbackReason) {
+      ElMessage.warning(latestJob.value.fallbackReason)
+    }
     ElMessage.success('采集任务已完成')
   } catch (error) {
     ElMessage.error(error?.message || '采集任务失败')
@@ -299,7 +303,7 @@ onBeforeUnmount(() => {
             <dd>{{ latestJob?.failedCount ?? 0 }}</dd>
           </div>
         </dl>
-        <p class="job-params">{{ latestJob?.requestParams || latestJob?.errorMessage || '暂无采集参数' }}</p>
+        <p class="job-params">{{ latestJob?.fallbackReason || latestJob?.requestParams || latestJob?.errorMessage || '暂无采集参数' }}</p>
       </section>
     </section>
 

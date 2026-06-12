@@ -26,6 +26,8 @@ create table if not exists crawl_job (
     failed_count int not null default 0,
     error_message varchar(1000) null,
     source varchar(32) null,
+    actual_source varchar(32) null,
+    fallback_reason varchar(500) null,
     request_params varchar(500) null,
     key idx_started_at (started_at)
 ) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;

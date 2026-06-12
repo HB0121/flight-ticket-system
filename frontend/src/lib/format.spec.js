@@ -4,7 +4,8 @@ import {
   buildPriceChartOption,
   buildPriceHistoryChartOption,
   formatAdviceSummary,
-  formatTimingReport
+  formatTimingReport,
+  resolveCollectionDataSource
 } from './format.js'
 
 describe('formatAdviceSummary', () => {
@@ -55,6 +56,15 @@ describe('buildCrawlerPayload', () => {
       adults: 1,
       maxResults: 3
     })
+  })
+})
+
+describe('resolveCollectionDataSource', () => {
+  it('uses the backend actual source when Amadeus falls back to sample', () => {
+    expect(resolveCollectionDataSource(
+      { source: 'amadeus' },
+      { source: 'amadeus', actualSource: 'sample' }
+    )).toBe('sample')
   })
 })
 

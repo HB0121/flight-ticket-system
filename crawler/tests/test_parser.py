@@ -4,6 +4,7 @@ from flight_crawler.amadeus_client import (
     normalize_flight_offers,
     should_use_sample_fallback,
 )
+from flight_crawler.spiders.amadeus_flights import AmadeusFlightsSpider
 
 
 def test_parse_flights_from_sample_html():
@@ -88,3 +89,21 @@ def test_amadeus_missing_credentials_uses_sample_fallback():
     assert should_use_sample_fallback("", "") is True
     assert should_use_sample_fallback("client-id", "secret") is False
     assert city_to_iata("上海") == "SHA"
+
+
+def test_amadeus_spider_marks_actual_source_when_falling_back(monkeypatch):
+    def fake_fetch_flight_offers(**_kwargs):
+        return []
+
+    monkeypatch.setattr(
+        "flight_crawler.spiders.amadeus_flights.fetch_flight_offers",
+        fake_fetch_flight_offers,
+    )
+    spider = AmadeusFlightsSpider(from_city="上海", to_city="北京", date="2026-06-19")
+
+    flights = spider._collect_flights()
+
+    assert flights
+    assert {flight["data_source"] for flight in flights} == {"sample"}
+    assert spider.actual_source == "sample"
+    assert "Amadeus returned no rows" in spider.fallback_reason
