@@ -17,22 +17,60 @@ public class DatabaseInitializer {
     public void ensureSecondVersionSchema() {
         ignoreFailure("alter table crawl_job add column source varchar(32) null");
         ignoreFailure("alter table crawl_job add column request_params varchar(500) null");
-        jdbcTemplate.execute("""
-                create table if not exists flight_price_snapshot (
-                    id bigint primary key auto_increment,
-                    flight_id bigint not null,
-                    flight_no varchar(20) not null,
-                    from_city varchar(32) not null,
-                    to_city varchar(32) not null,
-                    depart_time datetime not null,
-                    price decimal(10, 2) not null,
-                    seats_left int not null default 0,
-                    data_source varchar(32) not null,
-                    observed_at datetime not null
-                )
-                """);
+        ignoreFailure(
+                "create table if not exists flight_price_snapshot (" +
+                " id bigint primary key auto_increment," +
+                " flight_id bigint not null," +
+                " flight_no varchar(20) not null," +
+                " from_city varchar(32) not null," +
+                " to_city varchar(32) not null," +
+                " depart_time datetime not null," +
+                " price decimal(10, 2) not null," +
+                " seats_left int not null default 0," +
+                " data_source varchar(32) not null," +
+                " observed_at datetime not null" +
+                " )");
         ignoreFailure("create index idx_snapshot_flight on flight_price_snapshot (flight_id, observed_at)");
         ignoreFailure("create index idx_snapshot_route on flight_price_snapshot (from_city, to_city, depart_time)");
+        ignoreFailure("alter table crawl_job add column rejected_count int not null default 0");
+        ignoreFailure(
+                "create table if not exists flight_validation_failure (" +
+                " id bigint primary key auto_increment," +
+                " crawl_job_id bigint," +
+                " flight_no varchar(20)," +
+                " from_city varchar(32)," +
+                " to_city varchar(32)," +
+                " depart_time datetime," +
+                " price decimal(10,2)," +
+                " seats_left int," +
+                " failure_reason varchar(500) not null," +
+                " rejected_at datetime not null" +
+                " )");
+        ignoreFailure(
+                "create table if not exists price_context (" +
+                " id bigint primary key auto_increment," +
+                " from_city varchar(32) not null," +
+                " to_city varchar(32) not null," +
+                " depart_date date," +
+                " context_text text not null," +
+                " context_type varchar(32) not null default 'PRICE_TREND'," +
+                " created_at datetime not null" +
+                " )");
+        ignoreFailure(
+                "create table if not exists conversation_session (" +
+                " id varchar(36) primary key," +
+                " title varchar(128)," +
+                " created_at datetime not null," +
+                " updated_at datetime not null" +
+                " )");
+        ignoreFailure(
+                "create table if not exists conversation_message (" +
+                " id bigint primary key auto_increment," +
+                " session_id varchar(36) not null," +
+                " role varchar(16) not null," +
+                " content text not null," +
+                " created_at datetime not null" +
+                " )");
     }
 
     private void ignoreFailure(String sql) {

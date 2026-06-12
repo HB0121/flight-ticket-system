@@ -1,5 +1,7 @@
 package com.example.flight.flight;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +16,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/flights")
 public class FlightController {
+
+    private static final Logger log = LoggerFactory.getLogger(FlightController.class);
     private final FlightRepository flightRepository;
 
     public FlightController(FlightRepository flightRepository) {
@@ -26,6 +30,7 @@ public class FlightController {
                                @RequestParam(required = false)
                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
                                @RequestParam(required = false) String dataSource) {
+        log.debug("航班查询: fromCity={}, toCity={}, date={}, dataSource={}", fromCity, toCity, date, dataSource);
         return flightRepository.search(new FlightSearchCriteria(fromCity, toCity, date, dataSource));
     }
 

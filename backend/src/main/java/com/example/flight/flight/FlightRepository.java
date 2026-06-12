@@ -88,10 +88,8 @@ public class FlightRepository implements FlightSearchPort, PriceHistoryPort {
 
     @Override
     public List<FlightPriceSnapshot> findPriceHistory(Long flightId) {
-        return jdbcTemplate.query("""
-                select * from flight_price_snapshot
-                where flight_id = ?
-                order by observed_at asc
-                """, snapshotRowMapper, flightId);
+        return jdbcTemplate.query(
+                "select * from flight_price_snapshot where flight_id = ? order by observed_at asc",
+                snapshotRowMapper, flightId);
     }
 }

@@ -44,3 +44,45 @@ create table if not exists flight_price_snapshot (
     key idx_snapshot_flight (flight_id, observed_at),
     key idx_snapshot_route (from_city, to_city, depart_time)
 ) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
+
+create table if not exists flight_validation_failure (
+    id bigint primary key auto_increment,
+    crawl_job_id bigint,
+    flight_no varchar(20),
+    from_city varchar(32),
+    to_city varchar(32),
+    depart_time datetime,
+    price decimal(10,2),
+    seats_left int,
+    failure_reason varchar(500) not null,
+    rejected_at datetime not null,
+    key idx_job_rejection (crawl_job_id, rejected_at)
+) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
+
+create table if not exists price_context (
+    id bigint primary key auto_increment,
+    from_city varchar(32) not null,
+    to_city varchar(32) not null,
+    depart_date date,
+    context_text text not null,
+    context_type varchar(32) not null default 'PRICE_TREND',
+    created_at datetime not null,
+    key idx_price_context_route (from_city, to_city),
+    fulltext key ft_price_context (context_text)
+) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
+
+create table if not exists conversation_session (
+    id varchar(36) primary key,
+    title varchar(128),
+    created_at datetime not null,
+    updated_at datetime not null
+) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
+
+create table if not exists conversation_message (
+    id bigint primary key auto_increment,
+    session_id varchar(36) not null,
+    role varchar(16) not null,
+    content text not null,
+    created_at datetime not null,
+    key idx_cm_session (session_id, created_at)
+) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci;
