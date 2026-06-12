@@ -348,7 +348,6 @@ onBeforeUnmount(() => {
   <main v-else class="app-shell">
     <header class="topbar">
       <div>
-        <p class="eyebrow">综合课程设计 III · 3.1.7 · 第二版</p>
         <h1>机票抓取与自动更新系统</h1>
       </div>
       <div class="topbar-actions">
