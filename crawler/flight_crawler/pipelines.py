@@ -19,14 +19,18 @@ class MysqlPipeline:
         self.success_count = 0
         self.failed_count = 0
         self.source = getattr(spider, "source", getattr(spider, "name", "sample"))
+        self.actual_sources = set()
         self.request_params = getattr(spider, "request_params", f"source={self.source}")
         with self.connection.cursor() as cursor:
             cursor.execute(
                 """
-                insert into crawl_job(status, started_at, success_count, failed_count, source, request_params)
-                values (%s, %s, %s, %s, %s, %s)
+                insert into crawl_job(
+                    status, started_at, success_count, failed_count,
+                    source, actual_source, fallback_reason, request_params
+                )
+                values (%s, %s, %s, %s, %s, %s, %s, %s)
                 """,
-                ("RUNNING", datetime.now(), 0, 0, self.source, self.request_params),
+                ("RUNNING", datetime.now(), 0, 0, self.source, self.source, None, self.request_params),
             )
             self.job_id = cursor.lastrowid
         self.connection.commit()
@@ -100,6 +104,8 @@ class MysqlPipeline:
                     ),
                 )
             self.success_count += 1
+            if item.get("data_source"):
+                self.actual_sources.add(item["data_source"])
             self.connection.commit()
         except Exception:
             self.failed_count += 1
@@ -110,14 +116,31 @@ class MysqlPipeline:
     def close_spider(self, spider):
         status = "SUCCESS" if spider.crawler.stats.get_value("finish_reason") == "finished" else "FAILED"
         error_message = None if status == "SUCCESS" else str(spider.crawler.stats.get_value("finish_reason"))
+        actual_source = self._resolve_actual_source(spider)
+        fallback_reason = getattr(spider, "fallback_reason", None)
         with self.connection.cursor() as cursor:
             cursor.execute(
                 """
                 update crawl_job
-                set status = %s, finished_at = %s, success_count = %s, failed_count = %s, error_message = %s
+                set status = %s,
+                    finished_at = %s,
+                    success_count = %s,
+                    failed_count = %s,
+                    error_message = %s,
+                    actual_source = %s,
+                    fallback_reason = %s
                 where id = %s
                 """,
-                (status, datetime.now(), self.success_count, self.failed_count, error_message, self.job_id),
+                (
+                    status,
+                    datetime.now(),
+                    self.success_count,
+                    self.failed_count,
+                    error_message,
+                    actual_source,
+                    fallback_reason,
+                    self.job_id,
+                ),
             )
         self.connection.commit()
         self.connection.close()
@@ -126,6 +149,8 @@ class MysqlPipeline:
         with self.connection.cursor() as cursor:
             for statement in [
                 "alter table crawl_job add column source varchar(32) null",
+                "alter table crawl_job add column actual_source varchar(32) null",
+                "alter table crawl_job add column fallback_reason varchar(500) null",
                 "alter table crawl_job add column request_params varchar(500) null",
             ]:
                 try:
@@ -151,3 +176,10 @@ class MysqlPipeline:
                 """
             )
         self.connection.commit()
+
+    def _resolve_actual_source(self, spider):
+        if len(self.actual_sources) == 1:
+            return next(iter(self.actual_sources))
+        if len(self.actual_sources) > 1:
+            return "mixed"
+        return getattr(spider, "actual_source", self.source)

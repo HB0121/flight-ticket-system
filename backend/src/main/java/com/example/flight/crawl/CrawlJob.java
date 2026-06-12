@@ -11,6 +11,8 @@ public record CrawlJob(
         Integer failedCount,
         String errorMessage,
         String source,
+        String actualSource,
+        String fallbackReason,
         String requestParams
 ) {
     public CrawlJob(Long id,
@@ -20,6 +22,6 @@ public record CrawlJob(
                     Integer successCount,
                     Integer failedCount,
                     String errorMessage) {
-        this(id, status, startedAt, finishedAt, successCount, failedCount, errorMessage, null, null);
+        this(id, status, startedAt, finishedAt, successCount, failedCount, errorMessage, null, null, null, null);
     }
 }

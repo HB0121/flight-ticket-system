@@ -101,6 +101,18 @@ export function buildCrawlerPayload(form) {
   }
 }
 
+export function resolveCollectionDataSource(payload, job) {
+  const actualSource = job?.actualSource
+  if (actualSource === 'amadeus' || actualSource === 'sample') {
+    return actualSource
+  }
+  const requestedSource = payload?.source
+  if (requestedSource === 'amadeus' || requestedSource === 'sample') {
+    return requestedSource
+  }
+  return ''
+}
+
 export function formatTimingReport(response) {
   if (!response) {
     return ''

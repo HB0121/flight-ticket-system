@@ -16,6 +16,8 @@ public class DatabaseInitializer {
     @EventListener(ApplicationReadyEvent.class)
     public void ensureSecondVersionSchema() {
         ignoreFailure("alter table crawl_job add column source varchar(32) null");
+        ignoreFailure("alter table crawl_job add column actual_source varchar(32) null");
+        ignoreFailure("alter table crawl_job add column fallback_reason varchar(500) null");
         ignoreFailure("alter table crawl_job add column request_params varchar(500) null");
         jdbcTemplate.execute("""
                 create table if not exists flight_price_snapshot (

@@ -7,6 +7,9 @@ from flight_crawler.parser import parse_flights
 
 class SampleFlightsSpider(scrapy.Spider):
     name = "sample_flights"
+    source = "sample"
+    actual_source = "sample"
+    fallback_reason = None
 
     async def start(self):
         for request in self.start_requests():

@@ -27,6 +27,8 @@ class AmadeusFlightsSpider(scrapy.Spider):
         self.adults = int(adults)
         self.max_results = int(max_results)
         self.source = "amadeus"
+        self.actual_source = "amadeus"
+        self.fallback_reason = None
         self.request_params = (
             f"source=amadeus, fromCity={self.from_city}, toCity={self.to_city}, "
             f"date={self.date}, adults={self.adults}, maxResults={self.max_results}"
@@ -46,10 +48,15 @@ class AmadeusFlightsSpider(scrapy.Spider):
                 max_results=self.max_results,
             )
             if flights:
+                self.actual_source = "amadeus"
+                self.fallback_reason = None
                 return flights
-            self.logger.warning("Amadeus returned no rows or credentials are missing; using sample fallback.")
+            self.fallback_reason = "Amadeus returned no rows or credentials are missing; using sample fallback."
+            self.logger.warning(self.fallback_reason)
         except Exception as exc:
-            self.logger.warning("Amadeus collection failed; using sample fallback: %s", exc)
+            self.fallback_reason = f"Amadeus collection failed; using sample fallback: {exc}"
+            self.logger.warning(self.fallback_reason)
+        self.actual_source = "sample"
         return self._sample_flights()
 
     def _sample_flights(self):

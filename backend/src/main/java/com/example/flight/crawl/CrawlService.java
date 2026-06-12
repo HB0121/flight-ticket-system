@@ -47,7 +47,19 @@ public class CrawlService {
         }
 
         return crawlRepository.findLatest()
-                .orElseGet(() -> new CrawlJob(null, "UNKNOWN", null, null, 0, 0, "暂无采集记录", request.normalizedSource(), request.toSummary()));
+                .orElseGet(() -> new CrawlJob(
+                        null,
+                        "UNKNOWN",
+                        null,
+                        null,
+                        0,
+                        0,
+                        "暂无采集记录",
+                        request.normalizedSource(),
+                        request.normalizedSource(),
+                        null,
+                        request.toSummary()
+                ));
     }
 
     private String[] shellCommand(String executableCommand) {

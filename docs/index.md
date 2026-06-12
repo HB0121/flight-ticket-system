@@ -14,6 +14,7 @@
 ## 项目文档
 
 - [第一版框架](https://github.com/HB0121/flight-ticket-system/blob/main/%E7%AC%AC%E4%B8%80%E7%89%88%E6%A1%86%E6%9E%B6.md)
+- [数据端整改记录（2026-06-12）](./data-remediation-2026-06-12.md)
 - [GitHub 仓库](https://github.com/HB0121/flight-ticket-system)
 
 ## 演示路径

@@ -25,6 +25,6 @@ public class CrawlController {
     @GetMapping("/latest")
     public CrawlJob latest() {
         return crawlRepository.findLatest()
-                .orElseGet(() -> new CrawlJob(null, "EMPTY", null, null, 0, 0, "暂无采集记录", null, null));
+                .orElseGet(() -> new CrawlJob(null, "EMPTY", null, null, 0, 0, "暂无采集记录", null, null, null, null));
     }
 }
