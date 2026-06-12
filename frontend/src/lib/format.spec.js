@@ -76,16 +76,12 @@ describe('buildCrawlerPayload', () => {
       source: 'amadeus',
       fromCity: '上海',
       toCity: '北京',
-      date: '2026-06-19',
-      adults: 1,
-      maxResults: 3
+      date: '2026-06-19'
     })).toEqual({
       source: 'amadeus',
       fromCity: '上海',
       toCity: '北京',
-      date: '2026-06-19',
-      adults: 1,
-      maxResults: 3
+      date: '2026-06-19'
     })
   })
 })

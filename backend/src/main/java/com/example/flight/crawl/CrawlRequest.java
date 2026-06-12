@@ -68,7 +68,7 @@ public record CrawlRequest(
         args.add("-a");
         args.add("adults=" + (adults == null || adults < 1 ? 1 : adults));
         args.add("-a");
-        args.add("max_results=" + (maxResults == null || maxResults < 1 ? 5 : maxResults));
+        args.add("max_results=" + (maxResults == null || maxResults < 1 ? 50 : maxResults));
         return args;
     }
 

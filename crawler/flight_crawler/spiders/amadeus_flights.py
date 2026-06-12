@@ -50,7 +50,7 @@ class AmadeusFlightsSpider(scrapy.Spider):
         to_city="北京",
         date=None,
         adults="1",
-        max_results="5",
+        max_results="50",
         *args,
         **kwargs,
     ):

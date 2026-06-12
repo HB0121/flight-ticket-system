@@ -48,38 +48,49 @@ export function formatAdviceSummary(response) {
  */
 export function buildPriceChartOption(flights) {
   const rows = Array.isArray(flights) ? flights : []
+  // 航班较多时启用底部滚动条，防止标签挤在一起
+  const needZoom = rows.length > 8
   return {
     tooltip: {
-      trigger: 'axis',                         // 坐标轴触发：hover 整条轴显示所有系列数据
-      valueFormatter: value => `${value} 元`    // 提示框中数值后追加"元"
+      trigger: 'axis',
+      valueFormatter: value => `${value} 元`
     },
     grid: {
-      top: 24,     // 图表上边距（留出 tooltip 空间）
+      top: 40,     // 留足空间给 Y 轴标题"价格（元）"不被遮挡
       right: 20,
-      bottom: 36,  // 图表下边距（留出 x 轴标签空间）
-      left: 48     // 图表左边距（留出 y 轴标签空间）
+      bottom: needZoom ? 60 : 36,  // 有滚动条时多留空间
+      left: 64
     },
+    // 航班超过 8 条时显示底部滑动条
+    dataZoom: needZoom ? [{
+      type: 'slider',
+      start: 0,
+      end: 50,
+      height: 20,
+      bottom: 4
+    }] : undefined,
     xAxis: {
-      type: 'category',                        // 类目轴：离散的航班号
+      type: 'category',
       data: rows.map(flight => flight.flightNo),
-      axisTick: { alignWithLabel: true }       // 刻度线对齐标签中心
+      axisLabel: { rotate: rows.length > 6 ? 30 : 0 },  // 标签多时倾斜
+      axisTick: { alignWithLabel: true }
     },
     yAxis: {
-      type: 'value',                           // 数值轴：连续的票价
-      name: '价格',
-      axisLabel: {
-        formatter: '{value} 元'                 // y 轴标签追加"元"
-      }
+      type: 'value',
+      name: '价格（元）',
+      nameTextStyle: { fontSize: 12 },
+      axisLabel: { formatter: value => `${value}` }
     },
     series: [
       {
         name: '票价',
-        type: 'bar',                           // 柱状图系列
+        type: 'bar',
         data: rows.map(flight => Number(flight.price)),
-        barMaxWidth: 42,                       // 柱子最大宽度（防止柱子过宽）
+        barMaxWidth: 42,
+        barCategoryGap: '30%',     // 柱子之间留空隙，避免挤在一起
         itemStyle: {
-          color: '#2563eb',                    // 柱状图填充色（蓝色）
-          borderRadius: [4, 4, 0, 0]          // 顶部圆角 4px
+          color: '#2563eb',
+          borderRadius: [4, 4, 0, 0]
         }
       }
     ]
@@ -103,10 +114,10 @@ export function buildPriceHistoryChartOption(history) {
       valueFormatter: value => `${value} 元`
     },
     grid: {
-      top: 24,
+      top: 40,     // 留足空间给 Y 轴标题"价格（元）"不被遮挡
       right: 20,
       bottom: 36,
-      left: 48
+      left: 64
     },
     xAxis: {
       type: 'category',
@@ -115,9 +126,10 @@ export function buildPriceHistoryChartOption(history) {
     },
     yAxis: {
       type: 'value',
-      name: '价格',
+      name: '价格（元）',
+      nameTextStyle: { fontSize: 12 },
       axisLabel: {
-        formatter: '{value} 元'
+        formatter: value => `${value}`
       }
     },
     series: [
@@ -145,8 +157,6 @@ export function buildPriceHistoryChartOption(history) {
  * @param {string} [form.fromCity='上海'] - 出发城市（中文名）
  * @param {string} [form.toCity='北京'] - 到达城市（中文名）
  * @param {string} [form.date] - 出发日期（ISO 格式 yyyy-MM-dd）
- * @param {number} [form.adults=1] - 成人乘客数量
- * @param {number} [form.maxResults=5] - 最大返回结果数
  * @returns {Object} 后端 /api/crawl/run 所需的请求体
  */
 export function buildCrawlerPayload(form) {
@@ -160,9 +170,7 @@ export function buildCrawlerPayload(form) {
     source,
     fromCity: form.fromCity || '上海',
     toCity: form.toCity || '北京',
-    date: form.date,
-    adults: Number(form.adults || 1),
-    maxResults: Number(form.maxResults || 5)
+    date: form.date
   }
 }
 
