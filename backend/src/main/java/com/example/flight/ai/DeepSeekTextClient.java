@@ -1,5 +1,7 @@
 package com.example.flight.ai;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -11,6 +13,8 @@ import java.util.Optional;
 
 @Component
 public class DeepSeekTextClient implements AiTextClient {
+
+    private static final Logger log = LoggerFactory.getLogger(DeepSeekTextClient.class);
     private final String apiKey;
     private final String model;
     private final RestClient restClient;
@@ -29,6 +33,7 @@ public class DeepSeekTextClient implements AiTextClient {
     @Override
     public Optional<String> generate(String systemPrompt, String userPrompt) {
         if (!StringUtils.hasText(apiKey)) {
+            log.debug("DeepSeek API key not configured, using local fallback");
             return Optional.empty();
         }
         try {
@@ -46,7 +51,8 @@ public class DeepSeekTextClient implements AiTextClient {
                     .retrieve()
                     .body(Map.class);
             return extractContent(response);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            log.warn("DeepSeek API调用失败: {}", e.getMessage());
             return Optional.empty();
         }
     }

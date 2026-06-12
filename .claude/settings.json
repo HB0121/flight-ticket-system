@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python << 'PYEOF'\nimport sys, json, os\nd = json.load(sys.stdin)\nf = ((d.get('tool_input') or {}).get('file_path') or (d.get('tool_response') or {}).get('filePath') or '')\next = f.rsplit('.',1)[-1].lower() if '.' in f else ''\nbn = f.rsplit('/',1)[-1].rsplit('\\\\',1)[-1]\nnoise = ('node_modules', 'target', 'dist', '.git', '__pycache__', '.pytest_cache', '.venv')\nif any('/'+sd+'/' in f.replace('\\\\','/') or f.replace('\\\\','/').startswith(sd+'/') for sd in noise):\n    pass\nelif ext in ('java','xml','yml','yaml','js','vue','css','py','json','md','sql','html','cfg','ini','txt') or bn in ('Dockerfile','Makefile','.gitignore','.env.example'):\n    os.makedirs('.claude', exist_ok=True)\n    with open('.claude/.pending-verification', 'w') as m:\n        m.write('')\nPYEOF",
+            "shell": "bash",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f .claude/.pending-verification ]; then\npython << 'PYEOF'\nimport json\nprint(json.dumps({\n    \"continue\": False,\n    \"stopReason\": \"本轮修改了代码、配置或文档，请先完成交付验证（运行测试、lint/typecheck、功能验证或检查TodoWrite状态）并报告结果后再结束。验证完成并通过后，执行: rm .claude/.pending-verification 清除标记。\",\n    \"hookSpecificOutput\": {\n        \"hookEventName\": \"Stop\",\n        \"additionalContext\": \"本轮修改了代码/配置/文档但未完成交付验证。请继续工作：运行相关测试、lint或typecheck、进行功能验证，或检查TodoWrite任务完成状态。验证通过后，用Bash删除标记文件 rm .claude/.pending-verification，然后可以正常结束。\"\n    }\n}, ensure_ascii=False))\nPYEOF\nfi",
+            "shell": "bash",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

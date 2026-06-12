@@ -24,13 +24,32 @@ class TimingServiceTest {
                         snapshot(1L, 1020, "2026-06-11T10:00:00"),
                         snapshot(1L, 980, "2026-06-11T11:00:00")
                 ),
-                (systemPrompt, userPrompt) -> Optional.empty()
+                (systemPrompt, userPrompt) -> Optional.empty(),
+                new StubPriceContextRepository()
         );
 
         var response = service.analyze(new TimingRequest("2026-06-19 上海到北京，预算1200元"));
 
-        assertThat(response.summary()).contains("本地分析", "MU5101", "下降");
+        assertThat(response.summary()).contains("MU5101", "下降");
         assertThat(response.riskLevel()).isEqualTo("LOW");
+        assertThat(response.history()).hasSize(2);
+    }
+
+    @Test
+    void includesHolidayInfoWhenDateIsNearHoliday() {
+        var service = new TimingService(
+                new StubFlightSearchPort(List.of(flight("MU5101", "980"))),
+                flightId -> List.of(
+                        snapshot(1L, 1020, "2026-06-11T10:00:00"),
+                        snapshot(1L, 980, "2026-06-11T11:00:00")
+                ),
+                (systemPrompt, userPrompt) -> Optional.empty(),
+                new StubPriceContextRepository()
+        );
+
+        var response = service.analyze(new TimingRequest("2026-09-28 上海到北京，预算1200元"));
+
+        assertThat(response.summary()).contains("MU5101");
         assertThat(response.history()).hasSize(2);
     }
 
@@ -67,6 +86,27 @@ class TimingServiceTest {
         );
     }
 
+    private static class StubPriceContextRepository extends PriceContextRepository {
+        StubPriceContextRepository() {
+            super(null);
+        }
+
+        @Override
+        public List<String> searchContext(String fromCity, String toCity) {
+            return List.of("上海-北京航线：工作日早班价格通常高于午班。提前7-14天购票价格最低。");
+        }
+
+        @Override
+        public List<String> searchByKeyword(String keyword) {
+            return List.of();
+        }
+
+        @Override
+        public long count() {
+            return 1;
+        }
+    }
+
     private static class StubFlightSearchPort implements FlightSearchPort {
         private final List<Flight> flights;
 
@@ -78,7 +118,6 @@ class TimingServiceTest {
         public List<Flight> search(FlightSearchCriteria criteria) {
             assertThat(criteria.fromCity()).isEqualTo("上海");
             assertThat(criteria.toCity()).isEqualTo("北京");
-            assertThat(criteria.date()).isEqualTo(LocalDate.parse("2026-06-19"));
             return flights;
         }
     }

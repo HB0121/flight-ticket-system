@@ -21,7 +21,8 @@ public class CrawlRepository {
             rs.getInt("failed_count"),
             rs.getString("error_message"),
             rs.getString("source"),
-            rs.getString("request_params")
+            rs.getString("request_params"),
+            rs.getInt("rejected_count")
     );
 
     public CrawlRepository(JdbcTemplate jdbcTemplate) {
@@ -39,9 +40,9 @@ public class CrawlRepository {
 
     public void insertFailure(String source, String requestParams, String message) {
         LocalDateTime now = LocalDateTime.now();
-        jdbcTemplate.update("""
-                insert into crawl_job(status, started_at, finished_at, success_count, failed_count, error_message, source, request_params)
-                values (?, ?, ?, ?, ?, ?, ?, ?)
-                """, "FAILED", Timestamp.valueOf(now), Timestamp.valueOf(now), 0, 1, message, source, requestParams);
+        jdbcTemplate.update(
+                "insert into crawl_job(status, started_at, finished_at, success_count, failed_count, error_message, source, request_params)"
+                + " values (?, ?, ?, ?, ?, ?, ?, ?)",
+                "FAILED", Timestamp.valueOf(now), Timestamp.valueOf(now), 0, 1, message, source, requestParams);
     }
 }
