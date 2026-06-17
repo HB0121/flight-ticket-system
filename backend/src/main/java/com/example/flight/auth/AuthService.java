@@ -77,10 +77,10 @@ public class AuthService {
         }
         // BCrypt 哈希：自动加盐，输出格式为 $2a$10$...
         String hash = passwordEncoder.encode(request.password());
-        User user = userRepository.insert(request.username(), hash, request.username());
+        User user = userRepository.insert(request.username(), hash);
         UserToken token = tokenRepository.createToken(user.id());
         log.info("用户注册: username={}", user.username());
-        return new LoginResponse(user.id(), user.username(), user.nickname(), token.token());
+        return new LoginResponse(user.id(), user.username(), token.token());
     }
 
     /**
@@ -100,14 +100,14 @@ public class AuthService {
      */
     public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByUsername(request.username())
-                .orElseThrow(() -> new IllegalArgumentException("用户名或密码错误"));
+                .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
         // BCrypt 校验：使用恒定时间比较，防止时序攻击
         if (!passwordEncoder.matches(request.password(), user.password())) {
-            throw new IllegalArgumentException("用户名或密码错误");
+            throw new IllegalArgumentException("密码错误");
         }
         UserToken token = tokenRepository.createToken(user.id());
         log.info("用户登录: username={}", user.username());
-        return new LoginResponse(user.id(), user.username(), user.nickname(), token.token());
+        return new LoginResponse(user.id(), user.username(), token.token());
     }
 
     /**
@@ -150,6 +150,6 @@ public class AuthService {
      * @param nickname 显示昵称
      * @param token    登录令牌字符串
      */
-    public record LoginResponse(Long id, String username, String nickname, String token) {
+    public record LoginResponse(Long id, String username, String token) {
     }
 }

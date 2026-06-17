@@ -1,21 +1,20 @@
 server:
   port: 8080
+  tomcat:
+    uri-encoding: UTF-8
+    relaxed-query-chars: '|,{,},[,]'
 
 spring:
   datasource:
-    url: jdbc:h2:mem:flight_demo;DB_CLOSE_DELAY=-1;MODE=MYSQL
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
-  h2:
-    console:
-      enabled: true
+    url: jdbc:mysql://localhost:3306/flight_demo?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=utf8
+    username: flight
+    password: flight123
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jackson:
     time-zone: Asia/Shanghai
   sql:
     init:
-      mode: always
-      schema-locations: classpath:schema-dev.sql
+      mode: never
 
 app:
   crawler:

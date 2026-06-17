@@ -71,7 +71,6 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                 "id", response.id(),
                 "username", response.username(),
-                "nickname", response.nickname(),
                 "token", response.token()
         ));
     }
@@ -93,7 +92,6 @@ public class AuthController {
         return ResponseEntity.ok(Map.of(
                 "id", response.id(),
                 "username", response.username(),
-                "nickname", response.nickname(),
                 "token", response.token()
         ));
     }
@@ -138,8 +136,7 @@ public class AuthController {
         }
         return ResponseEntity.ok(Map.of(
                 "id", user.id(),
-                "username", user.username(),
-                "nickname", user.nickname()
+                "username", user.username()
         ));
     }
 }

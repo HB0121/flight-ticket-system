@@ -54,24 +54,6 @@ public class DatabaseInitializer {
         ignoreFailure("create index idx_snapshot_flight on flight_price_snapshot (flight_id, observed_at)");
         ignoreFailure("create index idx_snapshot_route on flight_price_snapshot (from_city, to_city, depart_time)");
 
-        // 为 crawl_job 添加被拒绝记录计数列
-        ignoreFailure("alter table crawl_job add column rejected_count int not null default 0");
-
-        // 创建校验失败记录表：保存爬虫输出中不符合业务规则的数据
-        ignoreFailure(
-                "create table if not exists flight_validation_failure (" +
-                " id bigint primary key auto_increment," +
-                " crawl_job_id bigint," +
-                " flight_no varchar(20)," +
-                " from_city varchar(32)," +
-                " to_city varchar(32)," +
-                " depart_time datetime," +
-                " price decimal(10,2)," +
-                " seats_left int," +
-                " failure_reason varchar(500) not null," +
-                " rejected_at datetime not null" +
-                " )");
-
         // 创建价格上下文表：存储 AI 生成的价格趋势分析文本
         ignoreFailure(
                 "create table if not exists price_context (" +
@@ -109,7 +91,6 @@ public class DatabaseInitializer {
                 " id bigint primary key auto_increment," +
                 " username varchar(32) unique not null," +
                 " password varchar(128) not null," +
-                " nickname varchar(32)," +
                 " created_at datetime not null" +
                 " )");
 

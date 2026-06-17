@@ -37,7 +37,6 @@ public class UserRepository {
             rs.getLong("id"),
             rs.getString("username"),
             rs.getString("password"),
-            rs.getString("nickname"),
             rs.getTimestamp("created_at").toLocalDateTime()
     );
 
@@ -86,10 +85,10 @@ public class UserRepository {
      * @param nickname     显示昵称（可为 null，默认取用户名）
      * @return 插入后的完整用户对象（含自增 ID）
      */
-    public User insert(String username, String passwordHash, String nickname) {
+    public User insert(String username, String passwordHash) {
         jdbcTemplate.update(
-                "insert into app_user(username, password, nickname, created_at) values (?, ?, ?, ?)",
-                username, passwordHash, nickname == null ? username : nickname,
+                "insert into app_user(username, password, created_at) values (?, ?, ?)",
+                username, passwordHash,
                 Timestamp.valueOf(LocalDateTime.now()));
         return findByUsername(username).orElseThrow();
     }

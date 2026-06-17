@@ -39,8 +39,7 @@ public class CrawlRepository {
             rs.getInt("failed_count"),
             rs.getString("error_message"),
             rs.getString("source"),
-            rs.getString("request_params"),
-            rs.getInt("rejected_count")
+            rs.getString("request_params")
     );
 
     /** 构造器注入 JdbcTemplate */

@@ -70,7 +70,7 @@ const searchForm = ref({
   source: 'sample',
   fromCity: '上海',
   toCity: '北京',
-  date: defaultDate(),
+  date: '2026-07-08',
 })
 const adviceInput = ref(`${searchForm.value.date} 上海到北京，预算1200元`)
 const timingInput = ref(`${searchForm.value.date} 上海到北京，预算1200元，什么时候买更合适？`)
@@ -216,33 +216,32 @@ async function loadPriceHistory(row = selectedFlight.value) {
 // 点击"查询航班"：先触发爬虫采集 → 再查询数据库刷新页面
 async function handleSearch() {
   const source = searchForm.value.source
-  runningCrawler.value = true
-  let crawlSuccess = false
-  try {
-    const payload = buildCrawlerPayload(searchForm.value)
-    latestJob.value = await runCrawler(payload)       // ① 触发爬虫
-    apiOnline.value = true
-    // 即使 HTTP 200，status 可能仍是 FAILED（爬虫命令执行失败）
-    crawlSuccess = latestJob.value?.status === 'SUCCESS'
-  } catch (error) {
-    if (!error.response) apiOnline.value = false
-  } finally { runningCrawler.value = false }
 
-  await loadFlights()               // ② 从数据库查询并渲染
+  if (source === 'amadeus') {
+    // 真实票价：先触发爬虫采集 → 成功才查数据库
+    runningCrawler.value = true
+    try {
+      const payload = buildCrawlerPayload(searchForm.value)
+      latestJob.value = await runCrawler(payload)
+      apiOnline.value = true
+    } catch { apiOnline.value = false }
+    finally { runningCrawler.value = false }
 
-  // ③ 根据采集结果和已有数据显示反馈
-  if (crawlSuccess) {
-    ElMessage.success(source === 'amadeus'
-      ? 'Amadeus 真实票价采集成功，数据已更新'
-      : '本地样例数据采集成功')
-  } else if (flights.value.length > 0) {
-    ElMessage.warning(source === 'amadeus'
-      ? 'Amadeus 采集失败（请检查 API 密钥和 Docker 环境），正在显示已有数据'
-      : '本地样例采集未成功（需 Docker 环境），正在显示已缓存数据')
+    if (latestJob.value?.status === 'SUCCESS') {
+      await loadFlights()
+      ElMessage.success(`查询成功，共找到 ${flights.value.length} 条航班`)
+    } else {
+      flights.value = []
+      ElMessage.error('查询失败，真实票价采集未成功')
+    }
   } else {
-    ElMessage.error(source === 'amadeus'
-      ? 'Amadeus 采集失败且数据库无数据，请检查 API 密钥和网络连接'
-      : '本地样例采集失败且数据库无数据，请确认后端和 Docker 已启动')
+    // 本地样例：直接查数据库（种子数据已预置）
+    await loadFlights()
+    if (flights.value.length > 0) {
+      ElMessage.success(`查询成功，共找到 ${flights.value.length} 条航班`)
+    } else {
+      ElMessage.error('查询失败，数据库中没有相关航班数据')
+    }
   }
 }
 
@@ -262,8 +261,8 @@ async function handleTiming() {
   try {
     timingResult.value = await requestTiming(timingInput.value)
     apiOnline.value = true
-    // v-if 渲染需要时间，延迟确保 DOM 元素已创建
-    setTimeout(() => renderTimingChart(), 150)
+    // v-if 嵌套渲染需要更长时间，延迟确保 DOM 完全就绪
+    setTimeout(() => renderTimingChart(), 300)
   } catch (error) {
     if (!error.response) apiOnline.value = false
     ElMessage.error(error?.message || '购票时机分析失败')
@@ -307,7 +306,7 @@ function resizeCharts() { priceChart?.resize(); historyChart?.resize(); timingCh
 
 watch(chartOption, () => nextTick(renderPriceChart))
 watch(historyOption, () => nextTick(renderHistoryChart))
-watch(timingChartOption, () => nextTick(renderTimingChart))
+watch(timingChartOption, () => { if (timingResult.value) setTimeout(renderTimingChart, 200) })
 
 // Listen for forced logout from interceptor
 function onAuthLogout() { isLoggedIn.value = false; currentUser.value = null }
@@ -364,7 +363,7 @@ onBeforeUnmount(() => {
       <div class="topbar-actions">
         <span class="user-info">
           <el-icon><User /></el-icon>
-          {{ currentUser?.nickname || currentUser?.username }}
+          {{ currentUser?.username }}
         </span>
         <el-button :icon="SwitchButton" @click="handleLogout">登出</el-button>
       </div>

@@ -184,7 +184,7 @@ export async function deleteConversation(sessionId) {
  * 用户登录。
  * @param {string} username - 用户名
  * @param {string} password - 密码（明文，通过 HTTPS 传输）
- * @returns {Promise<Object>} {id, username, nickname, token}
+ * @returns {Promise<Object>} {id, username, token}
  */
 export async function login(username, password) {
   const response = await http.post('/api/auth/login', { username, password })
@@ -195,11 +195,10 @@ export async function login(username, password) {
  * 用户注册。
  * @param {string} username - 用户名（2-32 字符，全局唯一）
  * @param {string} password - 密码（4-64 字符）
- * @param {string} nickname - 显示昵称（可选）
- * @returns {Promise<Object>} {id, username, nickname, token}
+ * @returns {Promise<Object>} {id, username, token}
  */
-export async function register(username, password, nickname) {
-  const response = await http.post('/api/auth/register', { username, password, nickname })
+export async function register(username, password) {
+  const response = await http.post('/api/auth/register', { username, password })
   return response.data
 }
 
@@ -214,7 +213,7 @@ export async function logout() {
 /**
  * 获取当前登录用户信息。
  * 需要在请求头携带有效的 Bearer token。
- * @returns {Promise<Object>} {id, username, nickname}
+ * @returns {Promise<Object>} {id, username}
  */
 export async function getMe() {
   const response = await http.get('/api/auth/me')
