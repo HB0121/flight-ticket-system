@@ -87,6 +87,28 @@ public class DatabaseInitializer {
                 " created_at datetime not null," +
                 " expires_at datetime not null" +
                 " )");
+        ignoreFailure(
+                "create table if not exists favorite (" +
+                " id bigint primary key auto_increment," +
+                " user_id bigint not null," +
+                " flight_id bigint not null," +
+                " created_at datetime not null," +
+                " constraint uk_favorite_user_flight unique (user_id, flight_id)" +
+                " )");
+        ignoreFailure("alter table favorite add constraint fk_favorite_user foreign key (user_id) references app_user(id)");
+        ignoreFailure("alter table favorite add constraint fk_favorite_flight foreign key (flight_id) references flight(id)");
+        ignoreFailure("create index idx_favorite_user_created on favorite (user_id, created_at)");
+        ignoreFailure(
+                "create table if not exists search_history (" +
+                " id bigint primary key auto_increment," +
+                " user_id bigint not null," +
+                " from_city varchar(32)," +
+                " to_city varchar(32)," +
+                " travel_date date," +
+                " data_source varchar(32)," +
+                " created_at datetime not null" +
+                " )");
+        ignoreFailure("create index idx_search_history_user_created on search_history (user_id, created_at)");
     }
 
     private void ignoreFailure(String sql) {

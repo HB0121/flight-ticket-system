@@ -1,31 +1,8 @@
-import axios from 'axios'
+import { http } from './http.js'
+export { login, register, logout, getMe } from './authApi.js'
 
-const http = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
-  timeout: 15000
-})
-
-// Request interceptor: attach auth token
-http.interceptors.request.use(config => {
-  const token = localStorage.getItem('token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
-
-// Response interceptor: handle 401
-http.interceptors.response.use(
-  response => response,
-  error => {
-    if (error.response && error.response.status === 401) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      window.dispatchEvent(new CustomEvent('auth:logout'))
-    }
-    return Promise.reject(error)
-  }
-)
+// Compatibility barrel only. New domain APIs should live in dedicated modules.
+const CRAWLER_TIMEOUT_MS = 130000
 
 export async function fetchFlights(params = {}) {
   const response = await http.get('/api/flights', { params })
@@ -48,7 +25,7 @@ export async function fetchLatestJob() {
 }
 
 export async function runCrawler(payload = {}) {
-  const response = await http.post('/api/crawl/run', payload)
+  const response = await http.post('/api/crawl/run', payload, { timeout: CRAWLER_TIMEOUT_MS })
   return response.data
 }
 
@@ -85,24 +62,4 @@ export async function sendMessage(sessionId, message) {
 
 export async function deleteConversation(sessionId) {
   await http.delete(`/api/ai/conversations/${sessionId}`)
-}
-
-// Auth APIs
-export async function login(username, password) {
-  const response = await http.post('/api/auth/login', { username, password })
-  return response.data
-}
-
-export async function register(username, password, nickname) {
-  const response = await http.post('/api/auth/register', { username, password, nickname })
-  return response.data
-}
-
-export async function logout() {
-  await http.post('/api/auth/logout')
-}
-
-export async function getMe() {
-  const response = await http.get('/api/auth/me')
-  return response.data
 }

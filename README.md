@@ -1,39 +1,67 @@
-# Flight Ticket System
+# Flight System
 
-综合课程设计 III 选题 `3.1.7`：基于网络爬虫的机票抓取与自动更新系统设计与实现。
+当前仓库已按 phase-1 目标重构为“航班数据采集与查询系统”，主线不再以 AI 交互为中心。
 
-第一版目标是完成稳定可演示的最小闭环：
+## Phase 1 架构
 
-- Scrapy 模拟爬虫解析本地样例 HTML
-- MySQL 保存航班和采集任务
-- SpringBoot 提供 REST API
-- Vue 3 PC 端展示航班和 AI 出行建议
+- `frontend`：Vue 3 路由化前端，区分普通用户与管理员视图
+- `backend`：Spring Boot 统一业务边界，负责认证、航班查询、收藏、搜索历史、管理端爬取接口
+- `crawler`：独立爬虫执行器，接收采集参数并写入规范化结果
 
-第二版目标是在第一版基础上增强课堂演示能力：
+当前主流程：
 
-- Amadeus API 真实航班报价采集，保留 sample 兜底
-- MySQL 保存航班当前状态和价格快照
-- DeepSeek API 生成 AI 出行建议和购票时机分析，保留本地规则兜底
-- Vue 3 PC 端展示采集配置、航班详情、价格趋势和 AI 报告
+- 普通用户：登录、航班查询、价格历史、收藏、搜索历史
+- 管理员：爬取任务、数据源状态
+- AI：保留为后续扩展能力，不属于当前一级导航，也不是 phase-1 的核心交付
 
-## 文档
+## 前端路由
 
-- [第一版框架](./第一版框架.md)
-- [第二版框架](./第二版框架.md)
-- [GitHub Pages 首页](./docs/index.md)
-- [原始设计文档](./2026-06-11-flight-ticket-system-design.md)
+- `/auth`：登录 / 注册
+- `/flights`：航班查询
+- `/favorites`：我的收藏
+- `/history`：搜索历史
+- `/admin/crawl-jobs`：爬取任务
+- `/admin/data-sources`：数据源状态
+
+## 主要接口
+
+认证：
+
+- `POST /api/auth/login`
+- `POST /api/auth/register`
+- `GET /api/auth/me`
+- `POST /api/auth/logout`
+
+用户侧：
+
+- `GET /api/flights`
+- `GET /api/flights/{id}`
+- `GET /api/flights/{id}/price-history`
+- `GET /api/me/favorites`
+- `POST /api/me/favorites`
+- `DELETE /api/me/favorites/{favoriteId}`
+- `GET /api/me/search-history`
+
+管理侧：
+
+- `POST /api/admin/crawl-jobs`
+- `GET /api/admin/crawl-jobs`
+- `GET /api/admin/data-sources/status`
+
+兼容接口仍可能保留在代码中，但新前端主流程应优先使用以上边界。
 
 ## 快速启动
 
-需要先确保 Docker Desktop 或 Docker Engine 正常运行。
+先确保 Docker Desktop 或 Docker Engine 可用。
 
-第二版外部 API 都是可选配置。未配置时系统会回退到 sample 数据和本地规则，仍可完成本地演示。
+如果只演示本地 fallback 流程，可以不配置外部数据源。若需要远程数据源，可按需设置：
 
 ```powershell
 $env:AMADEUS_CLIENT_ID="your-amadeus-client-id"
 $env:AMADEUS_CLIENT_SECRET="your-amadeus-client-secret"
-$env:DEEPSEEK_API_KEY="your-deepseek-api-key"
 ```
+
+启动数据库、后端与前端：
 
 ```powershell
 docker compose -f infra/docker-compose.yml up -d mysql
@@ -46,30 +74,22 @@ npm.cmd install
 npm.cmd run dev
 ```
 
-前端默认访问 `http://localhost:5173`，后端默认访问 `http://localhost:8080`。
+- 前端默认地址：`http://localhost:5173`
+- 后端默认地址：`http://localhost:8080`
 
-手动运行样例爬虫：
+手动运行爬虫：
 
 ```powershell
 docker compose -f infra/docker-compose.yml run --rm crawler
 ```
 
-GitHub Pages：
+## 数据源说明
 
-https://hb0121.github.io/flight-ticket-system/
+- `sample`：内置 fallback 数据源，适合本地演示
+- `amadeus`：作为远程扩展数据源保留在 phase-1 范围内
 
-## 主要接口
+## 说明
 
-- `POST /api/crawl/run`
-- `GET /api/crawl/latest`
-- `GET /api/flights?fromCity=&toCity=&date=&dataSource=`
-- `GET /api/flights/{id}`
-- `GET /api/flights/{id}/price-history`
-- `POST /api/ai/advice`
-- `POST /api/ai/timing`
-
-## 阶段说明
-
-第一版不做小程序、Redis、真实网页爬取、RAG 购票时机预测和公网服务器部署。
-
-第二版加入 Amadeus 真实航班报价采集、DeepSeek AI 和轻量购票时机分析，但仍不做小程序、公网部署、Redis 和完整向量库。
+- 当前重构目标是先把“查询系统 + 管理采集边界”做干净
+- AI 相关代码可以继续保留，但不应影响当前导航、接口边界和页面叙事
+- 旧 README 中关于 AI 主流程的描述已不再代表当前架构

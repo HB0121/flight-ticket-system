@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
 @Import(FlightRepository.class)
+@TestPropertySource(properties = "spring.sql.init.schema-locations=classpath:schema.sql")
 class FlightRepositoryTest {
     @Autowired
     private FlightRepository flightRepository;

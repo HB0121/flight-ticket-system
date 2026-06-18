@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -32,6 +33,14 @@ public class CrawlRepository {
     public Optional<CrawlJob> findLatest() {
         var jobs = jdbcTemplate.query("select * from crawl_job order by id desc limit 1", rowMapper);
         return jobs.stream().findFirst();
+    }
+
+    public List<CrawlJob> findRecent(int limit) {
+        return jdbcTemplate.query(
+                "select * from crawl_job order by id desc limit ?",
+                rowMapper,
+                limit
+        );
     }
 
     public void insertFailure(String message) {
