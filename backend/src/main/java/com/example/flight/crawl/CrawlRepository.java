@@ -44,7 +44,7 @@ public class CrawlRepository {
     }
 
     public void insertFailure(String message) {
-        insertFailure("sample", "", message);
+        insertFailure("unknown", "", message);
     }
 
     public void insertFailure(String source, String requestParams, String message) {

@@ -45,6 +45,17 @@ class FlightRepositoryTest {
     }
 
     @Test
+    void searchesFlightsByIataAirportCodesAndDate() {
+        insertFlight("MU5101", "东方航空", "未知", "未知", "CKG", "PVG", "2026-06-19 08:30:00", "2026-06-19 10:45:00", 980, "aerodatabox");
+        insertFlight("CA1502", "中国国航", "未知", "未知", "CKG", "SHA", "2026-06-19 11:20:00", "2026-06-19 13:35:00", 1280, "aerodatabox");
+        insertFlight("ZH9103", "深圳航空", "未知", "未知", "SZX", "PVG", "2026-06-19 14:20:00", "2026-06-19 16:35:00", 720, "aerodatabox");
+
+        var flights = flightRepository.search(new FlightSearchCriteria("CKG", "PVG", LocalDate.parse("2026-06-19"), "aerodatabox"));
+
+        assertThat(flights).extracting(Flight::flightNo).containsExactly("MU5101");
+    }
+
+    @Test
     void returnsPriceHistoryForFlightOrderedByObservationTime() {
         insertFlight("MU5101", "东方航空", "上海", "北京", "浦东机场", "首都机场", "2026-06-19 08:30:00", "2026-06-19 10:45:00", 980, "amadeus");
         Long flightId = jdbcTemplate.queryForObject("select id from flight where flight_no = 'MU5101' order by id desc limit 1", Long.class);

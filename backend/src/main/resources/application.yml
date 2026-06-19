@@ -3,10 +3,10 @@ server:
 
 spring:
   datasource:
-    url: jdbc:h2:mem:flight_demo;DB_CLOSE_DELAY=-1;MODE=MYSQL
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+    url: jdbc:mysql://localhost:3306/flight_demo?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: flight
+    password: flight123
+    driver-class-name: com.mysql.cj.jdbc.Driver
   h2:
     console:
       enabled: true
@@ -15,7 +15,12 @@ spring:
   sql:
     init:
       mode: always
-      schema-locations: classpath:schema-dev.sql
+      schema-locations: file:../infra/mysql/init.sql
+
+aerodatabox:
+  host: ${AERODATABOX_HOST:aerodatabox.p.rapidapi.com}
+  base-url: ${AERODATABOX_BASE_URL:https://aerodatabox.p.rapidapi.com}
+  key: ""
 
 app:
   crawler:

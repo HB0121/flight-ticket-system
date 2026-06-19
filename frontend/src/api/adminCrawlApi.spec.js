@@ -32,15 +32,15 @@ describe('adminCrawlApi', () => {
     const adminCrawlApi = await import('./adminCrawlApi.js')
     axiosMock.client.post.mockResolvedValueOnce({ data: { id: 5 } })
     axiosMock.client.get.mockResolvedValueOnce({ data: [{ id: 5 }] })
-    axiosMock.client.get.mockResolvedValueOnce({ data: [{ code: 'sample' }] })
+    axiosMock.client.get.mockResolvedValueOnce({ data: [{ code: 'amadeus' }] })
 
-    await adminCrawlApi.createCrawlJob({ source: 'sample' })
+    await adminCrawlApi.createCrawlJob({ source: 'amadeus' })
     await adminCrawlApi.listCrawlJobs()
     await adminCrawlApi.listDataSourceStatuses()
 
     expect(axiosMock.client.post).toHaveBeenCalledWith(
       '/api/admin/crawl-jobs',
-      { source: 'sample' },
+      { source: 'amadeus' },
       { timeout: 130000 }
     )
     expect(axiosMock.client.get).toHaveBeenNthCalledWith(1, '/api/admin/crawl-jobs')

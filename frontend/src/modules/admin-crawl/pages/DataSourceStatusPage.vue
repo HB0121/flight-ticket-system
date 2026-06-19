@@ -2,14 +2,14 @@
   <section class="data-source-status-page">
     <header class="data-source-status-page__header">
       <div>
-        <p class="data-source-status-page__eyebrow">Admin Data Sources</p>
-        <h2>Inspect basic crawl source configuration</h2>
+        <p class="data-source-status-page__eyebrow">{{ t('admin.dataSources.eyebrow') }}</p>
+        <h2>{{ t('admin.dataSources.title') }}</h2>
         <p class="data-source-status-page__subtitle">
-          Phase 1 keeps this view intentionally small: source code, mode, configuration readiness, and a short detail.
+          {{ t('admin.dataSources.subtitle') }}
         </p>
       </div>
       <button :disabled="loading" type="button" @click="loadStatuses">
-        {{ loading ? 'Refreshing...' : 'Refresh' }}
+        {{ loading ? t('admin.dataSources.actions.refreshing') : t('admin.dataSources.actions.refresh') }}
       </button>
     </header>
 
@@ -20,7 +20,7 @@
         <div class="data-source-status-page__row">
           <h3>{{ status.label }}</h3>
           <span :class="['data-source-status-page__badge', status.configured ? 'is-configured' : 'is-not-configured']">
-            {{ status.configured ? 'Configured' : 'Not Configured' }}
+            {{ status.configured ? t('admin.dataSources.badges.configured') : t('admin.dataSources.badges.notConfigured') }}
           </span>
         </div>
         <p class="data-source-status-page__meta">{{ status.code }} | {{ status.mode }}</p>
@@ -32,7 +32,10 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { listDataSourceStatuses } from '../../../api/adminCrawlApi.js'
+
+const { t } = useI18n()
 
 const loading = ref(false)
 const errorMessage = ref('')
@@ -61,7 +64,7 @@ function getErrorMessage(error) {
   return error?.response?.data?.message
     ?? error?.response?.data?.error
     ?? error?.message
-    ?? 'Unable to load data-source status right now.'
+    ?? t('admin.dataSources.errors.loadFailed')
 }
 </script>
 

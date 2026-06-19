@@ -23,13 +23,13 @@ public class CrawlController {
 
     @PostMapping("/run")
     public CrawlJob run(@RequestBody(required = false) CrawlRequest request) {
-        log.info("接收到爬虫触发请求: source={}", request != null ? request.normalizedSource() : "default");
-        return crawlService.runCrawler(request == null ? new CrawlRequest(null, null, null, null, null, null) : request);
+        log.info("Receive crawl trigger request: source={}", request != null ? request.normalizedSource() : "default");
+        return crawlService.runCrawler(request == null ? new CrawlRequest(null, null, null, null, null, null, null) : request);
     }
 
     @GetMapping("/latest")
     public CrawlJob latest() {
         return crawlRepository.findLatest()
-                .orElseGet(() -> new CrawlJob(null, "EMPTY", null, null, 0, 0, "暂无采集记录", null, null));
+                .orElseGet(() -> new CrawlJob(null, "EMPTY", null, null, 0, 0, "No crawl history yet", null, null));
     }
 }

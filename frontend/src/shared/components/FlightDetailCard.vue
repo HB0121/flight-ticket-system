@@ -2,7 +2,7 @@
   <section class="flight-detail-card">
     <header class="flight-detail-card__header">
       <div>
-        <p class="flight-detail-card__eyebrow">Selected Flight</p>
+        <p class="flight-detail-card__eyebrow">{{ t('flights.detail.eyebrow') }}</p>
         <h3>{{ flight.flightNo || '-' }}</h3>
       </div>
       <strong class="flight-detail-card__price">¥{{ formatPrice(flight.price) }}</strong>
@@ -10,35 +10,35 @@
 
     <dl class="flight-detail-card__grid">
       <div>
-        <dt>Airline</dt>
-        <dd>{{ flight.airlineName || '-' }}</dd>
+        <dt>{{ t('flights.detail.airline') }}</dt>
+        <dd>{{ flight.airlineLabel || flight.airlineName || '-' }}</dd>
       </div>
       <div>
-        <dt>Route</dt>
-        <dd>{{ flight.fromCity || '-' }} → {{ flight.toCity || '-' }}</dd>
+        <dt>{{ t('flights.detail.route') }}</dt>
+        <dd>{{ flight.routeLabel || `${flight.fromCity || '-'} -> ${flight.toCity || '-'}` }}</dd>
       </div>
       <div>
-        <dt>Airports</dt>
-        <dd>{{ flight.fromAirport || '-' }} → {{ flight.toAirport || '-' }}</dd>
+        <dt>{{ t('flights.detail.airports') }}</dt>
+        <dd>{{ flight.fromAirportLabel || flight.fromAirport || '-' }} -> {{ flight.toAirportLabel || flight.toAirport || '-' }}</dd>
       </div>
       <div>
-        <dt>Departure</dt>
+        <dt>{{ t('flights.detail.departure') }}</dt>
         <dd>{{ formatDateTime(flight.departTime) }}</dd>
       </div>
       <div>
-        <dt>Arrival</dt>
+        <dt>{{ t('flights.detail.arrival') }}</dt>
         <dd>{{ formatDateTime(flight.arriveTime) }}</dd>
       </div>
       <div>
-        <dt>Seats Left</dt>
+        <dt>{{ t('flights.detail.seatsLeft') }}</dt>
         <dd>{{ flight.seatsLeft ?? '-' }}</dd>
       </div>
       <div>
-        <dt>Source</dt>
+        <dt>{{ t('flights.detail.source') }}</dt>
         <dd>{{ flight.dataSource || '-' }}</dd>
       </div>
       <div>
-        <dt>Collected</dt>
+        <dt>{{ t('flights.detail.collected') }}</dt>
         <dd>{{ formatDateTime(flight.collectedAt) }}</dd>
       </div>
     </dl>
@@ -46,8 +46,11 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { formatDateTime } from '../../lib/format.js'
 import { formatPrice } from '../utils/price.js'
+
+const { t } = useI18n()
 
 defineProps({
   flight: {

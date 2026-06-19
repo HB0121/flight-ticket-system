@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { clearStoredSession, markSessionAnonymous } from '../auth/session.js'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 const REQUEST_TIMEOUT_MS = 15000
@@ -44,9 +45,8 @@ http.interceptors.response.use(
   response => response,
   error => {
     if (error.response?.status === 401) {
-      const storage = getStorage()
-      storage?.removeItem('token')
-      storage?.removeItem('user')
+      clearStoredSession()
+      markSessionAnonymous()
       dispatchAuthLogout()
     }
 

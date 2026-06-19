@@ -1,5 +1,6 @@
 # Java
 backend/target/
+backend/src/main/resources/application-local.yml
 
 # Node
 frontend/node_modules/

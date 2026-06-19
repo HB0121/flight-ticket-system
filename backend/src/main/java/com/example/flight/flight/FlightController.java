@@ -40,6 +40,7 @@ public class FlightController {
                                @RequestAttribute("user") User user) {
         log.debug("flight search: fromCity={}, toCity={}, date={}, dataSource={}", fromCity, toCity, date, dataSource);
         List<Flight> flights = flightRepository.search(new FlightSearchCriteria(fromCity, toCity, date, dataSource));
+        log.debug("flight search result count={}", flights.size());
         if (shouldRecordSearch(fromCity, toCity, date, dataSource)) {
             searchHistoryService.record(user.id(), fromCity, toCity, date, dataSource);
         }

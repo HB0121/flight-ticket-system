@@ -10,10 +10,17 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#app {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   margin: 0;
   min-width: 320px;
-  min-height: 100vh;
+  min-height: 100%;
   background:
     radial-gradient(circle at top, rgba(37, 99, 235, 0.08), transparent 32%),
     linear-gradient(180deg, #f8fbff 0%, #eef2f7 100%);
@@ -33,7 +40,7 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  min-height: 100%;
   background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
 }
 

@@ -6,8 +6,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -17,60 +22,126 @@ public class CrawlService {
     private final CrawlRepository crawlRepository;
     private final String command;
     private final Duration timeout;
+    private final String aerodataboxEnvKey;
+    private final String aerodataboxConfigKey;
 
     public CrawlService(CrawlRepository crawlRepository,
                         @Value("${app.crawler.command}") String command,
-                        @Value("${app.crawler.timeout-seconds:120}") long timeoutSeconds) {
+                        @Value("${app.crawler.timeout-seconds:120}") long timeoutSeconds,
+                        @Value("${AERODATABOX_KEY:}") String aerodataboxEnvKey,
+                        @Value("${aerodatabox.key:}") String aerodataboxConfigKey) {
         this.crawlRepository = crawlRepository;
         this.command = command;
         this.timeout = Duration.ofSeconds(timeoutSeconds);
-    }
-
-    public CrawlJob runSampleCrawler() {
-        return runCrawler(new CrawlRequest(null, null, null, null, null, null));
+        this.aerodataboxEnvKey = aerodataboxEnvKey;
+        this.aerodataboxConfigKey = aerodataboxConfigKey;
     }
 
     public CrawlJob runCrawler(CrawlRequest request) {
-        String executableCommand = command + " " + String.join(" ", request.toCrawlerArguments());
-        log.info("开始执行爬虫任务: {}", executableCommand);
+        List<String> commandArguments = buildCommandArguments(request);
+        String executableCommand = String.join(" ", commandArguments);
+        log.info("Starting crawler job: {}", executableCommand);
         try {
-            Process process = new ProcessBuilder(shellCommand(executableCommand))
+            ProcessBuilder processBuilder = new ProcessBuilder(commandArguments)
                     .directory(new File(System.getProperty("user.dir")))
-                    .redirectErrorStream(true)
-                    .start();
+                    .redirectErrorStream(true);
+            applyProcessEnvironment(processBuilder.environment());
+
+            Process process = processBuilder.start();
+            CompletableFuture<String> outputFuture = CompletableFuture.supplyAsync(() -> readProcessOutput(process));
             boolean completed = process.waitFor(timeout.toSeconds(), TimeUnit.SECONDS);
-            String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 
             if (!completed) {
                 process.destroyForcibly();
-                log.error("爬虫执行超时: {}", executableCommand);
-                crawlRepository.insertFailure(request.normalizedSource(), request.toSummary(), "爬虫执行超时：" + executableCommand);
+                process.waitFor(5, TimeUnit.SECONDS);
+                String output = readCollectedOutput(outputFuture);
+                log.error("Crawler timed out: {}", executableCommand);
+                crawlRepository.insertFailure(request.normalizedSource(), request.toSummary(), "Crawler timed out: " + executableCommand + "\n" + trimOutput(output));
             } else if (process.exitValue() != 0) {
-                log.error("爬虫执行失败: exitCode={}, output={}", process.exitValue(), trimOutput(output));
-                crawlRepository.insertFailure(request.normalizedSource(), request.toSummary(), "爬虫执行失败：" + trimOutput(output));
+                String output = readCollectedOutput(outputFuture);
+                log.error("Crawler failed: exitCode={}, output={}", process.exitValue(), trimOutput(output));
+                crawlRepository.insertFailure(request.normalizedSource(), request.toSummary(), "Crawler failed: " + trimOutput(output));
             } else {
-                log.info("爬虫执行成功: source={}", request.normalizedSource());
+                readCollectedOutput(outputFuture);
+                log.info("Crawler finished successfully: source={}", request.normalizedSource());
             }
         } catch (Exception ex) {
-            log.error("爬虫启动失败: {}", ex.getMessage(), ex);
-            crawlRepository.insertFailure(request.normalizedSource(), request.toSummary(), "爬虫启动失败：" + ex.getMessage());
+            log.error("Crawler startup failed: {}", ex.getMessage(), ex);
+            crawlRepository.insertFailure(request.normalizedSource(), request.toSummary(), "Crawler startup failed: " + ex.getMessage());
         }
 
         return crawlRepository.findLatest()
-                .orElseGet(() -> new CrawlJob(null, "UNKNOWN", null, null, 0, 0, "暂无采集记录", request.normalizedSource(), request.toSummary()));
+                .orElseGet(() -> new CrawlJob(null, "UNKNOWN", null, null, 0, 0, "No crawl history yet", request.normalizedSource(), request.toSummary()));
     }
 
-    private String[] shellCommand(String executableCommand) {
-        if (System.getProperty("os.name").toLowerCase().contains("win")) {
-            return new String[]{"cmd.exe", "/c", executableCommand};
+    List<String> buildCommandArguments(CrawlRequest request) {
+        var args = new ArrayList<>(splitCommand(command));
+        args.addAll(request.toCrawlerArguments());
+        return args;
+    }
+
+    void applyProcessEnvironment(Map<String, String> environment) {
+        if (!hasText(environment.get("AERODATABOX_KEY")) && hasText(effectiveAerodataboxKey())) {
+            environment.put("AERODATABOX_KEY", effectiveAerodataboxKey());
         }
-        return new String[]{"sh", "-lc", executableCommand};
+    }
+
+    String effectiveAerodataboxKey() {
+        return hasText(aerodataboxEnvKey) ? aerodataboxEnvKey : aerodataboxConfigKey;
+    }
+
+    private List<String> splitCommand(String rawCommand) {
+        var result = new ArrayList<String>();
+        if (rawCommand == null || rawCommand.isBlank()) {
+            return result;
+        }
+        var current = new StringBuilder();
+        boolean inQuote = false;
+        char quoteChar = 0;
+        for (int index = 0; index < rawCommand.length(); index++) {
+            char ch = rawCommand.charAt(index);
+            if ((ch == '"' || ch == '\'') && (!inQuote || ch == quoteChar)) {
+                inQuote = !inQuote;
+                quoteChar = inQuote ? ch : 0;
+            } else if (Character.isWhitespace(ch) && !inQuote) {
+                if (current.length() > 0) {
+                    result.add(current.toString());
+                    current.setLength(0);
+                }
+            } else {
+                current.append(ch);
+            }
+        }
+        if (current.length() > 0) {
+            result.add(current.toString());
+        }
+        return result;
+    }
+
+    private String readProcessOutput(Process process) {
+        try {
+            return new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException ex) {
+            return "Failed to read crawler output: " + ex.getMessage();
+        }
+    }
+
+    private String readCollectedOutput(CompletableFuture<String> outputFuture) {
+        try {
+            return outputFuture.get(5, TimeUnit.SECONDS);
+        } catch (Exception ex) {
+            return "Timed out while collecting crawler output: " + ex.getMessage();
+        }
     }
 
     private String trimOutput(String output) {
         if (output == null || output.isBlank()) {
-            return "无输出";
+            return "no output";
         }
         return output.length() > 500 ? output.substring(0, 500) : output;
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }

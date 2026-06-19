@@ -18,7 +18,7 @@ class MysqlPipeline:
         self._ensure_schema()
         self.success_count = 0
         self.failed_count = 0
-        self.source = getattr(spider, "source", getattr(spider, "name", "sample"))
+        self.source = getattr(spider, "source", getattr(spider, "name", "unknown"))
         self.request_params = getattr(spider, "request_params", f"source={self.source}")
         with self.connection.cursor() as cursor:
             cursor.execute(
@@ -108,8 +108,16 @@ class MysqlPipeline:
         return item
 
     def close_spider(self, spider):
-        status = "SUCCESS" if spider.crawler.stats.get_value("finish_reason") == "finished" else "FAILED"
-        error_message = None if status == "SUCCESS" else str(spider.crawler.stats.get_value("finish_reason"))
+        finish_reason = spider.crawler.stats.get_value("finish_reason")
+        status = self.close_status(self.success_count, self.failed_count, finish_reason)
+        live_error = spider.crawler.stats.get_value("live_error")
+        crawl_error = spider.crawler.stats.get_value("crawl_error")
+        if getattr(spider, "name", "") == "live_flights" and self.success_count == 0:
+            status = "FAILED"
+            live_error = live_error or "NO_FLIGHT_ROWS_PARSED"
+        if crawl_error:
+            status = "FAILED"
+        error_message = None if status == "SUCCESS" else str(crawl_error or live_error or finish_reason)
         with self.connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -121,6 +129,14 @@ class MysqlPipeline:
             )
         self.connection.commit()
         self.connection.close()
+
+    @staticmethod
+    def close_status(success_count, failed_count, finish_reason):
+        if failed_count > 0:
+            return "FAILED"
+        if success_count > 0 or finish_reason == "finished":
+            return "SUCCESS"
+        return "FAILED"
 
     def _ensure_schema(self):
         with self.connection.cursor() as cursor:

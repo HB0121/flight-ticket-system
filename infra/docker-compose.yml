@@ -28,9 +28,9 @@ services:
       MYSQL_DATABASE: flight_demo
       MYSQL_USER: flight
       MYSQL_PASSWORD: flight123
-      AMADEUS_CLIENT_ID: ${AMADEUS_CLIENT_ID:-}
-      AMADEUS_CLIENT_SECRET: ${AMADEUS_CLIENT_SECRET:-}
-      AMADEUS_BASE_URL: ${AMADEUS_BASE_URL:-https://test.api.amadeus.com}
+      AERODATABOX_KEY: ${AERODATABOX_KEY:-}
+      AERODATABOX_BASE_URL: ${AERODATABOX_BASE_URL:-https://aerodatabox.p.rapidapi.com}
+      AERODATABOX_HOST: ${AERODATABOX_HOST:-aerodatabox.p.rapidapi.com}
       TZ: Asia/Shanghai
     depends_on:
       mysql:

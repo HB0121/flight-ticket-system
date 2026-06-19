@@ -4,7 +4,8 @@ import {
   buildPriceChartOption,
   buildPriceHistoryChartOption,
   formatAdviceSummary,
-  formatTimingReport
+  formatTimingReport,
+  isLiveCrawlerSource
 } from './format.js'
 
 describe('formatAdviceSummary', () => {
@@ -55,6 +56,38 @@ describe('buildCrawlerPayload', () => {
       adults: 1,
       maxResults: 3
     })
+  })
+
+  it('builds live source payload without requiring a manual source URL', () => {
+    expect(buildCrawlerPayload({
+      source: 'ctrip_live',
+      fromCity: '上海',
+      toCity: '北京',
+      date: '2026-06-19',
+      adults: '2',
+      maxResults: '5',
+      sourceUrl: ''
+    })).toEqual({
+      source: 'ctrip_live',
+      fromCity: '上海',
+      toCity: '北京',
+      date: '2026-06-19',
+      adults: 2,
+      maxResults: 5
+    })
+  })
+
+  it('rejects unsupported sources instead of falling back to sample data', () => {
+    expect(() => buildCrawlerPayload({ source: 'unknown_live' })).toThrow(/unsupported source/i)
+  })
+})
+
+describe('isLiveCrawlerSource', () => {
+  it('recognizes the configured live learning sources', () => {
+    expect(isLiveCrawlerSource('ctrip_live')).toBe(true)
+    expect(isLiveCrawlerSource('fliggy_live')).toBe(true)
+    expect(isLiveCrawlerSource('qunar_live')).toBe(true)
+    expect(isLiveCrawlerSource('amadeus')).toBe(false)
   })
 })
 

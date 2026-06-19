@@ -1,9 +1,14 @@
 <template>
   <section class="auth-page">
     <div class="auth-card auth-module-card">
-      <p class="auth-eyebrow">Flight Query Platform</p>
-      <h1>Account Access</h1>
-      <p class="auth-subtitle">Sign in to continue to flight search, or create a new demo account.</p>
+      <div class="auth-locale-switch">
+        <button type="button" @click="switchLocale('zh-CN')">{{ t('common.locales.zhCN') }}</button>
+        <button type="button" @click="switchLocale('en-US')">{{ t('common.locales.enUS') }}</button>
+      </div>
+
+      <p class="auth-eyebrow">{{ t('auth.brand') }}</p>
+      <h1>{{ t('auth.login.title') }}</h1>
+      <p class="auth-subtitle">{{ t('auth.login.subtitle') }}</p>
 
       <div class="auth-switcher">
         <button
@@ -11,41 +16,41 @@
           :class="['auth-switcher__item', { active: mode === 'login' }]"
           @click="switchMode('login')"
         >
-          Login
+          {{ t('auth.switcher.login') }}
         </button>
         <button
           type="button"
           :class="['auth-switcher__item', { active: mode === 'register' }]"
           @click="switchMode('register')"
         >
-          Register
+          {{ t('auth.switcher.register') }}
         </button>
       </div>
 
       <el-form label-position="top" @submit.prevent="submit">
-        <el-form-item label="Username" class="auth-input">
+        <el-form-item :label="t('auth.fields.username')" class="auth-input">
           <el-input
             v-model.trim="form.username"
             autocomplete="username"
-            placeholder="Enter your username"
+            :placeholder="t('auth.placeholders.username')"
           />
         </el-form-item>
 
-        <el-form-item label="Password" class="auth-input">
+        <el-form-item :label="t('auth.fields.password')" class="auth-input">
           <el-input
             v-model.trim="form.password"
             autocomplete="current-password"
-            placeholder="Enter your password"
+            :placeholder="t('auth.placeholders.password')"
             show-password
             type="password"
           />
         </el-form-item>
 
-        <el-form-item v-if="mode === 'register'" label="Nickname (optional)" class="auth-input">
+        <el-form-item v-if="mode === 'register'" :label="t('auth.fields.nickname')" class="auth-input">
           <el-input
             v-model.trim="form.nickname"
             autocomplete="nickname"
-            placeholder="Defaults to the username if omitted"
+            :placeholder="t('auth.placeholders.nickname')"
           />
         </el-form-item>
 
@@ -59,14 +64,14 @@
           size="large"
           type="primary"
         >
-          {{ mode === 'login' ? 'Sign in' : 'Create account' }}
+          {{ mode === 'login' ? t('auth.login.submit') : t('auth.register.submit') }}
         </el-button>
       </el-form>
 
       <p class="auth-footnote">
-        {{ mode === 'login' ? 'Need an account?' : 'Already have an account?' }}
+        {{ mode === 'login' ? t('auth.footnote.loginPrompt') : t('auth.footnote.registerPrompt') }}
         <button class="auth-inline-link" type="button" @click="switchMode(mode === 'login' ? 'register' : 'login')">
-          {{ mode === 'login' ? 'Register here' : 'Back to login' }}
+          {{ mode === 'login' ? t('auth.footnote.loginAction') : t('auth.footnote.registerAction') }}
         </button>
       </p>
     </div>
@@ -75,11 +80,16 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { login, register } from '../../../api/authApi.js'
+import { markSessionAuthenticated } from '../../../auth/session.js'
+import { setStoredLocale } from '../../../i18n/locale.js'
 
 const router = useRouter()
+const route = useRoute()
+const { locale, t } = useI18n()
 
 const mode = ref('login')
 const submitting = ref(false)
@@ -95,6 +105,11 @@ function switchMode(nextMode) {
   mode.value = nextMode
   errorMessage.value = ''
   successMessage.value = ''
+}
+
+function switchLocale(nextLocale) {
+  locale.value = nextLocale
+  setStoredLocale(nextLocale)
 }
 
 function isValidSessionPayload(payload) {
@@ -116,6 +131,7 @@ function persistSession(payload) {
     username: payload.username,
     nickname: safeNickname
   }))
+  markSessionAuthenticated()
 }
 
 function getErrorMessage(error, fallback) {
@@ -125,14 +141,20 @@ function getErrorMessage(error, fallback) {
     ?? fallback
 }
 
+function getPostAuthTarget() {
+  return typeof route.query.redirect === 'string' && route.query.redirect
+    ? route.query.redirect
+    : { name: 'user-flights' }
+}
+
 async function submit() {
   if (!form.username || !form.password) {
-    errorMessage.value = 'Enter both username and password.'
+    errorMessage.value = t('auth.validation.missingCredentials')
     return
   }
 
   if (mode.value === 'register' && form.password.length < 4) {
-    errorMessage.value = 'Registration passwords must be at least 4 characters.'
+    errorMessage.value = t('auth.validation.shortPassword')
     return
   }
 
@@ -151,19 +173,19 @@ async function submit() {
 
     if (!isValidSessionPayload(payload)) {
       errorMessage.value = mode.value === 'login'
-        ? 'Login succeeded but the session payload was invalid.'
-        : 'Registration succeeded but the session payload was invalid.'
+        ? t('auth.login.invalidSession')
+        : t('auth.login.registerInvalidSession')
       return
     }
 
     persistSession(payload)
-    successMessage.value = mode.value === 'login' ? 'Signed in. Redirecting to flight search.' : 'Registration successful. You are now signed in.'
+    successMessage.value = mode.value === 'login' ? t('auth.login.success') : t('auth.register.success')
     ElMessage.success(successMessage.value)
-    await router.replace({ name: 'user-flights' })
+    await router.replace(getPostAuthTarget())
   } catch (error) {
     errorMessage.value = getErrorMessage(
       error,
-      mode.value === 'login' ? 'Login failed. Please try again.' : 'Registration failed. Please try again.'
+      mode.value === 'login' ? t('auth.login.error') : t('auth.register.error')
     )
   } finally {
     submitting.value = false
@@ -174,6 +196,22 @@ async function submit() {
 <style scoped>
 .auth-module-card {
   text-align: left;
+}
+
+.auth-locale-switch {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.auth-locale-switch button {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #ffffff;
+  cursor: pointer;
 }
 
 .auth-eyebrow {

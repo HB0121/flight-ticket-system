@@ -2,6 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
+import { createI18n } from 'vue-i18n'
 import FavoritesPage from './FavoritesPage.vue'
 
 const mocks = vi.hoisted(() => ({
@@ -29,9 +30,71 @@ async function flushPromises() {
   await nextTick()
 }
 
-function createWrapper() {
+function createTestI18n(locale = 'en-US') {
+  return createI18n({
+    legacy: false,
+    locale,
+    messages: {
+      'en-US': {
+        common: {
+          actions: {
+            refresh: 'Refresh',
+            remove: 'Remove'
+          },
+          labels: {
+            departure: 'Departure',
+            airports: 'Airports',
+            source: 'Source'
+          },
+          status: {
+            loadingFavorites: 'Loading favorites...'
+          }
+        },
+        favorites: {
+          eyebrow: 'User Profile',
+          title: 'Favorites',
+          subtitle: 'Review the flights you have already pinned from search results.',
+          empty: 'No saved flights yet.',
+          errors: {
+            loadFailed: 'Unable to load favorites right now.',
+            removeFailed: 'Unable to remove this favorite right now.'
+          }
+        }
+      },
+      'zh-CN': {
+        common: {
+          actions: {
+            refresh: '刷新',
+            remove: '移除'
+          },
+          labels: {
+            departure: '出发',
+            airports: '机场',
+            source: '来源'
+          },
+          status: {
+            loadingFavorites: '正在加载收藏...'
+          }
+        },
+        favorites: {
+          eyebrow: '用户资料',
+          title: '收藏',
+          subtitle: '查看你已经从搜索结果中收藏的航班。',
+          empty: '还没有收藏航班。',
+          errors: {
+            loadFailed: '当前无法加载收藏列表。',
+            removeFailed: '当前无法移除这条收藏。'
+          }
+        }
+      }
+    }
+  })
+}
+
+function createWrapper(locale = 'en-US') {
   return mount(FavoritesPage, {
     global: {
+      plugins: [createTestI18n(locale)],
       stubs: {
         ElButton: ElButtonStub
       }
@@ -64,5 +127,11 @@ describe('FavoritesPage', () => {
 
     expect(mocks.removeFavorite).toHaveBeenCalledWith(1)
     expect(wrapper.text()).toContain('No saved flights yet.')
+  })
+
+  it('renders localized favorites copy', () => {
+    const wrapper = createWrapper('zh-CN')
+
+    expect(wrapper.text()).toContain('收藏')
   })
 })

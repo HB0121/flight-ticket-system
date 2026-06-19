@@ -7,5 +7,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["scrapy", "crawl", "sample_flights"]
+CMD ["scrapy", "crawl", "aerodatabox_flights"]
 

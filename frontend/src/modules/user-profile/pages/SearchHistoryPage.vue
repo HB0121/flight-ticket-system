@@ -2,18 +2,18 @@
   <section class="profile-page">
     <header class="profile-page__header">
       <div>
-        <p class="profile-page__eyebrow">User Profile</p>
-        <h2>Search History</h2>
+        <p class="profile-page__eyebrow">{{ t('history.eyebrow') }}</p>
+        <h2>{{ t('history.title') }}</h2>
         <p class="profile-page__subtitle">
-          Recent flight searches are recorded automatically from the current query flow.
+          {{ t('history.subtitle') }}
         </p>
       </div>
     </header>
 
     <p v-if="errorMessage" class="profile-page__error">{{ errorMessage }}</p>
 
-    <div v-if="loading && !rows.length" class="profile-page__empty">Loading search history...</div>
-    <div v-else-if="!rows.length" class="profile-page__empty">No search history yet.</div>
+    <div v-if="loading && !rows.length" class="profile-page__empty">{{ t('common.status.loadingHistory') }}</div>
+    <div v-else-if="!rows.length" class="profile-page__empty">{{ t('history.empty') }}</div>
 
     <div v-else class="history-list">
       <article v-for="row in rows" :key="row.id" class="history-card">
@@ -25,15 +25,15 @@
 
         <dl class="history-card__meta">
           <div>
-            <dt>Travel Date</dt>
+            <dt>{{ t('common.labels.travelDate') }}</dt>
             <dd>{{ row.travelDate || '-' }}</dd>
           </div>
           <div>
-            <dt>Source</dt>
+            <dt>{{ t('common.labels.source') }}</dt>
             <dd>{{ row.dataSource || '-' }}</dd>
           </div>
           <div>
-            <dt>Searched At</dt>
+            <dt>{{ t('common.labels.searchedAt') }}</dt>
             <dd>{{ formatDateTime(row.createdAt) }}</dd>
           </div>
         </dl>
@@ -44,8 +44,11 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { fetchSearchHistory } from '../../../api/profileApi.js'
 import { formatDateTime } from '../../../lib/format.js'
+
+const { t } = useI18n()
 
 const rows = ref([])
 const loading = ref(false)
@@ -74,7 +77,7 @@ function getErrorMessage(error) {
   return error?.response?.data?.message
     ?? error?.response?.data?.error
     ?? error?.message
-    ?? 'Unable to load search history right now.'
+    ?? t('history.errors.loadFailed')
 }
 </script>
 

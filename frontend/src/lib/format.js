@@ -86,10 +86,16 @@ export function buildPriceHistoryChartOption(history) {
   }
 }
 
+const LIVE_CRAWLER_SOURCES = new Set(['ctrip_live', 'fliggy_live', 'qunar_live'])
+
+export function isLiveCrawlerSource(source) {
+  return LIVE_CRAWLER_SOURCES.has(source)
+}
+
 export function buildCrawlerPayload(form) {
-  const source = form?.source || 'sample'
-  if (source !== 'amadeus') {
-    return { source: 'sample' }
+  const source = form?.source || 'amadeus'
+  if (source !== 'amadeus' && !isLiveCrawlerSource(source)) {
+    throw new Error(`unsupported source: ${source}`)
   }
   return {
     source,

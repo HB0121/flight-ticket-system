@@ -93,27 +93,3 @@ create table if not exists user_token (
     created_at timestamp not null,
     expires_at timestamp not null
 );
-
--- Seed sample flights
-insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
-values ('MU5101', '东方航空', '上海', '北京', '虹桥机场', '首都机场', '2026-06-19 08:30:00', '2026-06-19 10:45:00', 980, 12, 'sample', '2026-06-12 09:00:00');
-insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
-values ('CA1502', '中国国航', '上海', '北京', '浦东机场', '大兴机场', '2026-06-19 11:20:00', '2026-06-19 13:35:00', 1280, 8, 'sample', '2026-06-12 09:00:00');
-insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
-values ('CZ3105', '南方航空', '广州', '北京', '白云机场', '大兴机场', '2026-06-19 09:10:00', '2026-06-19 12:10:00', 860, 20, 'sample', '2026-06-12 09:00:00');
-insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
-values ('ZH9103', '深圳航空', '深圳', '上海', '宝安机场', '虹桥机场', '2026-06-20 14:20:00', '2026-06-20 16:35:00', 720, 16, 'sample', '2026-06-12 09:00:00');
-insert into flight(flight_no, airline_name, from_city, to_city, from_airport, to_airport, depart_time, arrive_time, price, seats_left, data_source, collected_at)
-values ('HU7601', '海南航空', '北京', '上海', '首都机场', '虹桥机场', '2026-06-19 07:00:00', '2026-06-19 09:15:00', 1050, 5, 'sample', '2026-06-12 09:00:00');
-
--- Seed price snapshots for trend charts
-insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at)
-values (1, 'MU5101', '上海', '北京', '2026-06-19 08:30:00', 1050, 15, 'sample', '2026-06-10 09:00:00');
-insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at)
-values (1, 'MU5101', '上海', '北京', '2026-06-19 08:30:00', 1020, 14, 'sample', '2026-06-11 09:00:00');
-insert into flight_price_snapshot(flight_id, flight_no, from_city, to_city, depart_time, price, seats_left, data_source, observed_at)
-values (1, 'MU5101', '上海', '北京', '2026-06-19 08:30:00', 980, 12, 'sample', '2026-06-12 09:00:00');
-
--- Seed a crawl job for dashboard
-insert into crawl_job(status, started_at, finished_at, success_count, failed_count, error_message, source, request_params, rejected_count)
-values ('SUCCESS', '2026-06-12 09:00:00', '2026-06-12 09:00:05', 5, 0, null, 'sample', 'source=sample, fromCity=上海, toCity=北京, date=2026-06-19', 0);

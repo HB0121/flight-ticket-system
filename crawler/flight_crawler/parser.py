@@ -2,7 +2,7 @@ import re
 from bs4 import BeautifulSoup
 
 
-def parse_flights(html: str) -> list[dict]:
+def parse_flights(html: str, data_source: str = "unknown") -> list[dict]:
     soup = BeautifulSoup(html, "html.parser")
     flights = []
 
@@ -18,7 +18,7 @@ def parse_flights(html: str) -> list[dict]:
             "arrive_time": _attr(card, ".arrive-time", "datetime"),
             "price": _number(_text(card, ".price")),
             "seats_left": _number(_text(card, ".seats-left")),
-            "data_source": "sample",
+            "data_source": data_source,
         }
         if _is_complete(flight):
             flights.append(flight)

@@ -54,7 +54,7 @@
 
 先确保 Docker Desktop 或 Docker Engine 可用。
 
-如果只演示本地 fallback 流程，可以不配置外部数据源。若需要远程数据源，可按需设置：
+当前系统不再提供本地 sample/fallback 航班数据。未配置真实远程数据源时，采集任务会被禁用或直接失败。
 
 ```powershell
 $env:AMADEUS_CLIENT_ID="your-amadeus-client-id"
@@ -85,8 +85,7 @@ docker compose -f infra/docker-compose.yml run --rm crawler
 
 ## 数据源说明
 
-- `sample`：内置 fallback 数据源，适合本地演示
-- `amadeus`：作为远程扩展数据源保留在 phase-1 范围内
+- `amadeus`：当前唯一启用的真实远程数据源
 
 ## 说明
 

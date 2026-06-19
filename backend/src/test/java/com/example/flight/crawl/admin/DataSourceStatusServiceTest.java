@@ -7,20 +7,43 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DataSourceStatusServiceTest {
 
     @Test
-    void listsOnlyPhaseOneSafeSources() {
-        DataSourceStatusService service = new DataSourceStatusService("docker compose run crawler");
+    void listsOnlyAerodataboxAsConfiguredRemoteSource() {
+        DataSourceStatusService service = new DataSourceStatusService("docker compose run crawler", "env-key", "config-key");
 
         assertThat(service.listStatuses())
                 .extracting(DataSourceStatusService.DataSourceStatus::code)
-                .containsExactly("sample", "amadeus");
+                .containsExactly("aerodatabox");
     }
 
     @Test
-    void marksRemoteSourcesUnavailableWhenCrawlerCommandIsBlank() {
-        DataSourceStatusService service = new DataSourceStatusService("   ");
+    void marksRemoteSourceUnavailableWhenCrawlerCommandIsBlank() {
+        DataSourceStatusService service = new DataSourceStatusService("   ", "env-key", "config-key");
 
         assertThat(service.listStatuses())
                 .extracting(DataSourceStatusService.DataSourceStatus::configured)
-                .containsExactly(true, false);
+                .containsExactly(false);
+    }
+
+    @Test
+    void treatsLegacyAmadeusSourceAsAerodataboxForConfigurationChecks() {
+        DataSourceStatusService service = new DataSourceStatusService("docker compose run crawler", "env-key", "config-key");
+
+        assertThat(service.isConfigured("amadeus")).isTrue();
+        assertThat(service.isConfigured("aerodatabox")).isTrue();
+    }
+
+    @Test
+    void fallsBackToConfiguredKeyWhenEnvironmentKeyIsBlank() {
+        DataSourceStatusService service = new DataSourceStatusService("docker compose run crawler", "   ", "config-key");
+
+        assertThat(service.effectiveAerodataboxKey()).isEqualTo("config-key");
+        assertThat(service.isConfigured("aerodatabox")).isTrue();
+    }
+
+    @Test
+    void prefersEnvironmentKeyOverConfiguredKey() {
+        DataSourceStatusService service = new DataSourceStatusService("docker compose run crawler", "env-key", "config-key");
+
+        assertThat(service.effectiveAerodataboxKey()).isEqualTo("env-key");
     }
 }

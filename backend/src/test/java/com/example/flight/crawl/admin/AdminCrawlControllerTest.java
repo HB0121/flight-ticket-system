@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -28,20 +29,23 @@ class AdminCrawlControllerTest {
 
     private CrawlService crawlService;
     private CrawlRepository crawlRepository;
+    private DataSourceStatusService dataSourceStatusService;
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
         crawlService = mock(CrawlService.class);
         crawlRepository = mock(CrawlRepository.class);
-        AdminCrawlController controller = new AdminCrawlController(crawlService, crawlRepository);
+        dataSourceStatusService = mock(DataSourceStatusService.class);
+        when(dataSourceStatusService.isConfigured("aerodatabox")).thenReturn(true);
+        AdminCrawlController controller = new AdminCrawlController(crawlService, crawlRepository, dataSourceStatusService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
     }
 
     @Test
-    void createsAdminCrawlJob() throws Exception {
+    void createsAdminCrawlJobWithLegacySourceAlias() throws Exception {
         CrawlJob created = new CrawlJob(
                 9L,
                 "SUCCESS",
@@ -50,19 +54,24 @@ class AdminCrawlControllerTest {
                 12,
                 0,
                 null,
-                "sample",
-                "source=sample"
+                "aerodatabox",
+                "source=aerodatabox, airportCode=CKG, date=2026-06-18"
         );
         when(crawlService.runCrawler(any(CrawlRequest.class))).thenReturn(created);
 
         mockMvc.perform(post("/api/admin/crawl-jobs")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"source\":\"sample\"}"))
+                        .content("""
+                                {"source":"amadeus","airportCode":"CKG","date":"2026-06-18"}
+                                """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(9))
-                .andExpect(jsonPath("$.source").value("sample"));
+                .andExpect(jsonPath("$.source").value("aerodatabox"));
 
-        verify(crawlService).runCrawler(any(CrawlRequest.class));
+        verify(crawlService).runCrawler(argThat(request ->
+                "aerodatabox".equals(request.normalizedSource())
+                        && "CKG".equalsIgnoreCase(request.airportCode())
+        ));
     }
 
     @Test
@@ -76,7 +85,7 @@ class AdminCrawlControllerTest {
     }
 
     @Test
-    void rejectsCreateJobWhenSourceIsOutsidePhaseOneAllowlist() throws Exception {
+    void rejectsCreateJobWhenSourceIsOutsideAllowlist() throws Exception {
         mockMvc.perform(post("/api/admin/crawl-jobs")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"source\":\"ctrip_live\"}"))
@@ -96,8 +105,8 @@ class AdminCrawlControllerTest {
                         10,
                         0,
                         null,
-                        "sample",
-                        "source=sample"
+                        "aerodatabox",
+                        "source=aerodatabox, airportCode=CKG, date=2026-06-18"
                 )
         ));
 
@@ -105,5 +114,19 @@ class AdminCrawlControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(8))
                 .andExpect(jsonPath("$[0].status").value("SUCCESS"));
+    }
+
+    @Test
+    void rejectsCreateJobWhenSourceIsNotConfigured() throws Exception {
+        when(dataSourceStatusService.isConfigured("aerodatabox")).thenReturn(false);
+
+        mockMvc.perform(post("/api/admin/crawl-jobs")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"source":"aerodatabox","airportCode":"CKG","date":"2026-06-18"}
+                                """))
+                .andExpect(status().isInternalServerError());
+
+        verify(crawlService, never()).runCrawler(any(CrawlRequest.class));
     }
 }

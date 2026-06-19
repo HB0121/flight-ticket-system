@@ -21,9 +21,15 @@ public class UserSeedService {
 
     @EventListener(ApplicationReadyEvent.class)
     public void seedAdminUser() {
-        if (!userRepository.existsByUsername("admin")) {
-            authService.register(new RegisterRequest("admin", "admin123"));
-            log.info("已创建默认管理员账号: admin/admin123");
+        seedUser("admin", "admin123", "默认管理员账号");
+        seedUser("flight", "flight123", "默认演示账号");
+    }
+
+    private void seedUser(String username, String password, String label) {
+        if (userRepository.existsByUsername(username)) {
+            return;
         }
+        authService.register(new RegisterRequest(username, password));
+        log.info("已创建{}: {}/{}", label, username, password);
     }
 }

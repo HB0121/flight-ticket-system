@@ -7,6 +7,7 @@ import FavoritesPage from '../modules/user-profile/pages/FavoritesPage.vue'
 import SearchHistoryPage from '../modules/user-profile/pages/SearchHistoryPage.vue'
 import CrawlJobsPage from '../modules/admin-crawl/pages/CrawlJobsPage.vue'
 import DataSourceStatusPage from '../modules/admin-crawl/pages/DataSourceStatusPage.vue'
+import { ensureAuthenticatedSession } from '../auth/session.js'
 
 const history = typeof window === 'undefined'
   ? createMemoryHistory()
@@ -24,6 +25,7 @@ const router = createRouter({
     {
       path: '/',
       component: UserLayout,
+      meta: { requiresAuth: true },
       children: [
         {
           path: '',
@@ -49,6 +51,7 @@ const router = createRouter({
     {
       path: '/admin',
       component: AdminLayout,
+      meta: { requiresAuth: true },
       children: [
         {
           path: '',
@@ -67,6 +70,25 @@ const router = createRouter({
       ]
     }
   ]
+})
+
+router.beforeEach(async to => {
+  const isAuthenticated = await ensureAuthenticatedSession()
+
+  if (to.meta.public && isAuthenticated) {
+    return { name: 'user-flights' }
+  }
+
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    return {
+      name: 'auth',
+      query: to.fullPath && to.fullPath !== '/auth'
+        ? { redirect: to.fullPath }
+        : undefined
+    }
+  }
+
+  return true
 })
 
 export default router

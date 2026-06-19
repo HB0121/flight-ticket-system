@@ -2,19 +2,19 @@
   <section class="profile-page">
     <header class="profile-page__header">
       <div>
-        <p class="profile-page__eyebrow">User Profile</p>
-        <h2>Favorites</h2>
+        <p class="profile-page__eyebrow">{{ t('favorites.eyebrow') }}</p>
+        <h2>{{ t('favorites.title') }}</h2>
         <p class="profile-page__subtitle">
-          Review the flights you have already pinned from search results.
+          {{ t('favorites.subtitle') }}
         </p>
       </div>
-      <el-button :loading="loading" type="primary" @click="loadFavorites">Refresh</el-button>
+      <el-button :loading="loading" type="primary" @click="loadFavorites">{{ t('common.actions.refresh') }}</el-button>
     </header>
 
     <p v-if="errorMessage" class="profile-page__error">{{ errorMessage }}</p>
 
-    <div v-if="loading && !favorites.length" class="profile-page__empty">Loading favorites...</div>
-    <div v-else-if="!favorites.length" class="profile-page__empty">No saved flights yet.</div>
+    <div v-if="loading && !favorites.length" class="profile-page__empty">{{ t('common.status.loadingFavorites') }}</div>
+    <div v-else-if="!favorites.length" class="profile-page__empty">{{ t('favorites.empty') }}</div>
 
     <div v-else class="favorites-list">
       <article v-for="favorite in favorites" :key="favorite.id" class="favorites-card">
@@ -30,21 +30,21 @@
 
         <dl class="favorites-card__meta">
           <div>
-            <dt>Departure</dt>
+            <dt>{{ t('common.labels.departure') }}</dt>
             <dd>{{ formatDateTime(favorite.departTime) }}</dd>
           </div>
           <div>
-            <dt>Airports</dt>
+            <dt>{{ t('common.labels.airports') }}</dt>
             <dd>{{ favorite.fromAirport || '-' }} -> {{ favorite.toAirport || '-' }}</dd>
           </div>
           <div>
-            <dt>Source</dt>
+            <dt>{{ t('common.labels.source') }}</dt>
             <dd>{{ favorite.dataSource || '-' }}</dd>
           </div>
         </dl>
 
         <div class="favorites-card__actions">
-          <el-button :loading="removingId === favorite.id" @click="remove(favorite.id)">Remove</el-button>
+          <el-button :loading="removingId === favorite.id" @click="remove(favorite.id)">{{ t('common.actions.remove') }}</el-button>
         </div>
       </article>
     </div>
@@ -53,9 +53,12 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { fetchFavorites, removeFavorite } from '../../../api/profileApi.js'
 import { formatDateTime } from '../../../lib/format.js'
 import { formatPrice } from '../../../shared/utils/price.js'
+
+const { t } = useI18n()
 
 const favorites = ref([])
 const loading = ref(false)
@@ -75,7 +78,7 @@ async function loadFavorites() {
     favorites.value = Array.isArray(rows) ? rows : []
   } catch (error) {
     favorites.value = []
-    errorMessage.value = getErrorMessage(error, 'Unable to load favorites right now.')
+    errorMessage.value = getErrorMessage(error, t('favorites.errors.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -89,7 +92,7 @@ async function remove(favoriteId) {
     await removeFavorite(favoriteId)
     await loadFavorites()
   } catch (error) {
-    errorMessage.value = getErrorMessage(error, 'Unable to remove this favorite right now.')
+    errorMessage.value = getErrorMessage(error, t('favorites.errors.removeFailed'))
   } finally {
     removingId.value = null
   }

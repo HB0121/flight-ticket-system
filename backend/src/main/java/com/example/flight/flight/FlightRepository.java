@@ -54,11 +54,13 @@ public class FlightRepository implements FlightSearchPort, PriceHistoryPort {
         var args = new ArrayList<Object>();
 
         if (StringUtils.hasText(criteria.fromCity())) {
-            sql.append(" and from_city = ?");
+            sql.append(" and (from_city = ? or upper(from_airport) = upper(?))");
+            args.add(criteria.fromCity());
             args.add(criteria.fromCity());
         }
         if (StringUtils.hasText(criteria.toCity())) {
-            sql.append(" and to_city = ?");
+            sql.append(" and (to_city = ? or upper(to_airport) = upper(?))");
+            args.add(criteria.toCity());
             args.add(criteria.toCity());
         }
         if (criteria.date() != null) {
