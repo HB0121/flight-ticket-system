@@ -228,7 +228,10 @@
       </section>
     </section>
 
-    <section data-testid="dashboard-sync-strip" class="flight-search-page__sync-strip">
+    <section
+      data-testid="dashboard-sync-strip"
+      :class="['flight-search-page__sync-strip', { 'flight-search-page__sync-strip--failed': syncStatus === 'FAILED' }]"
+    >
       <div v-if="syncResult" data-testid="sync-result" class="flight-search-page__sync-strip-body">
         <div class="flight-search-page__sync-summary">
           <strong>{{ t('flights.syncResult.title') }}</strong>
