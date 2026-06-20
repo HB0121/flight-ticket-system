@@ -15,7 +15,7 @@
       </button>
     </nav>
 
-    <section class="flight-search-page__controls">
+    <section data-testid="dashboard-controls" class="flight-search-page__controls">
       <section
         ref="syncSectionRef"
         class="flight-search-page__card flight-search-page__control-card flight-search-page__control-card--sync"
@@ -228,7 +228,7 @@
       </section>
     </section>
 
-    <section data-testid="sync-result-card" class="flight-search-page__sync-strip">
+    <section data-testid="dashboard-sync-strip" class="flight-search-page__sync-strip">
       <div v-if="syncResult" data-testid="sync-result" class="flight-search-page__sync-strip-body">
         <div class="flight-search-page__sync-summary">
           <strong>{{ t('flights.syncResult.title') }}</strong>
@@ -307,7 +307,7 @@
       </dl>
     </section>
 
-    <section ref="resultsSectionRef" class="flight-search-page__workspace flight-search-page__console">
+    <section ref="resultsSectionRef" data-testid="dashboard-workspace" class="flight-search-page__workspace flight-search-page__console">
       <section class="flight-search-page__results-pane">
         <section class="flight-search-page__card flight-search-page__results-card">
           <div class="flight-search-page__results-head">
@@ -415,6 +415,7 @@
 
     <section
       ref="aiSectionRef"
+      data-testid="dashboard-ai"
       :class="[
         'flight-search-page__ai-drawer',
         { 'flight-search-page__ai-drawer--open': aiPanelOpen }
