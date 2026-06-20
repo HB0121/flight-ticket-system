@@ -1040,12 +1040,18 @@ watch(pagedFlights, rows => {
 <style scoped>
 .flight-search-page {
   display: grid;
-  gap: 14px;
+  gap: 16px;
   box-sizing: border-box;
   min-height: 0;
   overflow: visible;
   padding: 0 0 18px;
-  grid-template-rows: auto;
+  grid-template-rows: auto auto auto 1fr auto;
+  grid-template-areas:
+    "header"
+    "controls"
+    "strip"
+    "workspace"
+    "ai";
 }
 
 .flight-search-page__tabs {
@@ -1055,6 +1061,7 @@ watch(pagedFlights, rows => {
   gap: 8px;
   min-height: 48px;
   overflow: visible;
+  grid-area: header;
 }
 
 .flight-search-page__tab,
@@ -1084,20 +1091,22 @@ watch(pagedFlights, rows => {
 .flight-search-page__controls {
   display: grid;
   grid-template-columns: 0.46fr 0.54fr;
-  gap: 14px;
+  gap: 16px;
   align-items: stretch;
   min-height: 0;
   overflow: visible;
+  grid-area: controls;
 }
 
 .flight-search-page__workspace,
 .flight-search-page__console {
   display: grid;
-  grid-template-columns: minmax(0, 0.65fr) minmax(360px, 0.35fr);
-  gap: 14px;
+  grid-template-columns: minmax(0, 0.62fr) minmax(0, 0.38fr);
+  gap: 16px;
   align-items: start;
   min-height: 0;
   overflow: visible;
+  grid-area: workspace;
 }
 
 .flight-search-page__card {
@@ -1242,13 +1251,23 @@ watch(pagedFlights, rows => {
 
 .flight-search-page__sync-strip {
   display: grid;
-  gap: 8px;
-  padding: 10px 14px;
+  grid-template-columns: auto repeat(5, minmax(110px, 1fr)) auto;
+  gap: 12px;
+  align-items: center;
+  min-height: 56px;
+  padding: 8px 16px;
   background: #ffffff;
   border: 1px solid #dbe5f0;
-  border-radius: 14px;
-  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.04);
+  border-left: 4px solid #10b981;
+  border-radius: 12px;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.04);
   overflow: visible;
+  grid-area: strip;
+}
+
+.flight-search-page__sync-strip--failed {
+  border-left-color: #ef4444;
+  background: linear-gradient(180deg, #ffffff 0%, #fef2f2 100%);
 }
 
 .flight-search-page__sync-strip-body {
@@ -1552,22 +1571,23 @@ watch(pagedFlights, rows => {
 
 .flight-search-page__ai-drawer {
   display: grid;
-  gap: 10px;
-  padding: 12px 16px;
+  grid-template-rows: auto auto;
+  gap: 0;
+  padding: 10px 16px;
   background: #ffffff;
   border: 1px solid #dbe5f0;
-  border-radius: 14px;
-  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.04);
-  min-height: 56px;
-  overflow: visible;
-  align-content: start;
+  border-radius: 12px;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.04);
+  min-height: 48px;
+  max-height: 48px;
+  overflow: hidden;
+  transition: max-height 220ms ease;
+  grid-area: ai;
 }
 
 .flight-search-page__ai-drawer--open {
-  position: static;
-  max-height: none;
+  max-height: 40vh;
   overflow: auto;
-  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.04);
 }
 
 .flight-search-page__ai-drawer-copy strong {
