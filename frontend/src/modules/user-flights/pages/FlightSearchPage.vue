@@ -1,20 +1,5 @@
 <template>
   <section class="flight-search-page">
-    <nav class="flight-search-page__tabs" aria-label="Workspace Tabs">
-      <button type="button" class="flight-search-page__tab flight-search-page__tab--active" @click="scrollToSection('sync')">
-        {{ pageAnchorText.sync }}
-      </button>
-      <button type="button" class="flight-search-page__tab" @click="scrollToSection('search')">
-        {{ pageAnchorText.search }}
-      </button>
-      <button type="button" class="flight-search-page__tab" @click="scrollToSection('results')">
-        {{ pageAnchorText.results }}
-      </button>
-      <button type="button" class="flight-search-page__tab" @click="scrollToSection('ai')">
-        {{ pageAnchorText.ai }}
-      </button>
-    </nav>
-
     <section data-testid="dashboard-controls" class="flight-search-page__controls">
       <section
         ref="syncSectionRef"
@@ -677,12 +662,6 @@ const statusToneClass = computed(() => {
   return 'flight-search-page__status-pill--neutral'
 })
 
-const pageAnchorText = computed(() => (
-  locale.value === 'zh-CN'
-    ? { sync: '数据同步', search: '航班查询', results: '航班结果', ai: 'AI 建议' }
-    : { sync: 'Sync', search: 'Search', results: 'Results', ai: 'AI Advice' }
-))
-
 const resultsMetricText = computed(() => (
   locale.value === 'zh-CN'
     ? {
@@ -921,16 +900,6 @@ async function syncToday() {
   await submitSync()
 }
 
-function scrollToSection(section) {
-  const target = {
-    sync: syncSectionRef.value,
-    search: searchSectionRef.value,
-    results: resultsSectionRef.value,
-    ai: aiSectionRef.value
-  }[section]
-  target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-}
-
 async function submitAiAdvice() {
   const query = aiForm.query.trim()
   if (!query) {
@@ -1048,26 +1017,24 @@ watch(pagedFlights, rows => {
   min-height: 0;
   overflow: visible;
   padding: 0 0 18px;
-  grid-template-rows: auto auto auto 1fr auto;
+  grid-template-rows: auto auto 1fr auto;
   grid-template-areas:
-    "header"
     "controls"
     "strip"
     "workspace"
     "ai";
 }
 
-.flight-search-page__tabs {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  min-height: 48px;
+.flight-search-page__controls {
+  display: grid;
+  grid-template-columns: 0.32fr 0.68fr;
+  gap: 16px;
+  align-items: start;
+  min-height: 0;
   overflow: visible;
-  grid-area: header;
+  grid-area: controls;
 }
 
-.flight-search-page__tab,
 .flight-search-page__toggle {
   display: inline-flex;
   align-items: center;
@@ -1085,26 +1052,10 @@ watch(pagedFlights, rows => {
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
 }
 
-.flight-search-page__tab--active {
-  color: #ffffff;
-  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
-  border-color: transparent;
-}
-
-.flight-search-page__controls {
-  display: grid;
-  grid-template-columns: 0.46fr 0.54fr;
-  gap: 16px;
-  align-items: stretch;
-  min-height: 0;
-  overflow: visible;
-  grid-area: controls;
-}
-
 .flight-search-page__workspace,
 .flight-search-page__console {
   display: grid;
-  grid-template-columns: minmax(0, 0.62fr) minmax(0, 0.38fr);
+  grid-template-columns: minmax(0, 0.72fr) minmax(300px, 0.28fr);
   gap: 16px;
   align-items: start;
   min-height: 0;
@@ -1162,8 +1113,8 @@ watch(pagedFlights, rows => {
 
 .flight-search-page__sync-form {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px 12px;
+  grid-template-columns: 1fr;
+  gap: 8px;
   align-items: end;
   min-height: 0;
 }
@@ -1728,7 +1679,6 @@ watch(pagedFlights, rows => {
 }
 
 @media (max-width: 900px) {
-  .flight-search-page__tabs,
   .flight-search-page__card-head,
   .flight-search-page__results-head,
   .flight-search-page__results-footer,

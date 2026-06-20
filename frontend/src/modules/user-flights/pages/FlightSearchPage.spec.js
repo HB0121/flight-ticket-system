@@ -878,7 +878,7 @@ describe('FlightSearchPage', () => {
     const wrapper = createWrapper('en-US')
 
     expect(wrapper.find('.flight-search-page__header').exists()).toBe(false)
-    expect(wrapper.find('.flight-search-page__tabs').exists()).toBe(true)
+    expect(wrapper.find('.flight-search-page__tabs').exists()).toBe(false)
     expect(wrapper.find('.flight-search-page__controls').exists()).toBe(true)
     expect(wrapper.find('.flight-search-page__sync-strip').exists()).toBe(true)
     expect(wrapper.find('.flight-search-page__console').exists()).toBe(true)
