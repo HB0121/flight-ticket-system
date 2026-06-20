@@ -895,4 +895,79 @@ describe('FlightSearchPage', () => {
     expect(wrapper.find('.flight-search-page__console').exists()).toBe(true)
     expect(wrapper.find('[data-testid="ai-query-input"]').exists()).toBe(true)
   })
+
+  it('renders AI section collapsed by default with toggle visible', async () => {
+    const wrapper = createWrapper('en-US')
+    await flushPromises()
+
+    const aiDrawer = wrapper.find('[data-testid="dashboard-ai"]')
+    expect(aiDrawer.exists()).toBe(true)
+    expect(aiDrawer.classes()).toContain('flight-search-page__ai-drawer')
+    expect(aiDrawer.classes()).not.toContain('flight-search-page__ai-drawer--open')
+
+    const toggle = wrapper.find('[data-testid="ai-toggle"]')
+    expect(toggle.exists()).toBe(true)
+  })
+
+  it('expands AI section when toggle is clicked', async () => {
+    const wrapper = createWrapper('en-US')
+    await flushPromises()
+
+    const aiDrawer = wrapper.find('[data-testid="dashboard-ai"]')
+    expect(aiDrawer.classes()).not.toContain('flight-search-page__ai-drawer--open')
+
+    await expandAiPanel(wrapper)
+
+    expect(aiDrawer.classes()).toContain('flight-search-page__ai-drawer--open')
+  })
+
+  it('applies failed class to sync strip when sync status is FAILED', async () => {
+    mocks.syncFlights.mockResolvedValueOnce({
+      status: 'FAILED',
+      successCount: 0,
+      failedCount: 0,
+      source: 'aerodatabox',
+      finishedAt: '2026-06-20 14:15:09',
+      errorMessage: 'Sync failed: backend unavailable'
+    })
+
+    const wrapper = createWrapper('en-US')
+    await flushPromises()
+
+    await submitSync(wrapper)
+    await flushPromises()
+
+    const strip = wrapper.find('[data-testid="dashboard-sync-strip"]')
+    expect(strip.classes()).toContain('flight-search-page__sync-strip--failed')
+  })
+
+  it('keeps search card reachable while sync is in flight', async () => {
+    const syncDeferred = createDeferred()
+    mocks.syncFlights.mockReturnValueOnce(syncDeferred.promise)
+    mocks.fetchFlights.mockResolvedValueOnce([])
+
+    const wrapper = createWrapper('en-US')
+    await flushPromises()
+
+    // Start sync but don't await — sync promise stays pending.
+    const syncPromise = submitSync(wrapper)
+    await flushPromises()
+
+    // Search form should still be present and submittable.
+    const searchForm = wrapper.find('[data-testid="search-form"]')
+    expect(searchForm.exists()).toBe(true)
+    await searchForm.trigger('submit')
+    await flushPromises()
+
+    // Resolve the pending sync to clean up.
+    syncDeferred.resolve({
+      status: 'SUCCESS',
+      successCount: 1,
+      failedCount: 0,
+      source: 'aerodatabox',
+      finishedAt: '2026-06-20 14:15:09'
+    })
+    await syncPromise
+    await flushPromises()
+  })
 })
