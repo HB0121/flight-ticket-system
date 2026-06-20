@@ -40,7 +40,7 @@
 将根 `<section class="flight-search-page">` 的 `<style>` 区对应选择器名 `flight-search-page` 保持不变（避免破坏现有测试断言），但新增以下结构语义类：
 
 - 在同步卡 + 查询卡外层 `<section class="flight-search-page__controls">` 上加 `data-testid="dashboard-controls"`
-- 在同步摘要条 `<section data-testid="sync-result-card" class="flight-search-page__sync-strip">` 上加 `data-testid="dashboard-sync-strip"`
+- 在同步摘要条 `<section data-testid="sync-result-card" class="flight-search-page__sync-strip">` 上**替换** `data-testid="sync-result-card"` 为 `data-testid="dashboard-sync-strip"`（同元素上 data-testid 唯一；旧值仅在 plan 历史中引用，不会被任何测试或代码消费）
 - 在主结果区 `<section class="flight-search-page__workspace flight-search-page__console">` 上加 `data-testid="dashboard-workspace"`
 - 在 AI 区 `<section class="flight-search-page__ai-drawer">` 上加 `data-testid="dashboard-ai"`（已存在 `data-testid="ai-toggle"` 不变）
 
@@ -217,19 +217,19 @@ git commit -m "style(flights): 5-zone dashboard grid + compact AI drawer"
 **Files:**
 - Modify: `frontend/src/modules/user-flights/pages/FlightSearchPage.vue` 模板
 
-- [ ] **Step 1: 在 `<section data-testid="sync-result-card" class="flight-search-page__sync-strip">` 上按 syncStatus 切类**
+- [ ] **Step 1: 在 `<section data-testid="dashboard-sync-strip" class="flight-search-page__sync-strip">` 上按 syncStatus 切类**
 
-模板第 258 行原代码：
+模板原代码：
 
 ```vue
-<section data-testid="sync-result-card" class="flight-search-page__sync-strip">
+<section data-testid="dashboard-sync-strip" class="flight-search-page__sync-strip">
 ```
 
 改为：
 
 ```vue
 <section
-  data-testid="sync-result-card"
+  data-testid="dashboard-sync-strip"
   :class="['flight-search-page__sync-strip', { 'flight-search-page__sync-strip--failed': syncStatus === 'FAILED' }]"
 >
 ```
