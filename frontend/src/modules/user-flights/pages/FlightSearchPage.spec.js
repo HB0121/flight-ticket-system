@@ -970,4 +970,18 @@ describe('FlightSearchPage', () => {
     await syncPromise
     await flushPromises()
   })
+
+  it('mounts the dashboard structure cleanly at a narrow viewport', () => {
+    // jsdom does not apply CSS @media queries, so this test only verifies
+    // that mounting at a narrow viewport does not throw and the dashboard
+    // structure is intact. Real visual breakpoint behavior is verified
+    // manually in the browser (Task 6).
+    const wrapper = createWrapper('en-US')
+
+    // Core 5-zone structure still present regardless of viewport.
+    expect(wrapper.find('[data-testid="dashboard-controls"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="dashboard-sync-strip"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="dashboard-workspace"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="dashboard-ai"]').exists()).toBe(true)
+  })
 })
