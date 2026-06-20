@@ -1,24 +1,49 @@
 <template>
   <section class="flight-search-page">
     <nav class="flight-search-page__tabs" aria-label="Workspace Tabs">
-      <button type="button" class="flight-search-page__tab flight-search-page__tab--active" @click="scrollToSection('sync')">
+      <button
+        type="button"
+        data-testid="tab-sync"
+        :class="['flight-search-page__tab', { 'flight-search-page__tab--active': activeSection === 'sync' }]"
+        @click="activateSection('sync')"
+      >
         {{ pageAnchorText.sync }}
       </button>
-      <button type="button" class="flight-search-page__tab" @click="scrollToSection('search')">
+      <button
+        type="button"
+        data-testid="tab-search"
+        :class="['flight-search-page__tab', { 'flight-search-page__tab--active': activeSection === 'search' }]"
+        @click="activateSection('search')"
+      >
         {{ pageAnchorText.search }}
       </button>
-      <button type="button" class="flight-search-page__tab" @click="scrollToSection('results')">
+      <button
+        type="button"
+        data-testid="tab-results"
+        :class="['flight-search-page__tab', { 'flight-search-page__tab--active': activeSection === 'results' }]"
+        @click="activateSection('results')"
+      >
         {{ pageAnchorText.results }}
       </button>
-      <button type="button" class="flight-search-page__tab" @click="scrollToSection('ai')">
+      <button
+        type="button"
+        data-testid="tab-ai"
+        :class="['flight-search-page__tab', { 'flight-search-page__tab--active': activeSection === 'ai' }]"
+        @click="activateSection('ai')"
+      >
         {{ pageAnchorText.ai }}
       </button>
     </nav>
 
-    <section class="flight-search-page__controls">
+    <section data-testid="dashboard-controls" class="flight-search-page__controls">
       <section
         ref="syncSectionRef"
-        class="flight-search-page__card flight-search-page__control-card flight-search-page__control-card--sync"
+        :class="[
+          'flight-search-page__card',
+          'flight-search-page__control-card',
+          'flight-search-page__control-card--sync',
+          { 'flight-search-page__section--active': activeSection === 'sync' }
+        ]"
       >
         <div class="flight-search-page__card-head">
           <div>
@@ -83,15 +108,17 @@
           <p v-if="syncMessage" data-testid="sync-message" class="flight-search-page__sync-message">
             {{ syncMessage }}
           </p>
-          <p v-if="syncError" data-testid="sync-error" class="flight-search-page__error">
-            {{ syncError }}
-          </p>
         </div>
       </section>
 
       <section
         ref="searchSectionRef"
-        class="flight-search-page__card flight-search-page__control-card flight-search-page__control-card--search"
+        :class="[
+          'flight-search-page__card',
+          'flight-search-page__control-card',
+          'flight-search-page__control-card--search',
+          { 'flight-search-page__section--active': activeSection === 'search' }
+        ]"
       >
         <div class="flight-search-page__card-head">
           <div>
@@ -198,6 +225,8 @@
             >
               <el-option :label="filterOptionText.statusAny" value="" />
               <el-option :label="filterOptionText.statusScheduled" value="Scheduled" />
+              <el-option :label="filterOptionText.statusInFlight" value="In Flight" />
+              <el-option :label="filterOptionText.statusArrived" value="Arrived" />
               <el-option :label="filterOptionText.statusDelayed" value="Delayed" />
               <el-option :label="filterOptionText.statusCancelled" value="Cancelled" />
             </el-select>
@@ -223,12 +252,10 @@
             </el-button>
           </el-form-item>
         </el-form>
-
-        <p v-if="errorMessage" class="flight-search-page__error">{{ errorMessage }}</p>
       </section>
     </section>
 
-    <section data-testid="sync-result-card" class="flight-search-page__sync-strip">
+    <section data-testid="dashboard-sync-strip" class="flight-search-page__sync-strip">
       <div v-if="syncResult" data-testid="sync-result" class="flight-search-page__sync-strip-body">
         <div class="flight-search-page__sync-summary">
           <strong>{{ t('flights.syncResult.title') }}</strong>
@@ -278,14 +305,6 @@
         <p>{{ t('flights.syncResult.empty.description') }}</p>
       </div>
 
-      <div
-        v-if="syncResult?.errorMessage"
-        data-testid="sync-result-error-banner"
-        class="flight-search-page__sync-error-block"
-      >
-        {{ syncResult.errorMessage }}
-      </div>
-
       <dl
         v-if="syncResult && syncDetailsOpen"
         class="flight-search-page__sync-grid flight-search-page__sync-grid--details"
@@ -307,7 +326,15 @@
       </dl>
     </section>
 
-    <section ref="resultsSectionRef" class="flight-search-page__workspace flight-search-page__console">
+    <section
+      ref="resultsSectionRef"
+      data-testid="dashboard-workspace"
+      :class="[
+        'flight-search-page__workspace',
+        'flight-search-page__console',
+        { 'flight-search-page__section--active': activeSection === 'results' }
+      ]"
+    >
       <section class="flight-search-page__results-pane">
         <section class="flight-search-page__card flight-search-page__results-card">
           <div class="flight-search-page__results-head">
@@ -415,9 +442,13 @@
 
     <section
       ref="aiSectionRef"
+      data-testid="dashboard-ai"
       :class="[
         'flight-search-page__ai-drawer',
-        { 'flight-search-page__ai-drawer--open': aiPanelOpen }
+        {
+          'flight-search-page__ai-drawer--open': aiPanelOpen,
+          'flight-search-page__section--active': activeSection === 'ai'
+        }
       ]"
     >
       <div class="flight-search-page__ai-drawer-bar">
@@ -458,10 +489,6 @@
           </div>
         </div>
 
-        <p v-if="aiError" data-testid="ai-error" class="flight-search-page__error">
-          {{ aiError }}
-        </p>
-
         <div v-if="aiResult" class="flight-search-page__ai-result">
           <div data-testid="ai-intent" class="flight-search-page__ai-panel">
             <strong>{{ aiText.intentTitle }}</strong>
@@ -500,7 +527,7 @@
           </div>
         </div>
 
-        <div v-else-if="!aiError" class="flight-search-page__empty-panel">
+        <div v-else class="flight-search-page__empty-panel">
           <strong>{{ aiText.title }}</strong>
           <p>{{ aiText.empty }}</p>
         </div>
@@ -510,9 +537,11 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { ElNotification } from 'element-plus'
 import { fetchFlight, fetchFlights, fetchPriceHistory, requestAdvice, syncFlights } from '../../../api/flightApi.js'
+import { SESSION_LOGIN_AT_STORAGE_KEY } from '../../../auth/session.js'
 import { AIRPORT_OPTIONS, buildAirportOptionLabel } from '../../../shared/constants/airportOptions.js'
 import { matchesTimeSlot, normalizeFlightForDisplay } from '../../../shared/utils/flightDisplay.js'
 import FlightTable from '../../../shared/components/FlightTable.vue'
@@ -523,6 +552,8 @@ const { t, locale } = useI18n()
 
 let activeSearchRequestId = 0
 let activeSelectionRequestId = 0
+
+const AUTO_SYNC_SESSION_KEY = 'flight-system.autoSyncLoginAt'
 
 const loading = ref(false)
 const historyLoading = ref(false)
@@ -540,6 +571,7 @@ const aiLoading = ref(false)
 const aiResult = ref(null)
 const aiError = ref('')
 const aiPanelOpen = ref(false)
+const activeSection = ref('sync')
 const currentPage = ref(1)
 const pageSize = ref(10)
 const syncSectionRef = ref(null)
@@ -600,6 +632,8 @@ const filterOptionText = computed(() => (
         priceHigh: '2000以上',
         statusAny: '全部状态',
         statusScheduled: '正常',
+        statusInFlight: '飞行中',
+        statusArrived: '已到达',
         statusDelayed: '延误',
         statusCancelled: '取消',
         slotAny: '全部时段',
@@ -616,6 +650,8 @@ const filterOptionText = computed(() => (
         priceHigh: '2000+',
         statusAny: 'Any status',
         statusScheduled: 'Scheduled',
+        statusInFlight: 'In Flight',
+        statusArrived: 'Arrived',
         statusDelayed: 'Delayed',
         statusCancelled: 'Cancelled',
         slotAny: 'Any time',
@@ -808,7 +844,7 @@ function formatAiCandidateMeta(flight) {
 async function submitSearch() {
   const requestId = ++activeSearchRequestId
   loading.value = true
-  errorMessage.value = ''
+  activeSection.value = 'results'
   resetPagination()
 
   try {
@@ -831,7 +867,7 @@ async function submitSearch() {
     selectedFlight.value = null
     selectedFlightId.value = null
     priceHistory.value = []
-    errorMessage.value = getErrorMessage(error)
+    notifyError(getErrorMessage(error))
   } finally {
     if (requestId === activeSearchRequestId) loading.value = false
   }
@@ -845,7 +881,6 @@ async function selectFlight(flight) {
   selectedFlight.value = flight
   priceHistory.value = []
   historyLoading.value = true
-  errorMessage.value = ''
 
   const [detailResult, historyResult] = await Promise.allSettled([
     fetchFlight(flight.id),
@@ -864,9 +899,9 @@ async function selectFlight(flight) {
   }
 
   if (detailResult.status === 'rejected') {
-    errorMessage.value = getErrorMessage(detailResult.reason)
+    notifyError(getErrorMessage(detailResult.reason))
   } else if (historyResult.status === 'rejected') {
-    errorMessage.value = getErrorMessage(historyResult.reason, t('flights.errors.partialHistory'))
+    notifyError(getErrorMessage(historyResult.reason, t('flights.errors.partialHistory')))
   }
 
   if (requestId === activeSelectionRequestId) historyLoading.value = false
@@ -894,19 +929,19 @@ async function submitSync() {
 
   syncLoading.value = true
   syncMessage.value = ''
-  syncError.value = ''
+  activeSection.value = 'sync'
 
   try {
     const result = await syncFlights({ airportCode, date })
     syncResult.value = result ?? null
     if (isFailedSyncResult(result)) {
-      syncError.value = getSyncErrorMessage({ response: { data: result } })
+      notifyError(getSyncErrorMessage({ response: { data: result } }))
       return
     }
     await applySuccessfulSync(date)
   } catch (error) {
     syncResult.value = error?.response?.data ?? null
-    syncError.value = getSyncErrorMessage(error)
+    notifyError(getSyncErrorMessage(error))
   } finally {
     syncLoading.value = false
   }
@@ -917,14 +952,12 @@ async function syncToday() {
   await submitSync()
 }
 
-function scrollToSection(section) {
-  const target = {
-    sync: syncSectionRef.value,
-    search: searchSectionRef.value,
-    results: resultsSectionRef.value,
-    ai: aiSectionRef.value
-  }[section]
-  target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+function activateSection(section) {
+  activeSection.value = section
+
+  if (section === 'ai') {
+    aiPanelOpen.value = true
+  }
 }
 
 async function submitAiAdvice() {
@@ -937,6 +970,8 @@ async function submitAiAdvice() {
 
   aiLoading.value = true
   aiError.value = ''
+  activeSection.value = 'ai'
+  aiPanelOpen.value = true
 
   try {
     aiResult.value = await requestAdvice(query)
@@ -954,10 +989,10 @@ async function submitAiAdvice() {
 }
 
 async function applySuccessfulSync(date) {
-  syncError.value = ''
   syncMessage.value = t('flights.sync.messages.success')
   syncDetailsOpen.value = false
   filters.dataSource = 'aerodatabox'
+  activeSection.value = 'results'
   resetPagination()
   if (date) filters.date = date
   await submitSearch()
@@ -977,6 +1012,23 @@ function getTodayDateString() {
   const month = String(now.getMonth() + 1).padStart(2, '0')
   const day = String(now.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
+}
+
+function notifyError(message) {
+  if (!message) return
+
+  if (typeof ElNotification.closeAll === 'function') {
+    ElNotification.closeAll()
+  }
+
+  ElNotification({
+    title: locale.value === 'zh-CN' ? '操作失败' : 'Action failed',
+    message,
+    type: 'error',
+    duration: 0,
+    position: 'top-right',
+    offset: 88
+  })
 }
 
 function isFailedSyncResult(result) {
@@ -1005,6 +1057,46 @@ function handlePageChange(page) {
   currentPage.value = Math.min(Math.max(nextPage, 1), maxPage)
 }
 
+async function runInitialAutoSync() {
+  const loginAt = getStoredLoginTimestamp()
+  if (!loginAt) {
+    return
+  }
+
+  const autoSyncDate = toDateString(loginAt) || getTodayDateString()
+
+  if (hasCompletedAutoSync(loginAt)) {
+    filters.dataSource = 'aerodatabox'
+    filters.date = autoSyncDate
+    await submitSearch()
+    return
+  }
+
+  syncLoading.value = true
+  markAutoSyncCompleted(loginAt)
+  syncForm.date = autoSyncDate
+
+  try {
+    activeSection.value = 'results'
+    syncResult.value = await syncFlights({
+      airportCode: syncForm.airportCode?.trim() || 'CKG',
+      date: autoSyncDate
+    })
+
+    if (isFailedSyncResult(syncResult.value)) {
+      notifyError(getSyncErrorMessage({ response: { data: syncResult.value } }))
+      return
+    }
+
+    await applySuccessfulSync(autoSyncDate)
+  } catch (error) {
+    syncResult.value = error?.response?.data ?? null
+    notifyError(getSyncErrorMessage(error))
+  } finally {
+    syncLoading.value = false
+  }
+}
+
 function matchesPriceRange(price, range) {
   const numericPrice = Number(price)
   if (!Number.isFinite(numericPrice)) return false
@@ -1018,9 +1110,66 @@ function normalizeStatusValue(status) {
   return String(status ?? '').trim().toLowerCase()
 }
 
+function getStoredLoginTimestamp() {
+  const storage = typeof globalThis !== 'undefined' ? globalThis.localStorage ?? null : null
+  const existingLoginAt = storage?.getItem(SESSION_LOGIN_AT_STORAGE_KEY) ?? ''
+  if (existingLoginAt) {
+    return existingLoginAt
+  }
+
+  const token = storage?.getItem('token') ?? ''
+  if (!token || !storage) {
+    return ''
+  }
+
+  const fallbackLoginAt = new Date().toISOString()
+  storage.setItem(SESSION_LOGIN_AT_STORAGE_KEY, fallbackLoginAt)
+  return fallbackLoginAt
+}
+
+function hasCompletedAutoSync(loginAt) {
+  const storage = typeof globalThis !== 'undefined' ? globalThis.sessionStorage ?? null : null
+  return Boolean(loginAt) && storage?.getItem(AUTO_SYNC_SESSION_KEY) === loginAt
+}
+
+function markAutoSyncCompleted(loginAt) {
+  const storage = typeof globalThis !== 'undefined' ? globalThis.sessionStorage ?? null : null
+  if (!storage) return
+
+  storage.setItem(AUTO_SYNC_SESSION_KEY, loginAt)
+}
+
+function toDateString(value) {
+  if (!value) return ''
+
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) return ''
+
+  const year = parsed.getFullYear()
+  const month = String(parsed.getMonth() + 1).padStart(2, '0')
+  const day = String(parsed.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+onMounted(() => {
+  void runInitialAutoSync()
+})
+
 watch([filteredFlights, pageSize], () => {
   const maxPage = Math.max(Math.ceil(totalCount.value / Number(pageSize.value || 10)), 1)
   if (currentPage.value > maxPage) currentPage.value = maxPage
+})
+
+watch(syncError, message => {
+  if (message) notifyError(message)
+})
+
+watch(errorMessage, message => {
+  if (message) notifyError(message)
+})
+
+watch(aiError, message => {
+  if (message) notifyError(message)
 })
 
 watch(pagedFlights, rows => {
@@ -1039,7 +1188,7 @@ watch(pagedFlights, rows => {
 <style scoped>
 .flight-search-page {
   display: grid;
-  gap: 14px;
+  gap: 4px;
   box-sizing: border-box;
   min-height: 0;
   overflow: visible;
@@ -1051,8 +1200,8 @@ watch(pagedFlights, rows => {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  min-height: 48px;
+  gap: 4px;
+  min-height: 34px;
   overflow: visible;
 }
 
@@ -1061,11 +1210,11 @@ watch(pagedFlights, rows => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 38px;
-  padding: 0 16px;
+  min-height: 32px;
+  padding: 0 13px;
   color: #1d4ed8;
   font: inherit;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   background: #ffffff;
   border: 1px solid #d9e7fb;
@@ -1080,10 +1229,20 @@ watch(pagedFlights, rows => {
   border-color: transparent;
 }
 
+.flight-search-page__section--active {
+  scroll-margin-top: 0;
+}
+
+.flight-search-page__section--active.flight-search-page__card,
+.flight-search-page__section--active.flight-search-page__workspace,
+.flight-search-page__section--active.flight-search-page__ai-drawer {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.16), 0 12px 24px rgba(15, 23, 42, 0.05);
+}
+
 .flight-search-page__controls {
   display: grid;
   grid-template-columns: 0.46fr 0.54fr;
-  gap: 14px;
+  gap: 3px;
   align-items: stretch;
   min-height: 0;
   overflow: visible;
@@ -1092,8 +1251,8 @@ watch(pagedFlights, rows => {
 .flight-search-page__workspace,
 .flight-search-page__console {
   display: grid;
-  grid-template-columns: minmax(0, 0.65fr) minmax(360px, 0.35fr);
-  gap: 14px;
+  grid-template-columns: minmax(0, 0.71fr) minmax(300px, 0.29fr);
+  gap: 4px;
   align-items: start;
   min-height: 0;
   overflow: visible;
@@ -1101,9 +1260,9 @@ watch(pagedFlights, rows => {
 
 .flight-search-page__card {
   display: grid;
-  gap: 10px;
+  gap: 5px;
   min-width: 0;
-  padding: 16px 16px 14px;
+  padding: 6px 6px 5px;
   background: #ffffff;
   border: 1px solid #dbe5f0;
   border-radius: 16px;
@@ -1111,14 +1270,14 @@ watch(pagedFlights, rows => {
 }
 
 .flight-search-page__control-card {
-  min-height: 168px;
+  min-height: 108px;
   height: auto;
   align-content: start;
   overflow: visible;
 }
 
 .flight-search-page__control-card--search {
-  gap: 8px;
+  gap: 3px;
 }
 
 .flight-search-page__card-head,
@@ -1128,7 +1287,7 @@ watch(pagedFlights, rows => {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 10px;
+  gap: 4px;
 }
 
 .flight-search-page__card-head h2,
@@ -1136,21 +1295,21 @@ watch(pagedFlights, rows => {
 .flight-search-page__inspector-head h2 {
   margin: 0;
   color: #0f172a;
-  font-size: 17px;
+  font-size: 16px;
   line-height: 1.25;
 }
 
 .flight-search-page__section-note {
-  margin: 3px 0 0;
+  margin: 0;
   color: #64748b;
-  font-size: 12px;
-  line-height: 1.35;
+  font-size: 10px;
+  line-height: 1.3;
 }
 
 .flight-search-page__sync-form {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px 12px;
+  gap: 1px 4px;
   align-items: end;
   min-height: 0;
 }
@@ -1158,7 +1317,7 @@ watch(pagedFlights, rows => {
 .flight-search-page__filters {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 6px 10px;
+  gap: 1px 3px;
   align-items: end;
   min-height: 0;
 }
@@ -1170,9 +1329,9 @@ watch(pagedFlights, rows => {
 
 .flight-search-page__sync-form :deep(.el-form-item__label),
 .flight-search-page__filters :deep(.el-form-item__label) {
-  padding-bottom: 4px;
+  padding-bottom: 1px;
   color: #475569;
-  font-size: 12px;
+  font-size: 10px;
   line-height: 1.2;
 }
 
@@ -1182,7 +1341,7 @@ watch(pagedFlights, rows => {
 .flight-search-page__filters :deep(.el-input__wrapper),
 .flight-search-page__filters :deep(.el-select__wrapper),
 .flight-search-page__filters :deep(.el-date-editor.el-input) {
-  min-height: 36px;
+  min-height: 28px;
 }
 
 .flight-search-page__actions {
@@ -1195,7 +1354,7 @@ watch(pagedFlights, rows => {
 
 .flight-search-page__actions--sync :deep(.el-form-item__content) {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   flex-wrap: wrap;
 }
 
@@ -1210,14 +1369,14 @@ watch(pagedFlights, rows => {
 
 .flight-search-page__sync-feedback {
   display: grid;
-  gap: 6px;
+  gap: 2px;
   align-self: end;
 }
 
 .flight-search-page__sync-message {
   margin: 0;
-  min-height: 36px;
-  padding: 8px 12px;
+  min-height: 24px;
+  padding: 3px 5px;
   display: flex;
   align-items: center;
   color: #166534;
@@ -1241,8 +1400,8 @@ watch(pagedFlights, rows => {
 
 .flight-search-page__sync-strip {
   display: grid;
-  gap: 8px;
-  padding: 10px 14px;
+  gap: 3px;
+  padding: 3px 5px;
   background: #ffffff;
   border: 1px solid #dbe5f0;
   border-radius: 14px;
@@ -1253,18 +1412,18 @@ watch(pagedFlights, rows => {
 .flight-search-page__sync-strip-body {
   display: grid;
   grid-template-columns: minmax(180px, 1.1fr) repeat(4, minmax(110px, 0.8fr)) minmax(160px, 1fr) auto;
-  gap: 10px;
+  gap: 5px;
   align-items: center;
 }
 
 .flight-search-page__sync-summary {
   display: grid;
-  gap: 6px;
+  gap: 2px;
 }
 
 .flight-search-page__sync-summary strong {
   color: #0f172a;
-  font-size: 15px;
+  font-size: 13px;
 }
 
 .flight-search-page__status-pill {
@@ -1272,8 +1431,8 @@ watch(pagedFlights, rows => {
   align-items: center;
   gap: 8px;
   width: fit-content;
-  min-height: 30px;
-  padding: 0 12px;
+  min-height: 22px;
+  padding: 0 7px;
   border-radius: 999px;
   font-size: 11px;
   font-weight: 800;
@@ -1307,7 +1466,7 @@ watch(pagedFlights, rows => {
 
 .flight-search-page__sync-inline-item {
   display: grid;
-  gap: 3px;
+  gap: 2px;
 }
 
 .flight-search-page__sync-inline-item span {
@@ -1318,7 +1477,7 @@ watch(pagedFlights, rows => {
 
 .flight-search-page__sync-inline-item strong {
   color: #0f172a;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
 }
 
@@ -1395,7 +1554,7 @@ watch(pagedFlights, rows => {
   flex-direction: column;
   min-height: 0;
   overflow: visible;
-  gap: 12px;
+  gap: 3px;
 }
 
 .flight-search-page__results-head {
@@ -1403,25 +1562,25 @@ watch(pagedFlights, rows => {
 }
 
 .flight-search-page__results-count {
-  margin: 6px 0 0;
+  margin: 1px 0 0;
   color: #64748b;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .flight-search-page__result-controls {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 5px;
   color: #475569;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .flight-search-page__table-shell {
   flex: 1;
-  min-height: 460px;
-  max-height: 560px;
+  min-height: 820px;
+  max-height: 900px;
   overflow: auto;
 }
 
@@ -1429,8 +1588,8 @@ watch(pagedFlights, rows => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-top: 4px;
+  gap: 6px;
+  margin-top: 1px;
   flex-shrink: 0;
 }
 
@@ -1453,12 +1612,12 @@ watch(pagedFlights, rows => {
 
 .flight-search-page__inspector-pane {
   display: grid;
-  gap: 14px;
+  gap: 5px;
   align-self: start;
   overflow: auto;
   padding-right: 4px;
   grid-auto-rows: max-content;
-  max-height: 860px;
+  max-height: 780px;
 }
 
 .flight-search-page__detail-card,
@@ -1468,11 +1627,13 @@ watch(pagedFlights, rows => {
 }
 
 .flight-search-page__detail-card {
-  min-height: 300px;
+  min-height: 320px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
 }
 
 .flight-search-page__history-card {
-  min-height: 280px;
+  min-height: 300px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
 }
 
 .flight-search-page__detail-summary {
@@ -1480,7 +1641,7 @@ watch(pagedFlights, rows => {
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
-  padding: 12px 14px;
+  padding: 10px 12px;
   background: linear-gradient(180deg, #f9fbff 0%, #eef5ff 100%);
   border: 1px solid #d9e7fb;
   border-radius: 14px;
@@ -1488,30 +1649,30 @@ watch(pagedFlights, rows => {
 
 .flight-search-page__detail-flight {
   color: #2563eb;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
 }
 
 .flight-search-page__detail-route {
   min-width: 0;
   color: #0f172a;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   line-height: 1.45;
 }
 
 .flight-search-page__detail-price {
   color: #0f766e;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 800;
 }
 
 .flight-search-page__detail-grid,
 .flight-search-page__history-panel {
   display: grid;
-  gap: 12px;
+  gap: 10px;
   min-height: 0;
-  max-height: 320px;
+  max-height: 360px;
 }
 
 .flight-search-page__panel {
@@ -1552,7 +1713,7 @@ watch(pagedFlights, rows => {
 .flight-search-page__ai-drawer {
   display: grid;
   gap: 10px;
-  padding: 12px 16px;
+  padding: 10px 14px;
   background: #ffffff;
   border: 1px solid #dbe5f0;
   border-radius: 14px;
