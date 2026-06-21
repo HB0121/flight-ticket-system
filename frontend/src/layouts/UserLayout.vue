@@ -3,7 +3,7 @@
     <header class="user-shell__header">
       <div class="user-shell__brand">
         <div class="user-shell__logo" aria-hidden="true">
-          <span class="user-shell__logo-mark">F</span>
+          <span class="user-shell__logo-mark">✈</span>
         </div>
         <div class="user-shell__brand-copy">
           <h1>{{ t('flights.console.title') }}</h1>
@@ -41,15 +41,10 @@ import { setStoredLocale } from '../i18n/locale.js'
 const { locale, t } = useI18n()
 
 const badgeText = computed(() => (
-  locale.value === 'zh-CN'
-    ? {
-        dataSource: '数据来源：AeroDataBox',
-        mode: '模式：本地 MySQL 查询'
-      }
-    : {
-        dataSource: 'Data Source: AeroDataBox',
-        mode: 'Mode: Local MySQL Query'
-      }
+  {
+    dataSource: t('flights.console.badges.dataSource'),
+    mode: t('flights.console.badges.mode')
+  }
 ))
 
 function switchLocale(nextLocale) {
@@ -66,7 +61,7 @@ function switchLocale(nextLocale) {
   background:
     radial-gradient(circle at top left, rgba(219, 234, 254, 0.5), transparent 28%),
     linear-gradient(180deg, #f7fbff 0%, #eef5fb 100%);
-  padding: 10px 12px 12px;
+  padding: 8px 12px 12px;
 }
 
 .user-shell__header {
@@ -77,18 +72,18 @@ function switchLocale(nextLocale) {
   max-width: 1520px;
   width: 100%;
   margin: 0 auto;
-  padding: 14px 20px;
-  min-height: 78px;
+  padding: 8px 14px;
+  min-height: 66px;
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid #dbe5f0;
-  border-radius: 18px;
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.05);
+  border-radius: 12px;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
 }
 
 .user-shell__brand {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   min-width: 0;
 }
 
@@ -96,9 +91,9 @@ function switchLocale(nextLocale) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
   background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
   box-shadow: 0 10px 22px rgba(37, 99, 235, 0.22);
 }
@@ -122,10 +117,10 @@ function switchLocale(nextLocale) {
 }
 
 .user-shell__brand-copy p {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   color: #64748b;
-  font-size: 13px;
-  line-height: 1.45;
+  font-size: 12px;
+  line-height: 1.3;
 }
 
 .user-shell__nav {
@@ -139,8 +134,8 @@ function switchLocale(nextLocale) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 36px;
-  padding: 0 16px;
+  min-height: 32px;
+  padding: 0 14px;
   color: #334155;
   font-size: 13px;
   font-weight: 700;
@@ -168,8 +163,8 @@ function switchLocale(nextLocale) {
 .user-shell__badge {
   display: inline-flex;
   align-items: center;
-  min-height: 34px;
-  padding: 0 14px;
+  min-height: 30px;
+  padding: 0 12px;
   color: #1d4ed8;
   font-size: 12px;
   font-weight: 700;
@@ -192,7 +187,7 @@ function switchLocale(nextLocale) {
 }
 
 .user-shell__locale-switch button {
-  min-height: 32px;
+  min-height: 28px;
   padding: 0 12px;
   color: #334155;
   font: inherit;

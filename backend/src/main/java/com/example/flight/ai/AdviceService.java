@@ -1,5 +1,7 @@
 package com.example.flight.ai;
 
+import com.example.flight.crawl.FlightSyncPort;
+import com.example.flight.crawl.FlightSyncResult;
 import com.example.flight.flight.Flight;
 import com.example.flight.flight.FlightSearchCriteria;
 import com.example.flight.flight.FlightSearchPort;
@@ -8,34 +10,44 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class AdviceService {
 
     private static final Logger log = LoggerFactory.getLogger(AdviceService.class);
-    private static final Map<String, Set<String>> CITY_AIRPORT_ALIASES = Map.of(
-            "沈阳", Set.of("SHE"),
-            "重庆", Set.of("CKG"),
-            "北京", Set.of("PEK", "PKX"),
-            "上海", Set.of("PVG", "SHA"),
-            "天津", Set.of("TSN")
+    private static final Map<String, List<String>> CITY_AIRPORT_ALIASES = Map.of(
+            "沈阳", List.of("SHE"),
+            "重庆", List.of("CKG"),
+            "北京", List.of("PEK", "PKX"),
+            "上海", List.of("PVG", "SHA"),
+            "成都", List.of("CTU", "TFU"),
+            "广州", List.of("CAN"),
+            "深圳", List.of("SZX"),
+            "天津", List.of("TSN")
     );
 
     private final FlightSearchPort flightSearchPort;
     private final AiTextClient aiTextClient;
+    private final FlightSyncPort flightSyncPort;
 
     @Autowired
-    public AdviceService(FlightSearchPort flightSearchPort, AiTextClient aiTextClient) {
+    public AdviceService(FlightSearchPort flightSearchPort,
+                         AiTextClient aiTextClient,
+                         FlightSyncPort flightSyncPort) {
         this.flightSearchPort = flightSearchPort;
         this.aiTextClient = aiTextClient;
+        this.flightSyncPort = flightSyncPort;
+    }
+
+    public AdviceService(FlightSearchPort flightSearchPort, AiTextClient aiTextClient) {
+        this(flightSearchPort, aiTextClient, FlightSyncPort.noop());
     }
 
     public AdviceService(FlightSearchPort flightSearchPort) {
@@ -47,6 +59,20 @@ public class AdviceService {
         ParsedTravelIntent intent = TravelIntentParser.parse(message);
         AdviceIntentView intentView = AdviceIntentView.from(intent);
         CandidateSelection selection = selectCandidates(searchCandidates(intent), intent, message);
+        FlightSyncResult syncResult = FlightSyncResult.skipped(null);
+        boolean syncAttempted = false;
+        boolean autoSynced = false;
+
+        if (selection.candidates().isEmpty()) {
+            AutoSyncDecision decision = tryAutoSync(intent);
+            syncResult = decision.result();
+            syncAttempted = decision.attempted();
+            autoSynced = decision.synced();
+            if (syncResult.successful()) {
+                selection = selectCandidates(searchCandidates(intent), intent, message);
+            }
+        }
+
         List<Flight> candidates = selection.candidates();
 
         Optional<Flight> recommended = candidates.stream()
@@ -55,7 +81,17 @@ public class AdviceService {
         if (recommended.isEmpty()) {
             String route = routeText(intent);
             log.info("出行建议: 未找到匹配航班, route={}", route);
-            return new AdviceResponse(buildNoMatchSummary(route), intentView, null, candidates);
+            return new AdviceResponse(
+                    buildNoMatchSummary(route, syncResult, syncAttempted),
+                    intentView,
+                    null,
+                    candidates,
+                    autoSynced,
+                    syncAttempted,
+                    syncResult.status(),
+                    syncResult.message(),
+                    true
+            );
         }
 
         Flight flight = recommended.get();
@@ -66,12 +102,26 @@ public class AdviceService {
         );
         if (aiSummary.isPresent()) {
             log.debug("出行建议: 使用AI生成摘要");
-            return new AdviceResponse(withTimePreferenceNote(aiSummary.get(), intent, message, selection.timePreferenceMatched()), intentView, flight, candidates);
+            return new AdviceResponse(
+                    withTimePreferenceNote(aiSummary.get(), intent, message, selection.timePreferenceMatched()),
+                    intentView,
+                    flight,
+                    candidates,
+                    autoSynced,
+                    syncAttempted,
+                    syncResult.status(),
+                    syncResult.message(),
+                    false
+            );
         }
 
         log.debug("出行建议: 使用本地规则生成摘要");
         String summary = buildRuleSummary(intent, flight, message, selection.timePreferenceMatched());
-        return new AdviceResponse(summary, intentView, flight, candidates);
+        if (autoSynced) {
+            summary = "已自动同步该日期航班，并基于本地数据生成建议。" + summary;
+        }
+        return new AdviceResponse(summary, intentView, flight, candidates, autoSynced, syncAttempted,
+                syncResult.status(), syncResult.message(), false);
     }
 
     public AdviceResponse generateInSession(String sessionId, String message, List<ConversationMessage> history) {
@@ -142,7 +192,7 @@ public class AdviceService {
             return true;
         }
 
-        Set<String> codes = CITY_AIRPORT_ALIASES.get(city);
+        List<String> codes = CITY_AIRPORT_ALIASES.get(city);
         String normalizedAirport = normalizeAirportValue(airportValue);
         if (codes != null && normalizedAirport != null && codes.contains(normalizedAirport)) {
             return true;
@@ -215,8 +265,25 @@ public class AdviceService {
     }
 
     private String buildNoMatchSummary(String route) {
+        return buildNoMatchSummary(route, FlightSyncResult.skipped(null), false);
+    }
+
+    private String buildNoMatchSummary(String route, FlightSyncResult syncResult, boolean syncAttempted) {
         String routeText = route == null || route.isBlank() ? "" : route;
-        return "当前本地数据库暂无符合条件的航班" + routeText + "。建议先同步航班数据，或放宽预算、日期和时间偏好后再试。";
+        if (!syncAttempted) {
+            String message = syncResult.message();
+            String hint = message == null || message.isBlank()
+                    ? "请补充明确的出发机场和日期后再试，或手动同步对应日期航班。"
+                    : message;
+            return "当前本地数据库暂无符合条件的航班" + routeText + "。建议先同步航班数据，或" + hint;
+        }
+        if (!syncResult.successful()) {
+            String message = syncResult.message() == null || syncResult.message().isBlank()
+                    ? "未知错误"
+                    : syncResult.message();
+            return "当前本地暂无该日期航班，系统尝试同步航班数据失败，请稍后重试或手动同步该日期航班。失败原因：" + message;
+        }
+        return "已尝试同步该日期航班，但本地仍未找到" + routeText + "的候选航班，可尝试放宽目的机场、时间偏好或预算。";
     }
 
     private String buildRuleSummary(ParsedTravelIntent intent, Flight flight, String message, boolean timePreferenceMatched) {
@@ -281,6 +348,81 @@ public class AdviceService {
         return "暂无完全符合" + phrase + "的航班，以下为同日期同路线的相近可选航班。";
     }
 
+    private AutoSyncDecision tryAutoSync(ParsedTravelIntent intent) {
+        List<String> airportCodes = departureAirportCodes(intent);
+        if (intent.date() == null || airportCodes.isEmpty()) {
+            return new AutoSyncDecision(
+                    false,
+                    false,
+                    FlightSyncResult.skipped("请补充明确的出发机场和日期后再试，或手动同步对应日期航班。")
+            );
+        }
+
+        List<FlightSyncResult> results = new ArrayList<>();
+        for (String airportCode : airportCodes) {
+            try {
+                results.add(flightSyncPort.syncAirportDate(airportCode, intent.date()));
+            } catch (RuntimeException ex) {
+                results.add(FlightSyncResult.failed("aerodatabox", ex.getMessage()));
+            }
+        }
+
+        boolean attempted = results.stream().anyMatch(result -> !"SKIPPED".equalsIgnoreCase(result.status()));
+        boolean synced = results.stream().anyMatch(FlightSyncResult::successful);
+        FlightSyncResult result = mergeSyncResults(airportCodes, results, attempted, synced);
+        return new AutoSyncDecision(attempted, result.successful(), result);
+    }
+
+    private FlightSyncResult mergeSyncResults(List<String> airportCodes,
+                                              List<FlightSyncResult> results,
+                                              boolean attempted,
+                                              boolean synced) {
+        if (!attempted) {
+            return FlightSyncResult.skipped("请补充明确的出发机场和日期后再试，或手动同步对应日期航班。");
+        }
+        String airportText = String.join("/", airportCodes);
+        String message = results.stream()
+                .map(FlightSyncResult::message)
+                .filter(value -> value != null && !value.isBlank())
+                .distinct()
+                .collect(Collectors.joining("；"));
+        if (synced) {
+            int successCount = results.stream()
+                    .map(FlightSyncResult::successCount)
+                    .filter(value -> value != null)
+                    .mapToInt(Integer::intValue)
+                    .sum();
+            int failedCount = results.stream()
+                    .map(FlightSyncResult::failedCount)
+                    .filter(value -> value != null)
+                    .mapToInt(Integer::intValue)
+                    .sum();
+            String summary = "已自动同步该日期航班：" + airportText;
+            if (!message.isBlank()) {
+                summary = summary + "；" + message;
+            }
+            return FlightSyncResult.success("aerodatabox", successCount, failedCount, summary);
+        }
+        if (message.isBlank()) {
+            message = "自动同步未返回成功结果";
+        }
+        return FlightSyncResult.failed("aerodatabox", message);
+    }
+
+    private List<String> departureAirportCodes(ParsedTravelIntent intent) {
+        if (intent.fromCity() == null || intent.fromCity().isBlank()) {
+            return List.of();
+        }
+        List<String> codes = CITY_AIRPORT_ALIASES.get(intent.fromCity());
+        if (codes == null || codes.isEmpty()) {
+            return List.of();
+        }
+        return codes;
+    }
+
     private record CandidateSelection(List<Flight> candidates, boolean timePreferenceMatched) {
+    }
+
+    private record AutoSyncDecision(boolean attempted, boolean synced, FlightSyncResult result) {
     }
 }

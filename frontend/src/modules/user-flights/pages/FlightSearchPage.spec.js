@@ -877,14 +877,25 @@ describe('FlightSearchPage', () => {
   it('renders the dashboard workspace structure', () => {
     const wrapper = createWrapper('en-US')
 
-    expect(wrapper.find('.flight-search-page__header').exists()).toBe(false)
     expect(wrapper.find('.flight-search-page__tabs').exists()).toBe(false)
+    expect(wrapper.findAll('.flight-search-page__tab')).toHaveLength(0)
     expect(wrapper.find('.flight-search-page__controls').exists()).toBe(true)
+    expect(wrapper.find('.flight-search-page__control-card--sync').exists()).toBe(true)
+    expect(wrapper.find('.flight-search-page__control-card--search').exists()).toBe(true)
     expect(wrapper.find('.flight-search-page__sync-strip').exists()).toBe(true)
     expect(wrapper.find('.flight-search-page__console').exists()).toBe(true)
     expect(wrapper.find('.flight-search-page__results-pane').exists()).toBe(true)
     expect(wrapper.find('.flight-search-page__inspector-pane').exists()).toBe(true)
     expect(wrapper.find('.flight-search-page__table-shell').exists()).toBe(true)
+  })
+
+  it('stacks the sync action buttons inside the sync card', () => {
+    const wrapper = createWrapper('zh-CN')
+
+    const syncActions = wrapper.find('.flight-search-page__actions--sync')
+    expect(syncActions.exists()).toBe(true)
+    expect(syncActions.classes()).toContain('flight-search-page__actions--stacked')
+    expect(syncActions.findAll('button')).toHaveLength(2)
   })
   it('expands the ai drawer inline without removing the console workspace', async () => {
     const wrapper = createWrapper('en-US')
@@ -894,6 +905,8 @@ describe('FlightSearchPage', () => {
     expect(wrapper.find('.flight-search-page__ai-drawer').classes()).toContain('flight-search-page__ai-drawer--open')
     expect(wrapper.find('.flight-search-page__console').exists()).toBe(true)
     expect(wrapper.find('[data-testid="ai-query-input"]').exists()).toBe(true)
+    const aiDrawer = wrapper.find('[data-testid="dashboard-ai"]')
+    expect(aiDrawer.element.firstElementChild.classList.contains('flight-search-page__ai-content')).toBe(true)
   })
 
   it('renders AI section collapsed by default with toggle visible', async () => {
@@ -919,6 +932,117 @@ describe('FlightSearchPage', () => {
     await expandAiPanel(wrapper)
 
     expect(aiDrawer.classes()).toContain('flight-search-page__ai-drawer--open')
+  })
+
+  it('uses an internal table scroll mode when page size is 20', async () => {
+    mocks.fetchFlights.mockResolvedValueOnce(
+      Array.from({ length: 21 }, (_, index) => ({
+        id: index + 1,
+        flightNo: `MU${index + 1000}`,
+        fromAirport: 'CKG',
+        toAirport: 'PEK',
+        departTime: '2026-06-19T08:30:00',
+        airlineName: 'China Eastern',
+        status: 'Scheduled',
+        price: 980
+      }))
+    )
+    mocks.fetchFlight.mockResolvedValueOnce({
+      id: 1,
+      flightNo: 'MU1000',
+      airlineName: 'China Eastern'
+    })
+    mocks.fetchPriceHistory.mockResolvedValueOnce([])
+
+    const wrapper = createWrapper('en-US')
+    await submitSearch(wrapper)
+    await wrapper.find('[data-testid="pagination-size"]').setValue('20')
+    await flushPromises()
+
+    expect(wrapper.findAll('.flight-row')).toHaveLength(20)
+    expect(wrapper.find('.flight-search-page__table-shell').classes()).toContain('flight-search-page__table-shell--scroll')
+  })
+
+  it('renders complete pagination information and navigates pages locally', async () => {
+    mocks.fetchFlights.mockResolvedValueOnce(
+      Array.from({ length: 23 }, (_, index) => ({
+        id: index + 1,
+        flightNo: `MU${index + 1000}`,
+        fromAirport: 'CKG',
+        toAirport: 'PEK',
+        departTime: '2026-06-19T08:30:00',
+        airlineName: 'China Eastern',
+        status: 'Scheduled',
+        price: 980
+      }))
+    )
+    mocks.fetchFlight.mockResolvedValue({ id: 1, flightNo: 'MU1000', airlineName: 'China Eastern' })
+    mocks.fetchPriceHistory.mockResolvedValue([])
+
+    const wrapper = createWrapper('en-US')
+    await submitSearch(wrapper)
+
+    expect(wrapper.find('[data-testid="pagination-total-label"]').text()).toContain('23')
+    expect(wrapper.find('[data-testid="pagination-page-summary"]').text()).toContain('1 / 3')
+    expect(wrapper.find('[data-testid="pagination-range"]').text()).toContain('1 - 10')
+    expect(wrapper.find('[data-testid="pagination-first"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="pagination-last"]').exists()).toBe(true)
+
+    await wrapper.find('[data-testid="pagination-next"]').trigger('click')
+    await flushPromises()
+    expect(wrapper.find('[data-testid="pagination-current"]').text()).toBe('2')
+    expect(wrapper.find('.flight-row').text()).toContain('MU1010')
+    expect(wrapper.find('[data-testid="pagination-range"]').text()).toContain('11 - 20')
+
+    await wrapper.find('[data-testid="pagination-last"]').trigger('click')
+    await flushPromises()
+    expect(wrapper.find('[data-testid="pagination-current"]').text()).toBe('3')
+    expect(wrapper.find('.flight-row').text()).toContain('MU1020')
+
+    await wrapper.find('[data-testid="pagination-size"]').setValue('20')
+    await flushPromises()
+    expect(wrapper.find('[data-testid="pagination-current"]').text()).toBe('1')
+    expect(wrapper.findAll('.flight-row')).toHaveLength(20)
+    expect(wrapper.find('[data-testid="pagination-page-summary"]').text()).toContain('1 / 2')
+  })
+
+  it('shows ai auto-sync progress and backend sync result messages', async () => {
+    const adviceDeferred = createDeferred()
+    mocks.requestAdvice.mockReturnValueOnce(adviceDeferred.promise)
+
+    const wrapper = createWrapper('en-US')
+    await expandAiPanel(wrapper)
+    await wrapper.find('[data-testid="ai-query-input"]').setValue('2026-06-26 CKG to PEK, budget 1200, morning')
+    await wrapper.find('[data-testid="ai-submit"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="ai-sync-status"]').text()).toContain('auto-sync')
+
+    adviceDeferred.resolve({
+      summary: 'Recommended CA3301 after automatic sync.',
+      syncAttempted: true,
+      autoSynced: true,
+      syncStatus: 'SUCCESS',
+      syncMessage: 'Auto sync completed.',
+      intent: { from: 'CKG', to: 'PEK', date: '2026-06-26' },
+      recommendedFlight: {
+        id: 1,
+        flightNo: 'CA3301',
+        airlineName: 'Air China',
+        fromAirport: 'CKG',
+        toAirport: 'PEK',
+        departTime: '2026-06-26T09:00:00',
+        arriveTime: '2026-06-26T11:20:00',
+        price: 1180,
+        seatsLeft: 3,
+        dataSource: 'aerodatabox'
+      },
+      candidates: []
+    })
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="ai-sync-status"]').text()).toContain('Auto sync completed.')
+    expect(wrapper.find('[data-testid="ai-advice-summary"]').text()).toContain('CA3301')
   })
 
   it('applies failed class to sync strip when sync status is FAILED', async () => {

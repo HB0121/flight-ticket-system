@@ -86,8 +86,8 @@ export default {
       title: '\u673a\u7968\u67e5\u8be2\u7cfb\u7edf',
       subtitle: '\u57fa\u4e8e AeroDataBox \u7684\u822a\u73ed\u6570\u636e\u67e5\u8be2\u4e0e AI \u51fa\u884c\u5efa\u8bae\u5e73\u53f0',
       badges: {
-        dataSource: 'Data Source: AeroDataBox',
-        mode: 'Mode: Local MySQL Query'
+        dataSource: '数据来源：AeroDataBox',
+        mode: '模式：本地 MySQL 查询'
       }
     },
     sync: {

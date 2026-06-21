@@ -3,13 +3,20 @@ package com.example.flight.ai;
 import com.example.flight.flight.Flight;
 import com.example.flight.flight.FlightSearchCriteria;
 import com.example.flight.flight.FlightSearchPort;
+import com.example.flight.crawl.FlightSyncPort;
+import com.example.flight.crawl.FlightSyncResult;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.DayOfWeek;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Queue;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -167,6 +174,121 @@ class AdviceServiceTest {
         assertThat(advice.recommendedFlight().flightNo()).isEqualTo("MU9901");
     }
 
+    @Test
+    void matchesChengduChongqingAndGuangzhouShenzhenAirportAliases() {
+        var searchPort = new StubFlightSearchPort(List.of(
+                flight("3U2001", "未知", "未知", "CTU", "CKG", "760", 5, "2026-06-19T08:30:00", "2026-06-19T10:00:00"),
+                flight("3U2002", "未知", "未知", "TFU", "CKG", "820", 5, "2026-06-19T09:30:00", "2026-06-19T11:00:00"),
+                flight("ZH2003", "未知", "未知", "CAN", "SZX", "520", 5, "2026-06-19T07:30:00", "2026-06-19T08:45:00")
+        ));
+        var service = new AdviceService(searchPort);
+
+        AdviceResponse chengduAdvice = service.generate(new AdviceRequest("2026-06-19 成都到重庆，预算1200元，上午出发"));
+        AdviceResponse guangzhouAdvice = service.generate(new AdviceRequest("2026-06-19 广州到深圳，预算1200元，上午出发"));
+
+        assertThat(chengduAdvice.candidates()).extracting(Flight::flightNo).containsExactly("3U2001", "3U2002");
+        assertThat(guangzhouAdvice.candidates()).extracting(Flight::flightNo).containsExactly("ZH2003");
+    }
+
+    @Test
+    void autoSyncsDepartureAirportAndRetriesWhenLocalCandidatesAreMissing() {
+        var searchPort = new SequencedFlightSearchPort(
+                List.of(),
+                List.of(flight("CA3301", "\u91cd\u5e86", "\u5317\u4eac", "CKG", "PEK", "1180", 3,
+                        "2026-06-26T09:00:00", "2026-06-26T11:20:00"))
+        );
+        var syncPort = new RecordingFlightSyncPort(FlightSyncResult.success("aerodatabox", 12, 0, "auto sync ok"));
+        var service = new AdviceService(searchPort, (systemPrompt, userPrompt) -> Optional.empty(), syncPort);
+
+        AdviceResponse advice = service.generate(new AdviceRequest("2026-06-26 \u91cd\u5e86\u5230\u5317\u4eac\uff0c\u9884\u7b971200\u5143\uff0c\u5e0c\u671b\u4e0a\u5348\u51fa\u53d1"));
+
+        assertThat(syncPort.airportCode).isEqualTo("CKG");
+        assertThat(syncPort.date).isEqualTo(LocalDate.parse("2026-06-26"));
+        assertThat(searchPort.searchCalls).hasSize(2);
+        assertThat(advice.syncAttempted()).isTrue();
+        assertThat(advice.autoSynced()).isTrue();
+        assertThat(advice.syncStatus()).isEqualTo("SUCCESS");
+        assertThat(advice.fallbackUsed()).isFalse();
+        assertThat(advice.recommendedFlight().flightNo()).isEqualTo("CA3301");
+        assertThat(advice.syncMessage()).contains("auto sync ok");
+    }
+
+    @Test
+    void autoSyncsChengduAirportAndRetriesForChengduToChongqingRequest() {
+        LocalDate nextSaturday = LocalDate.now().with(TemporalAdjusters.next(DayOfWeek.SATURDAY));
+        var searchPort = new SequencedFlightSearchPort(
+                List.of(),
+                List.of(flight("3U1001", "成都", "重庆", "CTU", "CKG", "760", 5,
+                        nextSaturday + "T08:40:00", nextSaturday + "T10:10:00"))
+        );
+        var syncPort = new RecordingFlightSyncPort(FlightSyncResult.success("aerodatabox", 18, 0, "chengdu synced"));
+        var service = new AdviceService(searchPort, (systemPrompt, userPrompt) -> Optional.empty(), syncPort);
+
+        AdviceResponse advice = service.generate(new AdviceRequest("下周六从成都到重庆，预算1200，上午出发"));
+
+        assertThat(syncPort.airportCodes).containsExactly("CTU", "TFU");
+        assertThat(syncPort.dates).containsExactly(nextSaturday, nextSaturday);
+        assertThat(searchPort.searchCalls).hasSize(2);
+        assertThat(searchPort.searchCalls).allSatisfy(criteria -> assertThat(criteria.date()).isEqualTo(nextSaturday));
+        assertThat(advice.syncAttempted()).isTrue();
+        assertThat(advice.autoSynced()).isTrue();
+        assertThat(advice.syncStatus()).isEqualTo("SUCCESS");
+        assertThat(advice.candidates()).extracting(Flight::flightNo).containsExactly("3U1001");
+        assertThat(advice.recommendedFlight().flightNo()).isEqualTo("3U1001");
+    }
+
+    @Test
+    void returnsSyncedButNoMatchingRouteFallbackAfterRetryStillFindsNoCandidates() {
+        LocalDate nextSaturday = LocalDate.now().with(TemporalAdjusters.next(DayOfWeek.SATURDAY));
+        var searchPort = new SequencedFlightSearchPort(List.of(), List.of());
+        var syncPort = new RecordingFlightSyncPort(FlightSyncResult.success("aerodatabox", 18, 0, "chengdu synced"));
+        var service = new AdviceService(searchPort, (systemPrompt, userPrompt) -> Optional.empty(), syncPort);
+
+        AdviceResponse advice = service.generate(new AdviceRequest("下周六从成都到重庆，预算1200，上午出发"));
+
+        assertThat(syncPort.airportCodes).containsExactly("CTU", "TFU");
+        assertThat(syncPort.dates).containsExactly(nextSaturday, nextSaturday);
+        assertThat(searchPort.searchCalls).hasSize(2);
+        assertThat(advice.syncAttempted()).isTrue();
+        assertThat(advice.autoSynced()).isTrue();
+        assertThat(advice.fallbackUsed()).isTrue();
+        assertThat(advice.candidates()).isEmpty();
+        assertThat(advice.summary()).contains("已尝试同步该日期航班", "成都", "重庆");
+    }
+
+    @Test
+    void returnsFallbackWhenAutoSyncFails() {
+        var searchPort = new SequencedFlightSearchPort(List.of());
+        var syncPort = new RecordingFlightSyncPort(FlightSyncResult.failed("aerodatabox", "crawler timeout"));
+        var service = new AdviceService(searchPort, (systemPrompt, userPrompt) -> Optional.empty(), syncPort);
+
+        AdviceResponse advice = service.generate(new AdviceRequest("2026-06-26 \u91cd\u5e86\u5230\u5317\u4eac\uff0c\u9884\u7b971200\u5143\uff0c\u5e0c\u671b\u4e0a\u5348\u51fa\u53d1"));
+
+        assertThat(syncPort.airportCode).isEqualTo("CKG");
+        assertThat(advice.recommendedFlight()).isNull();
+        assertThat(advice.candidates()).isEmpty();
+        assertThat(advice.syncAttempted()).isTrue();
+        assertThat(advice.autoSynced()).isFalse();
+        assertThat(advice.syncStatus()).isEqualTo("FAILED");
+        assertThat(advice.fallbackUsed()).isTrue();
+        assertThat(advice.summary()).contains("\u5c1d\u8bd5\u540c\u6b65\u822a\u73ed\u6570\u636e\u5931\u8d25", "crawler timeout");
+    }
+
+    @Test
+    void skipsAutoSyncWhenDateIsMissing() {
+        var searchPort = new SequencedFlightSearchPort(List.of());
+        var syncPort = new RecordingFlightSyncPort(FlightSyncResult.success("aerodatabox", 1, 0, "should not run"));
+        var service = new AdviceService(searchPort, (systemPrompt, userPrompt) -> Optional.empty(), syncPort);
+
+        AdviceResponse advice = service.generate(new AdviceRequest("\u91cd\u5e86\u5230\u5317\u4eac\uff0c\u9884\u7b971200\u5143\uff0c\u5e0c\u671b\u4e0a\u5348\u51fa\u53d1"));
+
+        assertThat(syncPort.airportCode).isNull();
+        assertThat(advice.syncAttempted()).isFalse();
+        assertThat(advice.syncStatus()).isEqualTo("SKIPPED");
+        assertThat(advice.fallbackUsed()).isTrue();
+        assertThat(advice.summary()).contains("\u8bf7\u8865\u5145\u660e\u786e\u7684\u51fa\u53d1\u673a\u573a\u548c\u65e5\u671f");
+    }
+
     private static Flight flight(String flightNo,
                                  String fromCity,
                                  String toCity,
@@ -219,6 +341,43 @@ class AdviceServiceTest {
                     .filter(flight -> criteria.toCity() == null || flight.toCity().equals(criteria.toCity()))
                     .filter(flight -> criteria.date() == null || flight.departTime().toLocalDate().equals(criteria.date()))
                     .toList();
+        }
+    }
+
+    private static class SequencedFlightSearchPort implements FlightSearchPort {
+        private final Queue<List<Flight>> responses = new ArrayDeque<>();
+        private final List<FlightSearchCriteria> searchCalls = new ArrayList<>();
+
+        @SafeVarargs
+        private SequencedFlightSearchPort(List<Flight>... responses) {
+            this.responses.addAll(List.of(responses));
+        }
+
+        @Override
+        public List<Flight> search(FlightSearchCriteria criteria) {
+            searchCalls.add(criteria);
+            return responses.isEmpty() ? List.of() : responses.poll();
+        }
+    }
+
+    private static class RecordingFlightSyncPort implements FlightSyncPort {
+        private final FlightSyncResult result;
+        private final List<String> airportCodes = new ArrayList<>();
+        private final List<LocalDate> dates = new ArrayList<>();
+        private String airportCode;
+        private LocalDate date;
+
+        private RecordingFlightSyncPort(FlightSyncResult result) {
+            this.result = result;
+        }
+
+        @Override
+        public FlightSyncResult syncAirportDate(String airportCode, LocalDate date) {
+            this.airportCodes.add(airportCode);
+            this.dates.add(date);
+            this.airportCode = airportCode;
+            this.date = date;
+            return result;
         }
     }
 }

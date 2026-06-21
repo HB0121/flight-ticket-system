@@ -1,8 +1,7 @@
 package com.example.flight.crawl.admin;
 
 import com.example.flight.crawl.CrawlJob;
-import com.example.flight.crawl.CrawlRequest;
-import com.example.flight.crawl.CrawlService;
+import com.example.flight.crawl.FlightSyncService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,32 +14,15 @@ import java.time.LocalDate;
 @RequestMapping("/api/admin/flights")
 public class AdminFlightSyncController {
 
-    private final CrawlService crawlService;
-    private final DataSourceStatusService dataSourceStatusService;
+    private final FlightSyncService flightSyncService;
 
-    public AdminFlightSyncController(CrawlService crawlService,
-                                     DataSourceStatusService dataSourceStatusService) {
-        this.crawlService = crawlService;
-        this.dataSourceStatusService = dataSourceStatusService;
+    public AdminFlightSyncController(FlightSyncService flightSyncService) {
+        this.flightSyncService = flightSyncService;
     }
 
     @PostMapping("/sync")
     public CrawlJob sync(@RequestParam String airportCode,
                          @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        if (airportCode == null || airportCode.isBlank()) {
-            throw new IllegalArgumentException("airportCode is required");
-        }
-        if (!dataSourceStatusService.isConfigured("aerodatabox")) {
-            throw new IllegalStateException("source is not configured: aerodatabox");
-        }
-        return crawlService.runCrawler(new CrawlRequest(
-                "aerodatabox",
-                null,
-                null,
-                date,
-                null,
-                null,
-                airportCode
-        ));
+        return flightSyncService.runAirportSyncJob(airportCode, date);
     }
 }

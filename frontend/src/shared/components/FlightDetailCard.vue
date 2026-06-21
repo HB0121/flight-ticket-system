@@ -62,63 +62,69 @@ defineProps({
 
 <style scoped>
 .flight-detail-card {
-  padding: 18px;
+  padding: 10px;
   background: #ffffff;
   border: 1px solid #d9e2ef;
-  border-radius: 12px;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+  border-radius: 9px;
+  box-shadow: none;
 }
 
 .flight-detail-card__header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .flight-detail-card__eyebrow {
-  margin: 0 0 6px;
+  margin: 0 0 3px;
   color: #2563eb;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
 .flight-detail-card__header h3 {
   margin: 0;
-  font-size: 22px;
+  font-size: 18px;
 }
 
 .flight-detail-card__price {
   color: #0f766e;
-  font-size: 24px;
+  font-size: 18px;
 }
 
 .flight-detail-card__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 6px;
   margin: 0;
 }
 
 .flight-detail-card__grid div {
-  padding: 12px;
+  min-width: 0;
+  padding: 7px 8px;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 10px;
+  border-radius: 7px;
 }
 
 .flight-detail-card__grid dt {
   color: #64748b;
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .flight-detail-card__grid dd {
-  margin: 6px 0 0;
+  margin: 3px 0 0;
   color: #0f172a;
+  font-size: 12px;
   font-weight: 600;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (max-width: 720px) {

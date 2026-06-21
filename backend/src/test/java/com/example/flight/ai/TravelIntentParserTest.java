@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.DayOfWeek;
 import java.time.temporal.TemporalAdjusters;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,6 +28,17 @@ class TravelIntentParserTest {
 
         assertThat(intent.fromCity()).isNull();
         assertThat(intent.toCity()).isEqualTo("北京");
+        assertThat(intent.timePreference()).isEqualTo(TimePreference.MORNING);
+    }
+
+    @Test
+    void parsesChengduToChongqingNextSaturdayMorningRequest() {
+        ParsedTravelIntent intent = TravelIntentParser.parse("下周六从成都到重庆，预算1200，上午出发");
+
+        assertThat(intent.fromCity()).isEqualTo("成都");
+        assertThat(intent.toCity()).isEqualTo("重庆");
+        assertThat(intent.date()).isEqualTo(LocalDate.now().with(TemporalAdjusters.next(DayOfWeek.SATURDAY)));
+        assertThat(intent.budget()).isEqualByComparingTo(new BigDecimal("1200"));
         assertThat(intent.timePreference()).isEqualTo(TimePreference.MORNING);
     }
 }

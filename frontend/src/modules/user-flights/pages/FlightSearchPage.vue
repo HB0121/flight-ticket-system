@@ -44,7 +44,7 @@
             />
           </el-form-item>
 
-          <el-form-item class="flight-search-page__actions flight-search-page__actions--sync">
+          <el-form-item class="flight-search-page__actions flight-search-page__actions--sync flight-search-page__actions--stacked">
             <el-button
               data-testid="sync-submit"
               :loading="syncLoading"
@@ -319,7 +319,12 @@
             </div>
           </div>
 
-          <div class="flight-search-page__table-shell">
+          <div
+            :class="[
+              'flight-search-page__table-shell',
+              { 'flight-search-page__table-shell--scroll': Number(pageSize) > 10 }
+            ]"
+          >
             <FlightTable
               :flights="pagedFlights"
               :loading="loading"
@@ -335,13 +340,47 @@
 
           <div class="flight-search-page__results-footer">
             <div class="flight-search-page__results-summary">
-              <strong data-testid="pagination-total">{{ totalCount }}</strong>
-              <span>
-                {{ resultsMetricText.currentPage(currentPage) }}
+              <span data-testid="pagination-total-label">
+                {{ paginationText.total(totalCount) }}
+                <strong data-testid="pagination-total" class="flight-search-page__pagination-total-raw">{{ totalCount }}</strong>
               </span>
+              <span data-testid="pagination-page-summary">{{ paginationText.page(currentPage, totalPages) }}</span>
+              <span data-testid="pagination-range">{{ paginationText.range(paginationRangeStart, paginationRangeEnd, totalCount) }}</span>
             </div>
 
             <span data-testid="pagination-current" class="flight-search-page__page-number">{{ currentPage }}</span>
+
+            <div class="flight-search-page__pagination-actions" aria-label="Flight result pagination">
+              <button
+                type="button"
+                data-testid="pagination-first"
+                class="flight-search-page__page-button"
+                :disabled="currentPage <= 1"
+                @click="goToFirstPage"
+              >
+                {{ paginationText.first }}
+              </button>
+
+              <button
+                v-for="page in visiblePageNumbers"
+                :key="`page-${page}`"
+                type="button"
+                :class="['flight-search-page__page-button', { 'flight-search-page__page-button--active': page === currentPage }]"
+                @click="handlePageChange(page)"
+              >
+                {{ page }}
+              </button>
+
+              <button
+                type="button"
+                data-testid="pagination-last"
+                class="flight-search-page__page-button"
+                :disabled="currentPage >= totalPages"
+                @click="goToLastPage"
+              >
+                {{ paginationText.last }}
+              </button>
+            </div>
 
             <el-pagination
               :current-page="currentPage"
@@ -409,23 +448,15 @@
         { 'flight-search-page__ai-drawer--open': aiPanelOpen }
       ]"
     >
-      <div class="flight-search-page__ai-drawer-bar">
-        <div class="flight-search-page__ai-drawer-copy">
-          <strong>{{ aiText.title }}</strong>
-          <p>{{ aiText.description }}</p>
-        </div>
-
-        <button
-          type="button"
-          data-testid="ai-toggle"
-          class="flight-search-page__toggle"
-          @click="aiPanelOpen = !aiPanelOpen"
-        >
-          {{ aiPanelOpen ? toggleText.collapseAi : toggleText.expandAi }}
-        </button>
-      </div>
-
       <div v-if="aiPanelOpen" class="flight-search-page__ai-content">
+        <p
+          v-if="aiSyncStatusText"
+          data-testid="ai-sync-status"
+          class="flight-search-page__ai-sync-status"
+        >
+          {{ aiSyncStatusText }}
+        </p>
+
         <div class="flight-search-page__ai-form">
           <textarea
             v-model.trim="aiForm.query"
@@ -493,6 +524,22 @@
           <strong>{{ aiText.title }}</strong>
           <p>{{ aiText.empty }}</p>
         </div>
+      </div>
+
+      <div class="flight-search-page__ai-drawer-bar">
+        <div class="flight-search-page__ai-drawer-copy">
+          <strong>{{ aiText.title }}</strong>
+          <p>{{ aiText.description }}</p>
+        </div>
+
+        <button
+          type="button"
+          data-testid="ai-toggle"
+          class="flight-search-page__toggle"
+          @click="aiPanelOpen = !aiPanelOpen"
+        >
+          {{ aiPanelOpen ? toggleText.collapseAi : toggleText.expandAi }}
+        </button>
       </div>
     </section>
   </section>
@@ -650,6 +697,18 @@ const filteredFlights = computed(() =>
 )
 
 const totalCount = computed(() => filteredFlights.value.length)
+const totalPages = computed(() => Math.max(Math.ceil(totalCount.value / Number(pageSize.value || 10)), 1))
+const paginationRangeStart = computed(() => (
+  totalCount.value ? (currentPage.value - 1) * Number(pageSize.value || 10) + 1 : 0
+))
+const paginationRangeEnd = computed(() => Math.min(currentPage.value * Number(pageSize.value || 10), totalCount.value))
+const visiblePageNumbers = computed(() => {
+  const pages = new Set([1, totalPages.value])
+  for (let page = currentPage.value - 1; page <= currentPage.value + 1; page += 1) {
+    if (page >= 1 && page <= totalPages.value) pages.add(page)
+  }
+  return [...pages].sort((a, b) => a - b)
+})
 const pagedFlights = computed(() => {
   const startIndex = (currentPage.value - 1) * Number(pageSize.value || 10)
   return filteredFlights.value.slice(startIndex, startIndex + Number(pageSize.value || 10))
@@ -673,6 +732,24 @@ const resultsMetricText = computed(() => (
         total: count => `${count} results`,
         perPage: 'Per page',
         currentPage: page => `Page ${page}`
+      }
+))
+
+const paginationText = computed(() => (
+  locale.value === 'zh-CN'
+    ? {
+        total: count => `共 ${count} 条结果`,
+        page: (page, pages) => `第 ${page} / ${pages} 页`,
+        range: (start, end, count) => `显示第 ${start} - ${end} 条，共 ${count} 条`,
+        first: '首页',
+        last: '末页'
+      }
+    : {
+        total: count => `${count} results`,
+        page: (page, pages) => `Page ${page} / ${pages}`,
+        range: (start, end, count) => `Showing ${start} - ${end} of ${count}`,
+        first: 'First',
+        last: 'Last'
       }
 ))
 
@@ -777,6 +854,31 @@ const aiRecommendedFlight = computed(() =>
     ? normalizeFlightForDisplay(aiResult.value.recommendedFlight, locale.value)
     : null
 )
+
+const aiSyncStatusText = computed(() => {
+  if (aiLoading.value) {
+    return locale.value === 'zh-CN'
+      ? '本地暂无该日期航班时，系统会自动同步航班数据，请稍候...'
+      : 'If local data is missing, the backend may auto-sync flight data. Please wait...'
+  }
+
+  if (!aiResult.value?.syncAttempted) return ''
+
+  const message = aiResult.value.syncMessage || ''
+  if (aiResult.value.syncStatus === 'SUCCESS' && aiResult.value.autoSynced) {
+    return locale.value === 'zh-CN'
+      ? (message || '自动同步成功，正在基于本地数据生成建议。')
+      : (message || 'Auto sync completed. Advice is based on local data.')
+  }
+
+  if (aiResult.value.syncStatus === 'FAILED') {
+    return locale.value === 'zh-CN'
+      ? `自动同步失败：${message || '请稍后重试或手动同步该日期航班。'}`
+      : `Auto sync failed: ${message || 'Try again later or sync this date manually.'}`
+  }
+
+  return message
+})
 
 function formatAiCandidateMeta(flight) {
   const price = flight?.price ?? '-'
@@ -978,6 +1080,14 @@ function handlePageChange(page) {
   currentPage.value = Math.min(Math.max(nextPage, 1), maxPage)
 }
 
+function goToFirstPage() {
+  handlePageChange(1)
+}
+
+function goToLastPage() {
+  handlePageChange(totalPages.value)
+}
+
 function matchesPriceRange(price, range) {
   const numericPrice = Number(price)
   if (!Number.isFinite(numericPrice)) return false
@@ -994,6 +1104,10 @@ function normalizeStatusValue(status) {
 watch([filteredFlights, pageSize], () => {
   const maxPage = Math.max(Math.ceil(totalCount.value / Number(pageSize.value || 10)), 1)
   if (currentPage.value > maxPage) currentPage.value = maxPage
+})
+
+watch(pageSize, () => {
+  resetPagination()
 })
 
 watch(pagedFlights, rows => {
@@ -1409,8 +1523,9 @@ watch(pagedFlights, rows => {
 }
 
 .flight-search-page__results-summary {
-  display: inline-flex;
-  align-items: baseline;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   color: #64748b;
   font-size: 13px;
@@ -1423,6 +1538,47 @@ watch(pagedFlights, rows => {
 
 .flight-search-page__page-number {
   display: none;
+}
+
+.flight-search-page__pagination-total-raw {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.flight-search-page__pagination-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.flight-search-page__page-button {
+  min-height: 30px;
+  padding: 0 10px;
+  color: #334155;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  background: #ffffff;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.flight-search-page__page-button:disabled {
+  color: #94a3b8;
+  cursor: not-allowed;
+  background: #f8fafc;
+}
+
+.flight-search-page__page-button--active {
+  color: #ffffff;
+  background: #2563eb;
+  border-color: #2563eb;
 }
 
 .flight-search-page__inspector-pane {
@@ -1566,6 +1722,17 @@ watch(pagedFlights, rows => {
 .flight-search-page__ai-form {
   display: grid;
   gap: 12px;
+}
+
+.flight-search-page__ai-sync-status {
+  margin: 0;
+  padding: 8px 10px;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
 }
 
 .flight-search-page__ai-textarea {
@@ -1715,6 +1882,397 @@ watch(pagedFlights, rows => {
   .flight-search-page__ai-drawer {
     padding: 14px;
     border-radius: 14px;
+  }
+}
+
+/* Workbench rewrite overrides */
+.flight-search-page {
+  gap: 8px;
+  padding: 0 0 12px;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "controls"
+    "strip"
+    "workspace"
+    "ai";
+}
+
+.flight-search-page__controls {
+  grid-template-columns: minmax(320px, 0.36fr) minmax(0, 0.64fr);
+  gap: 10px;
+}
+
+.flight-search-page__card {
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.045);
+}
+
+.flight-search-page__control-card {
+  min-height: 130px;
+  height: auto;
+  align-content: start;
+}
+
+.flight-search-page__card-head,
+.flight-search-page__results-head,
+.flight-search-page__inspector-head,
+.flight-search-page__ai-drawer-bar {
+  gap: 8px;
+}
+
+.flight-search-page__card-head h2,
+.flight-search-page__results-head h2,
+.flight-search-page__inspector-head h2 {
+  font-size: 15px;
+  line-height: 1.15;
+}
+
+.flight-search-page__section-note {
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.flight-search-page__sync-form {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(150px, 0.9fr);
+  gap: 6px 8px;
+}
+
+.flight-search-page__filters {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 5px 8px;
+}
+
+.flight-search-page__sync-form :deep(.el-form-item__label),
+.flight-search-page__filters :deep(.el-form-item__label) {
+  padding-bottom: 2px;
+  font-size: 11px;
+  line-height: 1.1;
+}
+
+.flight-search-page__sync-form :deep(.el-input__wrapper),
+.flight-search-page__sync-form :deep(.el-select__wrapper),
+.flight-search-page__sync-form :deep(.el-date-editor.el-input),
+.flight-search-page__filters :deep(.el-input__wrapper),
+.flight-search-page__filters :deep(.el-select__wrapper),
+.flight-search-page__filters :deep(.el-date-editor.el-input) {
+  min-height: 30px;
+}
+
+.flight-search-page__sync-form :deep(.el-input__inner),
+.flight-search-page__filters :deep(.el-input__inner) {
+  font-size: 12px;
+}
+
+.flight-search-page__actions--sync {
+  grid-column: auto;
+}
+
+.flight-search-page__actions--sync :deep(.el-form-item__content) {
+  align-items: stretch;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+.flight-search-page__actions--sync :deep(.el-button) {
+  width: 100%;
+  margin-left: 0;
+}
+
+.flight-search-page__actions--sync :deep(.el-button),
+.flight-search-page__actions--search :deep(.el-button) {
+  min-height: 30px;
+  padding: 0 12px;
+  font-size: 12px;
+}
+
+.flight-search-page__actions--search {
+  grid-column: auto;
+}
+
+.flight-search-page__sync-feedback {
+  gap: 4px;
+}
+
+.flight-search-page__sync-message,
+.flight-search-page__error {
+  min-height: 30px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.flight-search-page__sync-strip {
+  display: block;
+  min-height: 48px;
+  padding: 6px 12px;
+  border-left-width: 3px;
+  border-radius: 9px;
+}
+
+.flight-search-page__sync-strip-body {
+  display: grid;
+  grid-template-columns: minmax(160px, 1.2fr) repeat(4, minmax(86px, 0.7fr)) minmax(140px, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.flight-search-page__sync-summary {
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.flight-search-page__sync-summary strong {
+  font-size: 14px;
+}
+
+.flight-search-page__status-pill {
+  min-height: 24px;
+  padding: 0 10px;
+  font-size: 10px;
+}
+
+.flight-search-page__sync-inline-item {
+  gap: 1px;
+}
+
+.flight-search-page__sync-inline-item span {
+  font-size: 10px;
+}
+
+.flight-search-page__sync-inline-item strong {
+  font-size: 12px;
+}
+
+.flight-search-page__toggle {
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.flight-search-page__sync-strip-empty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 34px;
+}
+
+.flight-search-page__sync-strip-empty strong {
+  font-size: 14px;
+}
+
+.flight-search-page__sync-strip-empty p {
+  font-size: 12px;
+}
+
+.flight-search-page__sync-grid--details {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 8px;
+}
+
+.flight-search-page__meta-card {
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+
+.flight-search-page__workspace,
+.flight-search-page__console {
+  grid-template-columns: minmax(0, 0.68fr) minmax(320px, 0.32fr);
+  gap: 10px;
+}
+
+.flight-search-page__results-card {
+  gap: 8px;
+  min-height: 430px;
+}
+
+.flight-search-page__results-head {
+  align-items: center;
+}
+
+.flight-search-page__results-count {
+  margin-top: 2px;
+  font-size: 12px;
+}
+
+.flight-search-page__result-controls {
+  gap: 8px;
+  font-size: 12px;
+}
+
+.flight-search-page__result-controls :deep(.el-select) {
+  width: 74px;
+}
+
+.flight-search-page__result-controls :deep(.el-select__wrapper) {
+  min-height: 30px;
+}
+
+.flight-search-page__table-shell {
+  flex: 1 1 auto;
+  height: 386px;
+  min-height: 386px;
+  max-height: 386px;
+  overflow: hidden;
+}
+
+.flight-search-page__table-shell--scroll {
+  overflow: auto;
+}
+
+.flight-search-page__results-footer {
+  min-height: 34px;
+  margin-top: 0;
+  padding-top: 4px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.flight-search-page__results-summary {
+  font-size: 12px;
+}
+
+.flight-search-page__results-summary strong {
+  font-size: 15px;
+}
+
+.flight-search-page__inspector-pane {
+  gap: 10px;
+  max-height: 640px;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.flight-search-page__detail-card,
+.flight-search-page__history-card {
+  min-height: 0;
+}
+
+.flight-search-page__detail-summary {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 9px;
+}
+
+.flight-search-page__detail-flight {
+  font-size: 18px;
+}
+
+.flight-search-page__detail-route {
+  overflow: hidden;
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.flight-search-page__detail-price {
+  font-size: 16px;
+}
+
+.flight-search-page__detail-grid,
+.flight-search-page__history-panel {
+  gap: 8px;
+  max-height: none;
+}
+
+.flight-search-page__empty-panel {
+  padding: 12px;
+  border-radius: 9px;
+  font-size: 12px;
+}
+
+.flight-search-page__empty-panel strong {
+  margin-bottom: 4px;
+}
+
+.flight-search-page__ai-drawer {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  min-height: 52px;
+  max-height: 52px;
+  padding: 8px 12px;
+  border-radius: 9px;
+  overflow: visible;
+}
+
+.flight-search-page__ai-drawer--open {
+  max-height: 52px;
+  overflow: visible;
+}
+
+.flight-search-page__ai-drawer-copy strong {
+  font-size: 15px;
+}
+
+.flight-search-page__ai-drawer-copy p {
+  margin-top: 2px;
+  font-size: 11px;
+}
+
+.flight-search-page__ai-content {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  left: 0;
+  display: grid;
+  gap: 10px;
+  max-height: 340px;
+  padding: 12px;
+  overflow: auto;
+  background: #ffffff;
+  border: 1px solid #dbe5f0;
+  border-radius: 10px;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.14);
+}
+
+.flight-search-page__ai-textarea {
+  min-height: 82px;
+  padding: 10px 12px;
+  border-radius: 9px;
+}
+
+@media (max-width: 1280px) {
+  .flight-search-page__controls,
+  .flight-search-page__workspace,
+  .flight-search-page__console {
+    grid-template-columns: 1fr;
+  }
+
+  .flight-search-page__control-card {
+    min-height: 0;
+  }
+
+  .flight-search-page__table-shell {
+    height: 360px;
+    min-height: 360px;
+    max-height: 360px;
+  }
+
+  .flight-search-page__inspector-pane {
+    max-height: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .flight-search-page__sync-form,
+  .flight-search-page__filters,
+  .flight-search-page__sync-strip-body,
+  .flight-search-page__ai-result {
+    grid-template-columns: 1fr;
+  }
+
+  .flight-search-page__sync-strip-empty,
+  .flight-search-page__results-head,
+  .flight-search-page__results-footer,
+  .flight-search-page__ai-drawer-bar {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 </style>

@@ -190,7 +190,7 @@ function formatShortTime(date) {
 <style scoped>
 .price-history-chart {
   display: grid;
-  gap: 12px;
+  gap: 8px;
   min-height: 0;
 }
 
@@ -198,69 +198,69 @@ function formatShortTime(date) {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
 }
 
 .price-history-chart__header h3 {
-  margin: 0 0 4px;
-  font-size: 17px;
+  margin: 0 0 2px;
+  font-size: 15px;
   color: #0f172a;
 }
 
 .price-history-chart__header p {
   margin: 0;
   color: #64748b;
-  font-size: 13px;
-  line-height: 1.45;
+  font-size: 11px;
+  line-height: 1.3;
 }
 
 .price-history-chart__stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  gap: 6px;
   margin: 0;
 }
 
 .price-history-chart__stats dt {
   color: #64748b;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
 }
 
 .price-history-chart__stats dd {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   color: #0f172a;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 800;
 }
 
 .price-history-chart__empty {
-  padding: 16px;
+  padding: 12px;
   color: #64748b;
   background: #f8fafc;
   border: 1px dashed #cbd5e1;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .price-history-chart__body {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(130px, 0.8fr);
-  gap: 14px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(118px, 0.8fr);
+  gap: 8px;
   min-height: 0;
 }
 
 .price-history-chart__plot {
   display: grid;
-  gap: 8px;
+  gap: 6px;
   min-height: 0;
 }
 
 .price-history-chart__svg {
   width: 100%;
-  height: 170px;
+  height: 138px;
   background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
   border: 1px solid #dbeafe;
-  border-radius: 12px;
+  border-radius: 8px;
 }
 
 .price-history-chart__grid line {
@@ -293,15 +293,15 @@ function formatShortTime(date) {
 .price-history-chart__x-axis {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
-  gap: 6px;
+  gap: 4px;
   color: #64748b;
-  font-size: 11px;
+  font-size: 10px;
 }
 
 .price-history-chart__list {
   display: grid;
-  gap: 8px;
-  max-height: 210px;
+  gap: 6px;
+  max-height: 178px;
   overflow: auto;
   padding-right: 4px;
 }
@@ -310,18 +310,18 @@ function formatShortTime(date) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 8px 10px;
-  font-size: 12px;
+  gap: 8px;
+  padding: 6px 8px;
+  font-size: 11px;
   color: #334155;
   background: #f8fbff;
   border: 1px solid #dbeafe;
-  border-radius: 10px;
+  border-radius: 7px;
 }
 
 .price-history-chart__list-row strong {
   color: #0f172a;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 @media (max-width: 900px) {

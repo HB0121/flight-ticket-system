@@ -1,12 +1,5 @@
 <template>
   <div class="flight-table">
-    <div class="flight-table__header">
-      <div>
-        <h3>{{ t('flights.table.title') }}</h3>
-        <p>{{ t('flights.table.results', { count: flights.length }) }}</p>
-      </div>
-    </div>
-
     <el-table
       :data="flights"
       :empty-text="loading ? t('common.status.loadingFlights') : t('flights.table.empty')"
@@ -23,19 +16,18 @@
       <el-table-column :label="t('flights.table.columns.route')" min-width="220">
         <template #default="{ row }">
           <div class="flight-table__primary">{{ row.routeLabel || `${row.fromAirport || '-'} -> ${row.toAirport || '-'}` }}</div>
-          <div class="flight-table__secondary">{{ row.fromAirportLabel || row.fromAirport || '-' }} -> {{ row.toAirportLabel || row.toAirport || '-' }}</div>
         </template>
       </el-table-column>
 
       <el-table-column :label="t('flights.table.columns.departure')" min-width="150">
         <template #default="{ row }">
-          {{ formatDateTime(row.departTime) }}
+          {{ formatTimeOnly(row.departTime) }}
         </template>
       </el-table-column>
 
       <el-table-column :label="t('flights.table.columns.arrival')" min-width="150">
         <template #default="{ row }">
-          {{ formatDateTime(row.arriveTime) }}
+          {{ formatTimeOnly(row.arriveTime) }}
         </template>
       </el-table-column>
 
@@ -74,7 +66,6 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { formatDateTime } from '../../lib/format.js'
 import { formatPrice } from '../utils/price.js'
 
 const { locale, t, te } = useI18n()
@@ -115,30 +106,28 @@ const unknownStatusLabel = computed(() => {
 function rowClassName({ row }) {
   return row.id === props.selectedFlightId ? 'flight-table__row--selected' : ''
 }
+
+function formatTimeOnly(value) {
+  if (!value) return '-'
+  const text = String(value).replace('T', ' ')
+  const timePart = text.includes(' ') ? text.split(' ')[1] : text
+  return timePart.slice(0, 5) || '-'
+}
 </script>
 
 <style scoped>
 .flight-table {
   display: grid;
-  gap: 10px;
-}
-
-.flight-table__header h3 {
-  margin: 0 0 4px;
-  font-size: 17px;
-}
-
-.flight-table__header p {
-  margin: 0;
-  color: #64748b;
-  font-size: 12px;
+  gap: 0;
+  min-width: 0;
+  height: 100%;
 }
 
 .flight-table__primary {
   color: #0f172a;
   font-weight: 600;
-  font-size: 14px;
-  line-height: 1.25;
+  font-size: 13px;
+  line-height: 1.15;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -147,8 +136,8 @@ function rowClassName({ row }) {
 .flight-table__secondary {
   margin-top: 2px;
   color: #64748b;
-  font-size: 11px;
-  line-height: 1.25;
+  font-size: 10px;
+  line-height: 1.1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -157,17 +146,17 @@ function rowClassName({ row }) {
 .flight-table__price {
   color: #0f766e;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .flight-table__status {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 24px;
-  padding: 0 8px;
+  min-height: 20px;
+  padding: 0 7px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
 }
 
@@ -192,21 +181,37 @@ function rowClassName({ row }) {
 }
 
 :deep(.el-table th.el-table__cell) {
-  padding: 8px 0;
+  height: 30px;
+  padding: 3px 0;
 }
 
 :deep(.el-table td.el-table__cell) {
-  padding: 6px 0;
+  height: 34px;
+  padding: 3px 0;
 }
 
 :deep(.el-table .cell) {
-  line-height: 1.3;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 :deep(.el-table th.el-table__cell .cell) {
   font-size: 12px;
   font-weight: 700;
   color: #475569;
+}
+
+:deep(.el-table),
+:deep(.el-table__inner-wrapper) {
+  height: 100%;
+}
+
+:deep(.el-table__header-wrapper) {
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 </style>
 
