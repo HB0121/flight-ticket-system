@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/auth")
 @Validated
@@ -32,23 +30,13 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
         AuthService.LoginResponse response = authService.register(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
-                "id", response.id(),
-                "username", response.username(),
-                "nickname", response.nickname(),
-                "token", response.token()
-        ));
+        return ResponseEntity.status(HttpStatus.CREATED).body(AuthSessionResponse.from(response));
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         AuthService.LoginResponse response = authService.login(request);
-        return ResponseEntity.ok(Map.of(
-                "id", response.id(),
-                "username", response.username(),
-                "nickname", response.nickname(),
-                "token", response.token()
-        ));
+        return ResponseEntity.ok(AuthSessionResponse.from(response));
     }
 
     @PostMapping("/logout")
@@ -62,14 +50,9 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<?> me(@RequestAttribute(value = "user", required = false) User user) {
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
-                    "error", "未登录或 token 已过期"
-            ));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new AuthErrorResponse("鏈櫥褰曟垨 token 宸茶繃鏈?"));
         }
-        return ResponseEntity.ok(Map.of(
-                "id", user.id(),
-                "username", user.username(),
-                "nickname", user.nickname()
-        ));
+        return ResponseEntity.ok(MeResponse.from(user));
     }
 }
