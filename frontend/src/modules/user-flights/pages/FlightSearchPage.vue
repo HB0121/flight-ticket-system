@@ -168,10 +168,12 @@
               data-testid="filter-price-range"
               @change="onFilterChange"
             >
-              <el-option :label="filterOptionText.priceAny" value="" />
-              <el-option :label="filterOptionText.priceLow" value="0-1000" />
-              <el-option :label="filterOptionText.priceMid" value="1000-2000" />
-              <el-option :label="filterOptionText.priceHigh" value="2000+" />
+              <el-option
+                v-for="option in priceRangeOptions"
+                :key="`price-${option.value || 'all'}`"
+                :label="option.label"
+                :value="option.value"
+              />
             </el-select>
           </el-form-item>
 
@@ -181,10 +183,12 @@
               data-testid="filter-status"
               @change="onFilterChange"
             >
-              <el-option :label="filterOptionText.statusAny" value="" />
-              <el-option :label="filterOptionText.statusScheduled" value="Scheduled" />
-              <el-option :label="filterOptionText.statusDelayed" value="Delayed" />
-              <el-option :label="filterOptionText.statusCancelled" value="Cancelled" />
+              <el-option
+                v-for="option in statusOptions"
+                :key="`status-${option.value || 'all'}`"
+                :label="option.label"
+                :value="option.value"
+              />
             </el-select>
           </el-form-item>
 
@@ -194,11 +198,12 @@
               data-testid="filter-depart-slot"
               @change="onFilterChange"
             >
-              <el-option :label="filterOptionText.slotAny" value="" />
-              <el-option :label="filterOptionText.slotOvernight" value="overnight" />
-              <el-option :label="filterOptionText.slotMorning" value="morning" />
-              <el-option :label="filterOptionText.slotAfternoon" value="afternoon" />
-              <el-option :label="filterOptionText.slotEvening" value="evening" />
+              <el-option
+                v-for="option in departSlotOptions"
+                :key="`slot-${option.value || 'all'}`"
+                :label="option.label"
+                :value="option.value"
+              />
             </el-select>
           </el-form-item>
 
@@ -556,6 +561,14 @@ import { matchesTimeSlot, normalizeFlightForDisplay } from '../../../shared/util
 import FlightTable from '../../../shared/components/FlightTable.vue'
 import FlightDetailCard from '../../../shared/components/FlightDetailCard.vue'
 import PriceHistoryChart from '../../../shared/charts/PriceHistoryChart.vue'
+import { useFlightPagination } from '../composables/useFlightPagination.js'
+import {
+  DEPART_SLOT_OPTIONS,
+  FLIGHT_STATUS_OPTIONS,
+  PRICE_RANGE_OPTIONS,
+  matchesPriceRange,
+  normalizeStatusValue
+} from '../data/filterOptions.js'
 
 const { t, locale } = useI18n()
 
@@ -578,8 +591,6 @@ const aiLoading = ref(false)
 const aiResult = ref(null)
 const aiError = ref('')
 const aiPanelOpen = ref(false)
-const currentPage = ref(1)
-const pageSize = ref(10)
 const syncSectionRef = ref(null)
 const searchSectionRef = ref(null)
 const resultsSectionRef = ref(null)
@@ -663,6 +674,9 @@ const filterOptionText = computed(() => (
         slotEvening: 'Evening'
       }
 ))
+const priceRangeOptions = computed(() => buildFilterOptions(PRICE_RANGE_OPTIONS))
+const statusOptions = computed(() => buildFilterOptions(FLIGHT_STATUS_OPTIONS))
+const departSlotOptions = computed(() => buildFilterOptions(DEPART_SLOT_OPTIONS))
 
 const placeholderText = computed(() => (
   locale.value === 'zh-CN'
@@ -698,23 +712,20 @@ const filteredFlights = computed(() =>
   })
 )
 
-const totalCount = computed(() => filteredFlights.value.length)
-const totalPages = computed(() => Math.max(Math.ceil(totalCount.value / Number(pageSize.value || 10)), 1))
-const paginationRangeStart = computed(() => (
-  totalCount.value ? (currentPage.value - 1) * Number(pageSize.value || 10) + 1 : 0
-))
-const paginationRangeEnd = computed(() => Math.min(currentPage.value * Number(pageSize.value || 10), totalCount.value))
-const visiblePageNumbers = computed(() => {
-  const pages = new Set([1, totalPages.value])
-  for (let page = currentPage.value - 1; page <= currentPage.value + 1; page += 1) {
-    if (page >= 1 && page <= totalPages.value) pages.add(page)
-  }
-  return [...pages].sort((a, b) => a - b)
-})
-const pagedFlights = computed(() => {
-  const startIndex = (currentPage.value - 1) * Number(pageSize.value || 10)
-  return filteredFlights.value.slice(startIndex, startIndex + Number(pageSize.value || 10))
-})
+const {
+  currentPage,
+  pageSize,
+  totalCount,
+  totalPages,
+  paginationRangeStart,
+  paginationRangeEnd,
+  visiblePageNumbers,
+  pagedFlights,
+  resetPagination,
+  handlePageChange,
+  goToFirstPage,
+  goToLastPage
+} = useFlightPagination(filteredFlights)
 
 const statusToneClass = computed(() => {
   if (syncStatus.value === 'SUCCESS') return 'flight-search-page__status-pill--success'
@@ -1072,45 +1083,12 @@ function onFilterChange() {
   resetPagination()
 }
 
-function resetPagination() {
-  currentPage.value = 1
+function buildFilterOptions(options) {
+  return options.map(option => ({
+    ...option,
+    label: filterOptionText.value[option.labelKey]
+  }))
 }
-
-function handlePageChange(page) {
-  const nextPage = Number(page) || 1
-  const maxPage = Math.max(Math.ceil(totalCount.value / Number(pageSize.value || 10)), 1)
-  currentPage.value = Math.min(Math.max(nextPage, 1), maxPage)
-}
-
-function goToFirstPage() {
-  handlePageChange(1)
-}
-
-function goToLastPage() {
-  handlePageChange(totalPages.value)
-}
-
-function matchesPriceRange(price, range) {
-  const numericPrice = Number(price)
-  if (!Number.isFinite(numericPrice)) return false
-  if (range === '0-1000') return numericPrice <= 1000
-  if (range === '1000-2000') return numericPrice > 1000 && numericPrice <= 2000
-  if (range === '2000+') return numericPrice > 2000
-  return true
-}
-
-function normalizeStatusValue(status) {
-  return String(status ?? '').trim().toLowerCase()
-}
-
-watch([filteredFlights, pageSize], () => {
-  const maxPage = Math.max(Math.ceil(totalCount.value / Number(pageSize.value || 10)), 1)
-  if (currentPage.value > maxPage) currentPage.value = maxPage
-})
-
-watch(pageSize, () => {
-  resetPagination()
-})
 
 watch(pagedFlights, rows => {
   if (!rows.length) {
