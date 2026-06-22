@@ -1,7 +1,6 @@
 package com.example.flight.flight;
 
 import com.example.flight.auth.User;
-import com.example.flight.flight.history.SearchHistoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -22,13 +21,10 @@ public class FlightController {
 
     private static final Logger log = LoggerFactory.getLogger(FlightController.class);
 
-    private final FlightRepository flightRepository;
-    private final SearchHistoryService searchHistoryService;
+    private final FlightService flightService;
 
-    public FlightController(FlightRepository flightRepository,
-                            SearchHistoryService searchHistoryService) {
-        this.flightRepository = flightRepository;
-        this.searchHistoryService = searchHistoryService;
+    public FlightController(FlightService flightService) {
+        this.flightService = flightService;
     }
 
     @GetMapping
@@ -39,34 +35,23 @@ public class FlightController {
                                @RequestParam(required = false) String dataSource,
                                @RequestAttribute("user") User user) {
         log.debug("flight search: fromCity={}, toCity={}, date={}, dataSource={}", fromCity, toCity, date, dataSource);
-        List<Flight> flights = flightRepository.search(new FlightSearchCriteria(fromCity, toCity, date, dataSource));
+        List<Flight> flights = flightService.search(fromCity, toCity, date, dataSource, user.id());
         log.debug("flight search result count={}", flights.size());
-        if (shouldRecordSearch(fromCity, toCity, date, dataSource)) {
-            searchHistoryService.record(user.id(), fromCity, toCity, date, dataSource);
-        }
         return flights;
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Flight> findById(@PathVariable Long id) {
-        return flightRepository.findById(id)
+        return flightService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/{id}/price-history")
     public ResponseEntity<List<FlightPriceSnapshot>> priceHistory(@PathVariable Long id) {
-        if (flightRepository.findById(id).isEmpty()) {
+        if (flightService.findById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(flightRepository.findPriceHistory(id));
-    }
-
-    private boolean shouldRecordSearch(String fromCity, String toCity, LocalDate date, String dataSource) {
-        return hasText(fromCity) || hasText(toCity) || date != null || hasText(dataSource);
-    }
-
-    private boolean hasText(String value) {
-        return value != null && !value.trim().isEmpty();
+        return ResponseEntity.ok(flightService.findPriceHistory(id));
     }
 }

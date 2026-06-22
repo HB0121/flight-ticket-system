@@ -22,28 +22,28 @@ import java.util.List;
 @Validated
 public class FavoriteController {
 
-    private final FavoriteRepository favoriteRepository;
+    private final FavoriteService favoriteService;
 
-    public FavoriteController(FavoriteRepository favoriteRepository) {
-        this.favoriteRepository = favoriteRepository;
+    public FavoriteController(FavoriteService favoriteService) {
+        this.favoriteService = favoriteService;
     }
 
     @GetMapping
     public List<FavoriteRecord> list(@RequestAttribute("user") User user) {
-        return favoriteRepository.findByUserId(user.id());
+        return favoriteService.list(user.id());
     }
 
     @PostMapping
     public ResponseEntity<FavoriteRecord> create(@RequestAttribute("user") User user,
                                                  @Valid @RequestBody CreateFavoriteRequest request) {
-        FavoriteRecord favorite = favoriteRepository.create(user.id(), request.flightId());
+        FavoriteRecord favorite = favoriteService.create(user.id(), request.flightId());
         return ResponseEntity.status(HttpStatus.CREATED).body(favorite);
     }
 
     @DeleteMapping("/{favoriteId}")
     public ResponseEntity<Void> delete(@RequestAttribute("user") User user,
                                        @PathVariable Long favoriteId) {
-        favoriteRepository.deleteByUserAndFavoriteId(user.id(), favoriteId);
+        favoriteService.delete(user.id(), favoriteId);
         return ResponseEntity.noContent().build();
     }
 

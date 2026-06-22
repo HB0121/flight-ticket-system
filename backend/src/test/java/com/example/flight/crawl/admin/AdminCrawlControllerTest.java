@@ -30,6 +30,7 @@ class AdminCrawlControllerTest {
     private CrawlService crawlService;
     private CrawlRepository crawlRepository;
     private DataSourceStatusService dataSourceStatusService;
+    private AdminCrawlJobService adminCrawlJobService;
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -38,7 +39,8 @@ class AdminCrawlControllerTest {
         crawlRepository = mock(CrawlRepository.class);
         dataSourceStatusService = mock(DataSourceStatusService.class);
         when(dataSourceStatusService.isConfigured("aerodatabox")).thenReturn(true);
-        AdminCrawlController controller = new AdminCrawlController(crawlService, crawlRepository, dataSourceStatusService);
+        adminCrawlJobService = new AdminCrawlJobService(crawlService, crawlRepository, dataSourceStatusService);
+        AdminCrawlController controller = new AdminCrawlController(adminCrawlJobService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();

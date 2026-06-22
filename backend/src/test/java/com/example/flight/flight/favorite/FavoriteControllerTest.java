@@ -20,8 +20,8 @@ class FavoriteControllerTest {
 
     @BeforeEach
     void setUp() {
-        FavoriteRepository favoriteRepository = mock(FavoriteRepository.class);
-        FavoriteController controller = new FavoriteController(favoriteRepository);
+        FavoriteService favoriteService = mock(FavoriteService.class);
+        FavoriteController controller = new FavoriteController(favoriteService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
