@@ -563,6 +563,7 @@ import FlightDetailCard from '../../../shared/components/FlightDetailCard.vue'
 import PriceHistoryChart from '../../../shared/charts/PriceHistoryChart.vue'
 import { useFlightPagination } from '../composables/useFlightPagination.js'
 import { useFlightSelection } from '../composables/useFlightSelection.js'
+import { useFlightSync } from '../composables/useFlightSync.js'
 import {
   DEPART_SLOT_OPTIONS,
   FLIGHT_STATUS_OPTIONS,
@@ -578,11 +579,6 @@ let activeSearchRequestId = 0
 const loading = ref(false)
 const errorMessage = ref('')
 const flights = ref([])
-const syncLoading = ref(false)
-const syncResult = ref(null)
-const syncMessage = ref('')
-const syncError = ref('')
-const syncDetailsOpen = ref(false)
 const aiLoading = ref(false)
 const aiResult = ref(null)
 const aiError = ref('')
@@ -619,16 +615,10 @@ const filters = reactive({
   departSlot: ''
 })
 
-const syncForm = reactive({
-  airportCode: 'CKG',
-  date: getTodayDateString()
-})
-
 const aiForm = reactive({
   query: ''
 })
 
-const syncStatus = computed(() => String(syncResult.value?.status ?? '').toUpperCase())
 const airportOptions = AIRPORT_OPTIONS
 const airlineOptions = computed(() => {
   const names = flights.value.map(flight => flight?.airlineName).filter(Boolean)
@@ -739,11 +729,25 @@ const {
   goToLastPage
 } = useFlightPagination(filteredFlights)
 
-const statusToneClass = computed(() => {
-  if (syncStatus.value === 'SUCCESS') return 'flight-search-page__status-pill--success'
-  if (syncStatus.value === 'FAILED') return 'flight-search-page__status-pill--failed'
-  if (syncStatus.value === 'RUNNING') return 'flight-search-page__status-pill--running'
-  return 'flight-search-page__status-pill--neutral'
+const {
+  syncForm,
+  syncLoading,
+  syncResult,
+  syncMessage,
+  syncError,
+  syncDetailsOpen,
+  syncStatus,
+  statusToneClass,
+  submitSync,
+  syncToday,
+  formatSyncValue
+} = useFlightSync({
+  filters,
+  resetPagination,
+  submitSearch,
+  getTodayDateString,
+  t,
+  syncFlights
 })
 
 const resultsMetricText = computed(() => (
@@ -959,35 +963,6 @@ function getErrorMessage(error, fallback = t('flights.errors.loadFailed')) {
     ?? fallback
 }
 
-async function submitSync() {
-  const airportCode = syncForm.airportCode?.trim()
-  const date = syncForm.date || getTodayDateString()
-
-  syncLoading.value = true
-  syncMessage.value = ''
-  syncError.value = ''
-
-  try {
-    const result = await syncFlights({ airportCode, date })
-    syncResult.value = result ?? null
-    if (isFailedSyncResult(result)) {
-      syncError.value = getSyncErrorMessage({ response: { data: result } })
-      return
-    }
-    await applySuccessfulSync(date)
-  } catch (error) {
-    syncResult.value = error?.response?.data ?? null
-    syncError.value = getSyncErrorMessage(error)
-  } finally {
-    syncLoading.value = false
-  }
-}
-
-async function syncToday() {
-  syncForm.date = getTodayDateString()
-  await submitSync()
-}
-
 async function submitAiAdvice() {
   const query = aiForm.query.trim()
   if (!query) {
@@ -1014,38 +989,12 @@ async function submitAiAdvice() {
   }
 }
 
-async function applySuccessfulSync(date) {
-  syncError.value = ''
-  syncMessage.value = t('flights.sync.messages.success')
-  syncDetailsOpen.value = false
-  filters.dataSource = 'aerodatabox'
-  resetPagination()
-  if (date) filters.date = date
-  await submitSearch()
-}
-
-function getSyncErrorMessage(error, fallback = t('flights.sync.messages.failed')) {
-  return error?.response?.data?.errorMessage
-    ?? error?.response?.data?.message
-    ?? error?.response?.data?.error
-    ?? error?.message
-    ?? fallback
-}
-
 function getTodayDateString() {
   const now = new Date()
   const year = now.getFullYear()
   const month = String(now.getMonth() + 1).padStart(2, '0')
   const day = String(now.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
-}
-
-function isFailedSyncResult(result) {
-  return String(result?.status ?? '').toUpperCase() === 'FAILED'
-}
-
-function formatSyncValue(value) {
-  return value === null || value === undefined || value === '' ? '-' : String(value)
 }
 
 function getAirportLabel(code) {
