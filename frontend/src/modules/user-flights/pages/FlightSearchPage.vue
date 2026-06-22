@@ -553,7 +553,7 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { fetchFlight, fetchFlights, fetchPriceHistory } from '../../../api/flightApi.js'
+import { fetchFlights } from '../../../api/flightApi.js'
 import { syncFlights } from '../../../api/flightSyncApi.js'
 import { requestAdvice } from '../../../api/aiTravelApi.js'
 import { AIRPORT_OPTIONS, buildAirportOptionLabel } from '../../../shared/constants/airportOptions.js'
@@ -562,6 +562,7 @@ import FlightTable from '../../../shared/components/FlightTable.vue'
 import FlightDetailCard from '../../../shared/components/FlightDetailCard.vue'
 import PriceHistoryChart from '../../../shared/charts/PriceHistoryChart.vue'
 import { useFlightPagination } from '../composables/useFlightPagination.js'
+import { useFlightSelection } from '../composables/useFlightSelection.js'
 import {
   DEPART_SLOT_OPTIONS,
   FLIGHT_STATUS_OPTIONS,
@@ -573,15 +574,10 @@ import {
 const { t, locale } = useI18n()
 
 let activeSearchRequestId = 0
-let activeSelectionRequestId = 0
 
 const loading = ref(false)
-const historyLoading = ref(false)
 const errorMessage = ref('')
 const flights = ref([])
-const selectedFlight = ref(null)
-const selectedFlightId = ref(null)
-const priceHistory = ref([])
 const syncLoading = ref(false)
 const syncResult = ref(null)
 const syncMessage = ref('')
@@ -595,6 +591,22 @@ const syncSectionRef = ref(null)
 const searchSectionRef = ref(null)
 const resultsSectionRef = ref(null)
 const aiSectionRef = ref(null)
+
+const {
+  historyLoading,
+  selectedFlight,
+  selectedFlightId,
+  priceHistory,
+  selectFlight,
+  clearSelectedFlight
+} = useFlightSelection({
+  locale,
+  getErrorMessage,
+  getPartialHistoryMessage: () => t('flights.errors.partialHistory'),
+  setErrorMessage: message => {
+    errorMessage.value = message
+  }
+})
 
 const filters = reactive({
   fromCity: '',
@@ -916,9 +928,7 @@ async function submitSearch() {
     flights.value = Array.isArray(rows) ? rows : []
 
     if (!flights.value.length || !pagedFlights.value.length) {
-      selectedFlight.value = null
-      selectedFlightId.value = null
-      priceHistory.value = []
+      clearSelectedFlight()
       return
     }
 
@@ -926,48 +936,11 @@ async function submitSearch() {
   } catch (error) {
     if (requestId !== activeSearchRequestId) return
     flights.value = []
-    selectedFlight.value = null
-    selectedFlightId.value = null
-    priceHistory.value = []
+    clearSelectedFlight()
     errorMessage.value = getErrorMessage(error)
   } finally {
     if (requestId === activeSearchRequestId) loading.value = false
   }
-}
-
-async function selectFlight(flight) {
-  if (!flight?.id) return
-
-  const requestId = ++activeSelectionRequestId
-  selectedFlightId.value = flight.id
-  selectedFlight.value = flight
-  priceHistory.value = []
-  historyLoading.value = true
-  errorMessage.value = ''
-
-  const [detailResult, historyResult] = await Promise.allSettled([
-    fetchFlight(flight.id),
-    fetchPriceHistory(flight.id)
-  ])
-
-  if (requestId !== activeSelectionRequestId) return
-
-  if (detailResult.status === 'fulfilled' && detailResult.value) {
-    selectedFlight.value = normalizeFlightForDisplay(detailResult.value, locale.value)
-  }
-  if (historyResult.status === 'fulfilled') {
-    priceHistory.value = Array.isArray(historyResult.value) ? historyResult.value : []
-  } else {
-    priceHistory.value = []
-  }
-
-  if (detailResult.status === 'rejected') {
-    errorMessage.value = getErrorMessage(detailResult.reason)
-  } else if (historyResult.status === 'rejected') {
-    errorMessage.value = getErrorMessage(historyResult.reason, t('flights.errors.partialHistory'))
-  }
-
-  if (requestId === activeSelectionRequestId) historyLoading.value = false
 }
 
 function buildQueryParams() {
@@ -1092,9 +1065,7 @@ function buildFilterOptions(options) {
 
 watch(pagedFlights, rows => {
   if (!rows.length) {
-    selectedFlight.value = null
-    selectedFlightId.value = null
-    priceHistory.value = []
+    clearSelectedFlight()
     return
   }
   if (!rows.some(row => row.id === selectedFlightId.value)) {
