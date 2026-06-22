@@ -41,6 +41,15 @@ describe('api client timeouts', () => {
       { timeout: 130000 }
     )
   })
+
+  it('keeps compatibility exports for split domain APIs', async () => {
+    const clientApi = await import('./client.js')
+
+    expect(clientApi.fetchFlights).toEqual(expect.any(Function))
+    expect(clientApi.syncFlights).toEqual(expect.any(Function))
+    expect(clientApi.requestAdvice).toEqual(expect.any(Function))
+    expect(clientApi.createConversation).toEqual(expect.any(Function))
+  })
 })
 
 describe('router bootstrap', () => {

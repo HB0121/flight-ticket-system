@@ -548,7 +548,9 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { fetchFlight, fetchFlights, fetchPriceHistory, requestAdvice, syncFlights } from '../../../api/flightApi.js'
+import { fetchFlight, fetchFlights, fetchPriceHistory } from '../../../api/flightApi.js'
+import { syncFlights } from '../../../api/flightSyncApi.js'
+import { requestAdvice } from '../../../api/aiTravelApi.js'
 import { AIRPORT_OPTIONS, buildAirportOptionLabel } from '../../../shared/constants/airportOptions.js'
 import { matchesTimeSlot, normalizeFlightForDisplay } from '../../../shared/utils/flightDisplay.js'
 import FlightTable from '../../../shared/components/FlightTable.vue'

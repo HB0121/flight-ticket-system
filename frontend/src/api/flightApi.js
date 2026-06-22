@@ -15,6 +15,7 @@ export async function fetchPriceHistory(id) {
   return response.data
 }
 
+// Compatibility exports. New code should import these from their domain APIs.
 export async function syncFlights({ airportCode, date }) {
   const response = await http.post('/api/admin/flights/sync', null, {
     params: {
