@@ -1,0 +1,31 @@
+# Java
+backend/target/
+backend/src/main/resources/application-local.yml
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Python
+crawler/.venv/
+crawler/__pycache__/
+crawler/.pytest_cache/
+crawler/**/*.pyc
+
+# Local data
+data/
+logs/
+*.log
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Claude Code runtime
+.claude/.pending-verification
+
+# IDE
+.idea/
+.vscode/
+

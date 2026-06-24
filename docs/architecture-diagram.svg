@@ -1,0 +1,100 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="830" viewBox="0 0 1200 830">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a1520"/><stop offset="1" stop-color="#0f1f30"/></linearGradient>
+<filter id="sh"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.25"/></filter>
+</defs>
+<rect x="0" y="0" width="1200" height="830" fill="url(#bg)"/>
+<text x="600" y="38" fill="#e0f0ff" font-size="22" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-weight="700">飞行票务数据采集与查询系统</text>
+<text x="600" y="60" fill="#8aa9c9" font-size="11.5" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif">Flight Ticket Scraping · 综合课程设计 III · 三层架构</text>
+<rect x="28" y="84" width="223" height="18" fill="#2d4a5e44" rx="9"/><text x="139.5" y="98" fill="#8aa9c9" font-size="10.5" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-weight="600">FRONTEND · Vue 3 + TypeScript</text>
+<rect x="30" y="108" width="216" height="165" fill="#152233" rx="8" stroke="#00bcd4" stroke-width="1.5"/><rect x="30" y="108" width="216" height="32" fill="#00bcd422" rx="8"/><rect x="30" y="108" width="216" height="8" fill="#00bcd422" rx="8"/>
+<line x1="30" y1="140" x2="246" y2="140" stroke="#00bcd444" stroke-width="0.5"/>
+<text x="44" y="129" fill="#00bcd4" font-size="12.5" font-weight="700" font-family="'Segoe UI',Arial,sans-serif">📄 页面</text><circle cx="42" cy="145" r="2.5" fill="#00bcd466"/><text x="50" y="148" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">AuthPage (登录/注册)</text>
+<circle cx="42" cy="166" r="2.5" fill="#00bcd466"/><text x="50" y="169" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">FlightSearchPage (航班查询)</text>
+<circle cx="42" cy="187" r="2.5" fill="#00bcd466"/><text x="50" y="190" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">FavoritesPage (我的收藏)</text>
+<circle cx="42" cy="208" r="2.5" fill="#00bcd466"/><text x="50" y="211" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">SearchHistoryPage (搜索历史)</text>
+<circle cx="42" cy="229" r="2.5" fill="#00bcd466"/><text x="50" y="232" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">CrawlJobs / DataSourceStatus</text>
+<rect x="270" y="108" width="216" height="143" fill="#152233" rx="8" stroke="#4fc3f7" stroke-width="1.5"/><rect x="270" y="108" width="216" height="32" fill="#4fc3f722" rx="8"/><rect x="270" y="108" width="216" height="8" fill="#4fc3f722" rx="8"/>
+<line x1="270" y1="140" x2="486" y2="140" stroke="#4fc3f744" stroke-width="0.5"/>
+<text x="284" y="129" fill="#4fc3f7" font-size="12.5" font-weight="700" font-family="'Segoe UI',Arial,sans-serif">🧩 组件</text><circle cx="282" cy="145" r="2.5" fill="#4fc3f766"/><text x="290" y="148" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">FlightTable</text>
+<circle cx="282" cy="166" r="2.5" fill="#4fc3f766"/><text x="290" y="169" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">FlightDetailCard</text>
+<circle cx="282" cy="187" r="2.5" fill="#4fc3f766"/><text x="290" y="190" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">PriceHistoryChart</text>
+<circle cx="282" cy="208" r="2.5" fill="#4fc3f766"/><text x="290" y="211" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">UserLayout / AdminLayout</text>
+<rect x="510" y="108" width="216" height="165" fill="#152233" rx="8" stroke="#66bb6a" stroke-width="1.5"/><rect x="510" y="108" width="216" height="32" fill="#66bb6a22" rx="8"/><rect x="510" y="108" width="216" height="8" fill="#66bb6a22" rx="8"/>
+<line x1="510" y1="140" x2="726" y2="140" stroke="#66bb6a44" stroke-width="0.5"/>
+<text x="524" y="129" fill="#66bb6a" font-size="12.5" font-weight="700" font-family="'Segoe UI',Arial,sans-serif">🔌 API 层</text><circle cx="522" cy="145" r="2.5" fill="#66bb6a66"/><text x="530" y="148" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">authApi / flightApi</text>
+<circle cx="522" cy="166" r="2.5" fill="#66bb6a66"/><text x="530" y="169" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">profileApi / adminCrawlApi</text>
+<circle cx="522" cy="187" r="2.5" fill="#66bb6a66"/><text x="530" y="190" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">http.js (axios 封装)</text>
+<circle cx="522" cy="208" r="2.5" fill="#66bb6a66"/><text x="530" y="211" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">client.js / router</text>
+<circle cx="522" cy="229" r="2.5" fill="#66bb6a66"/><text x="530" y="232" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">session.js / format.js</text>
+<line x1="100" y1="290" x2="1100" y2="290" stroke="#3a6a8a80" stroke-width="1.2" stroke-dasharray="6,4"/>
+<text x="600" y="284" fill="#3a6a8a" font-size="10" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif">REST API (axios http)</text>
+<rect x="28" y="297" width="286" height="18" fill="#2d4a5e44" rx="9"/><text x="171" y="311" fill="#8aa9c9" font-size="10.5" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-weight="600">BACKEND · Java SpringBoot 3.3 (JDK 17)</text>
+<rect x="30" y="321" width="195" height="170" fill="#152233" rx="8" stroke="#e53935" stroke-width="1.5"/><rect x="30" y="321" width="195" height="32" fill="#e5393522" rx="8"/><rect x="30" y="321" width="195" height="8" fill="#e5393522" rx="8"/>
+<line x1="30" y1="353" x2="225" y2="353" stroke="#e5393544" stroke-width="0.5"/>
+<text x="44" y="342" fill="#e53935" font-size="12.5" font-weight="700" font-family="'Segoe UI',Arial,sans-serif">🔐 Auth 认证</text><circle cx="42" cy="358" r="2.5" fill="#e5393566"/><text x="50" y="361" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">AuthController</text>
+<circle cx="42" cy="379" r="2.5" fill="#e5393566"/><text x="50" y="382" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">AuthService</text>
+<circle cx="42" cy="400" r="2.5" fill="#e5393566"/><text x="50" y="403" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">User / UserToken</text>
+<circle cx="42" cy="421" r="2.5" fill="#e5393566"/><text x="50" y="424" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">LoginInterceptor</text>
+<circle cx="42" cy="442" r="2.5" fill="#e5393566"/><text x="50" y="445" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">TokenRepository</text>
+<rect x="250" y="321" width="195" height="192" fill="#152233" rx="8" stroke="#4fc3f7" stroke-width="1.5"/><rect x="250" y="321" width="195" height="32" fill="#4fc3f722" rx="8"/><rect x="250" y="321" width="195" height="8" fill="#4fc3f722" rx="8"/>
+<line x1="250" y1="353" x2="445" y2="353" stroke="#4fc3f744" stroke-width="0.5"/>
+<text x="264" y="342" fill="#4fc3f7" font-size="12.5" font-weight="700" font-family="'Segoe UI',Arial,sans-serif">✈️ Flight 航班</text><circle cx="262" cy="358" r="2.5" fill="#4fc3f766"/><text x="270" y="361" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">FlightController</text>
+<circle cx="262" cy="379" r="2.5" fill="#4fc3f766"/><text x="270" y="382" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">FlightRepository</text>
+<circle cx="262" cy="400" r="2.5" fill="#4fc3f766"/><text x="270" y="403" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">FlightSearchPort</text>
+<circle cx="262" cy="421" r="2.5" fill="#4fc3f766"/><text x="270" y="424" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">PriceHistoryPort</text>
+<circle cx="262" cy="442" r="2.5" fill="#4fc3f766"/><text x="270" y="445" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">FavoriteController</text>
+<circle cx="262" cy="463" r="2.5" fill="#4fc3f766"/><text x="270" y="466" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">SearchHistoryController</text>
+<rect x="470" y="321" width="195" height="148" fill="#152233" rx="8" stroke="#66bb6a" stroke-width="1.5"/><rect x="470" y="321" width="195" height="32" fill="#66bb6a22" rx="8"/><rect x="470" y="321" width="195" height="8" fill="#66bb6a22" rx="8"/>
+<line x1="470" y1="353" x2="665" y2="353" stroke="#66bb6a44" stroke-width="0.5"/>
+<text x="484" y="342" fill="#66bb6a" font-size="12.5" font-weight="700" font-family="'Segoe UI',Arial,sans-serif">🕷 Crawl 爬取</text><circle cx="482" cy="358" r="2.5" fill="#66bb6a66"/><text x="490" y="361" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">CrawlService / CrawlJob</text>
+<circle cx="482" cy="379" r="2.5" fill="#66bb6a66"/><text x="490" y="382" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">AdminCrawlController</text>
+<circle cx="482" cy="400" r="2.5" fill="#66bb6a66"/><text x="490" y="403" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">DataSourceStatusService</text>
+<circle cx="482" cy="421" r="2.5" fill="#66bb6a66"/><text x="490" y="424" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">CrawlRepository</text>
+<rect x="690" y="321" width="195" height="192" fill="#152233" rx="8" stroke="#ab47bc" stroke-width="1.5"/><rect x="690" y="321" width="195" height="32" fill="#ab47bc22" rx="8"/><rect x="690" y="321" width="195" height="8" fill="#ab47bc22" rx="8"/>
+<line x1="690" y1="353" x2="885" y2="353" stroke="#ab47bc44" stroke-width="0.5"/>
+<text x="704" y="342" fill="#ab47bc" font-size="12.5" font-weight="700" font-family="'Segoe UI',Arial,sans-serif">🤖 AI 模块</text><circle cx="702" cy="358" r="2.5" fill="#ab47bc66"/><text x="710" y="361" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">AdviceService / TimingService</text>
+<circle cx="702" cy="379" r="2.5" fill="#ab47bc66"/><text x="710" y="382" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">TravelIntentParser</text>
+<circle cx="702" cy="400" r="2.5" fill="#ab47bc66"/><text x="710" y="403" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">DeepSeekTextClient</text>
+<circle cx="702" cy="421" r="2.5" fill="#ab47bc66"/><text x="710" y="424" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">ConversationSession</text>
+<circle cx="702" cy="442" r="2.5" fill="#ab47bc66"/><text x="710" y="445" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">HolidayProximityCalc</text>
+<circle cx="702" cy="463" r="2.5" fill="#ab47bc66"/><text x="710" y="466" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">PriceContextSeedService</text>
+<rect x="910" y="321" width="260" height="126" fill="#152233" rx="8" stroke="#78909c" stroke-width="1.5"/><rect x="910" y="321" width="260" height="32" fill="#78909c22" rx="8"/><rect x="910" y="321" width="260" height="8" fill="#78909c22" rx="8"/>
+<line x1="910" y1="353" x2="1170" y2="353" stroke="#78909c44" stroke-width="0.5"/>
+<text x="924" y="342" fill="#78909c" font-size="12.5" font-weight="700" font-family="'Segoe UI',Arial,sans-serif">⚙ Config / 通用</text><circle cx="922" cy="358" r="2.5" fill="#78909c66"/><text x="930" y="361" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">WebConfig / ErrorResponse</text>
+<circle cx="922" cy="379" r="2.5" fill="#78909c66"/><text x="930" y="382" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">GlobalExceptionHandler</text>
+<circle cx="922" cy="400" r="2.5" fill="#78909c66"/><text x="930" y="403" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">DatabaseInitializer</text>
+<circle cx="922" cy="421" r="2.5" fill="#78909c66"/><text x="930" y="424" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">CrawlController</text>
+<line x1="100" y1="530" x2="1100" y2="530" stroke="#3a6a8a80" stroke-width="1.2" stroke-dasharray="6,4"/>
+<text x="600" y="524" fill="#3a6a8a" font-size="10" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif">docker run --rm crawler (子进程触发)</text>
+<rect x="28" y="537" width="265" height="18" fill="#2d4a5e44" rx="9"/><text x="160.5" y="551" fill="#8aa9c9" font-size="10.5" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-weight="600">CRAWLER · Python Scrapy (Docker 容器)</text>
+<rect x="30" y="561" width="260" height="148" fill="#152233" rx="8" stroke="#4caf50" stroke-width="1.5"/><rect x="30" y="561" width="260" height="32" fill="#4caf5022" rx="8"/><rect x="30" y="561" width="260" height="8" fill="#4caf5022" rx="8"/>
+<line x1="30" y1="593" x2="290" y2="593" stroke="#4caf5044" stroke-width="0.5"/>
+<text x="44" y="582" fill="#4caf50" font-size="12.5" font-weight="700" font-family="'Segoe UI',Arial,sans-serif">🕸 爬虫 Spider</text><circle cx="42" cy="598" r="2.5" fill="#4caf5066"/><text x="50" y="601" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">AmadeusFlightsSpider</text>
+<circle cx="42" cy="619" r="2.5" fill="#4caf5066"/><text x="50" y="622" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">LiveFlightsSpider (实时)</text>
+<circle cx="42" cy="640" r="2.5" fill="#4caf5066"/><text x="50" y="643" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">SampleFlightsSpider (离线兜底)</text>
+<circle cx="42" cy="661" r="2.5" fill="#4caf5066"/><text x="50" y="664" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">RobotsGuard (robots.txt)</text>
+<rect x="320" y="561" width="220" height="126" fill="#152233" rx="8" stroke="#ff9800" stroke-width="1.5"/><rect x="320" y="561" width="220" height="32" fill="#ff980022" rx="8"/><rect x="320" y="561" width="220" height="8" fill="#ff980022" rx="8"/>
+<line x1="320" y1="593" x2="540" y2="593" stroke="#ff980044" stroke-width="0.5"/>
+<text x="334" y="582" fill="#ff9800" font-size="12.5" font-weight="700" font-family="'Segoe UI',Arial,sans-serif">⚙ Parser / 客户端</text><circle cx="332" cy="598" r="2.5" fill="#ff980066"/><text x="340" y="601" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">AmadeusClient (API)</text>
+<circle cx="332" cy="619" r="2.5" fill="#ff980066"/><text x="340" y="622" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">Parser / LiveParser</text>
+<circle cx="332" cy="640" r="2.5" fill="#ff980066"/><text x="340" y="643" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">LiveSources</text>
+<circle cx="332" cy="661" r="2.5" fill="#ff980066"/><text x="340" y="664" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">Items / Pipelines</text>
+<rect x="750" y="561" width="220" height="60" fill="#152233" rx="8" stroke="#78909c" stroke-width="1.5"/><rect x="750" y="561" width="220" height="32" fill="#78909c22" rx="8"/><rect x="750" y="561" width="220" height="8" fill="#78909c22" rx="8"/>
+<line x1="750" y1="593" x2="970" y2="593" stroke="#78909c44" stroke-width="0.5"/>
+<text x="764" y="582" fill="#78909c" font-size="12.5" font-weight="700" font-family="'Segoe UI',Arial,sans-serif">☁ 外部 API</text><circle cx="762" cy="598" r="2.5" fill="#78909c66"/><text x="770" y="601" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">Amadeus Flight API</text>
+<circle cx="762" cy="619" r="2.5" fill="#78909c66"/><text x="770" y="622" fill="#c8dbe8" font-size="10.5" font-family="'Segoe UI',Arial,sans-serif">DeepSeek AI API</text>
+<line x1="100" y1="740" x2="1100" y2="740" stroke="#3a6a8a80" stroke-width="1.2" stroke-dasharray="6,4"/>
+<rect x="28" y="747" width="237" height="18" fill="#2d4a5e44" rx="9"/><text x="146.5" y="761" fill="#8aa9c9" font-size="10.5" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-weight="600">INFRASTRUCTURE (Docker Compose)</text>
+<rect x="30" y="771" width="200" height="30" fill="#152233" rx="8" stroke="#546e7a" stroke-width="1.5"/><rect x="30" y="771" width="200" height="32" fill="#546e7a22" rx="8"/><rect x="30" y="771" width="200" height="8" fill="#546e7a22" rx="8"/>
+<line x1="30" y1="803" x2="230" y2="803" stroke="#546e7a44" stroke-width="0.5"/>
+<text x="44" y="792" fill="#546e7a" font-size="12.5" font-weight="700" font-family="'Segoe UI',Arial,sans-serif">🐳 MySQL 8.4 · Docker</text>
+<text x="470" y="725" fill="#3a6a8a" font-size="10" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif">📥 写入: 航班记录 / 价格快照 / 爬取任务</text>
+<text x="220" y="298" fill="#3a6a8a" font-size="9" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif">JDBC · MySQL / H2</text>
+<g transform="translate(600,740)">
+<ellipse cx="0" cy="0" rx="75" ry="18" fill="#1a3a4a" stroke="#00bcd4" stroke-width="1.5"/>
+<rect x="-75" y="0" width="150" height="36" fill="#1a3a4a" stroke="#00bcd4" stroke-width="1.5"/>
+<ellipse cx="0" cy="36" rx="75" ry="18" fill="#1a3a4a" stroke="#00bcd4" stroke-width="1.5"/>
+<text x="0" y="23" fill="#00bcd4" font-size="13" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-weight="700">MySQL · flight_demo</text>
+</g>
+</svg>
