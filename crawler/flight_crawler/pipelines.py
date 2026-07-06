@@ -20,6 +20,7 @@ class MysqlPipeline:
         self.failed_count = 0
         self.source = getattr(spider, "source", getattr(spider, "name", "unknown"))
         self.request_params = getattr(spider, "request_params", f"source={self.source}")
+        # One crawler run corresponds to one crawl_job row shown in the admin UI.
         with self.connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -34,6 +35,7 @@ class MysqlPipeline:
     def process_item(self, item, spider):
         try:
             with self.connection.cursor() as cursor:
+                # Re-syncing the same flight updates price/seats instead of creating duplicates.
                 cursor.execute(
                     """
                     insert into flight(
@@ -79,6 +81,7 @@ class MysqlPipeline:
                     ),
                 )
                 flight_id = cursor.fetchone()[0]
+                # Keep every observed price as a snapshot for the price history chart.
                 cursor.execute(
                     """
                     insert into flight_price_snapshot(
@@ -118,6 +121,7 @@ class MysqlPipeline:
         if crawl_error:
             status = "FAILED"
         error_message = None if status == "SUCCESS" else str(crawl_error or live_error or finish_reason)
+        # Final status and counters are what the frontend receives as the sync result.
         with self.connection.cursor() as cursor:
             cursor.execute(
                 """

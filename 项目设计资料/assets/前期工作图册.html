@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>机票抓取与自动更新系统 - 前期工作图册</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --ink: #162033;
+      --muted: #5f6f86;
+      --line: #d7e0ec;
+      --panel: #ffffff;
+      --accent: #2563eb;
+      --accent-2: #0f766e;
+      --accent-3: #f59e0b;
+      --danger: #dc2626;
+      --shadow: 0 18px 45px rgba(22, 32, 51, 0.10);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-width: 1280px;
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 8% 8%, rgba(37, 99, 235, 0.10), transparent 28%),
+        radial-gradient(circle at 92% 0%, rgba(15, 118, 110, 0.12), transparent 26%),
+        var(--bg);
+    }
+
+    .book {
+      width: 1440px;
+      margin: 0 auto;
+      padding: 38px 44px 58px;
+    }
+
+    .cover,
+    .sheet {
+      margin-bottom: 34px;
+      padding: 34px;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(215, 224, 236, 0.9);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .cover {
+      min-height: 360px;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 28px;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .cover::after {
+      content: "";
+      position: absolute;
+      right: -100px;
+      top: -140px;
+      width: 420px;
+      height: 420px;
+      border: 42px solid rgba(37, 99, 235, 0.08);
+      border-radius: 50%;
+    }
+
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--accent-2);
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      font-size: 52px;
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      margin: 18px 0 0;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 20px;
+      line-height: 1.7;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .meta-card,
+    .info-card,
+    .prototype-card,
+    .flow-node {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 12px 28px rgba(22, 32, 51, 0.06);
+    }
+
+    .meta-card {
+      min-height: 108px;
+      padding: 18px;
+    }
+
+    .meta-card strong,
+    .info-card strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--ink);
+      font-size: 18px;
+    }
+
+    .meta-card span,
+    .info-card span {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .sheet-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+
+    .sheet-head h2 {
+      font-size: 32px;
+    }
+
+    .sheet-head p {
+      margin: 8px 0 0;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.65;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 32px;
+      padding: 0 14px;
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 800;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .flow-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }
+
+    .flow-panel {
+      padding: 22px;
+      background: #f8fbff;
+      border: 1px solid #dbeafe;
+      border-radius: 22px;
+    }
+
+    .flow-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .flow-title h3 {
+      font-size: 22px;
+    }
+
+    .flow-stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .flow-node {
+      min-height: 68px;
+      display: grid;
+      grid-template-columns: 46px 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 14px;
+      position: relative;
+    }
+
+    .flow-node:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 36px;
+      bottom: -13px;
+      width: 2px;
+      height: 13px;
+      background: var(--accent);
+      opacity: 0.45;
+    }
+
+    .num {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 900;
+      background: var(--accent);
+      border-radius: 12px;
+    }
+
+    .flow-node:nth-child(2n) .num {
+      background: var(--accent-2);
+    }
+
+    .flow-node:nth-child(3n) .num {
+      background: var(--accent-3);
+    }
+
+    .flow-node strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 16px;
+    }
+
+    .flow-node span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .loop {
+      margin-top: 24px;
+      padding: 24px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+    }
+
+    .loop svg {
+      width: 100%;
+      height: 210px;
+      display: block;
+    }
+
+    .prototype-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+    }
+
+    .prototype-card {
+      padding: 18px;
+      min-height: 342px;
+    }
+
+    .prototype-card h3 {
+      margin-bottom: 14px;
+      font-size: 21px;
+    }
+
+    .wire {
+      height: 258px;
+      padding: 14px;
+      background: #f8fafc;
+      border: 1px solid #dbe3ef;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .wire-nav,
+    .wire-bar,
+    .wire-row,
+    .wire-button,
+    .wire-input,
+    .wire-chart,
+    .wire-table,
+    .wire-panel {
+      border-radius: 8px;
+    }
+
+    .wire-nav {
+      height: 28px;
+      margin-bottom: 12px;
+      background: #dbeafe;
+    }
+
+    .wire-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .wire-input {
+      height: 30px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+    }
+
+    .wire-button {
+      height: 30px;
+      background: var(--accent);
+    }
+
+    .wire-main {
+      display: grid;
+      grid-template-columns: 1.5fr 0.9fr;
+      gap: 10px;
+      height: 168px;
+    }
+
+    .wire-table,
+    .wire-panel {
+      background: #ffffff;
+      border: 1px solid #dbe3ef;
+    }
+
+    .wire-table {
+      padding: 10px;
+    }
+
+    .line {
+      height: 10px;
+      margin-bottom: 8px;
+      background: #e2e8f0;
+      border-radius: 999px;
+    }
+
+    .line.short {
+      width: 58%;
+    }
+
+    .line.mid {
+      width: 78%;
+    }
+
+    .wire-panel {
+      padding: 12px;
+    }
+
+    .wire-chart {
+      height: 76px;
+      margin-top: 12px;
+      background: linear-gradient(135deg, #dbeafe 0%, #ccfbf1 100%);
+      border: 1px solid #bfdbfe;
+    }
+
+    .auth-wire {
+      display: grid;
+      grid-template-columns: 1fr 0.78fr;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .auth-card-wire {
+      padding: 20px;
+      background: #ffffff;
+      border: 1px solid #dbe3ef;
+      border-radius: 14px;
+    }
+
+    .pill-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .pill {
+      height: 34px;
+      background: #eff6ff;
+      border-radius: 10px;
+    }
+
+    .list-wire {
+      display: grid;
+      gap: 10px;
+    }
+
+    .list-item {
+      min-height: 48px;
+      padding: 10px;
+      background: #ffffff;
+      border: 1px solid #dbe3ef;
+      border-radius: 10px;
+    }
+
+    .admin-wire {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 10px;
+    }
+
+    .admin-form {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr) 0.9fr;
+      gap: 6px;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .status-box {
+      min-height: 76px;
+      padding: 12px;
+      background: #ffffff;
+      border: 1px solid #dbe3ef;
+      border-radius: 12px;
+    }
+
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      margin-bottom: 10px;
+      background: var(--accent-2);
+      border-radius: 50%;
+    }
+
+    .analysis-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .info-card {
+      min-height: 190px;
+      padding: 22px;
+    }
+
+    .info-card em {
+      display: inline-grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      margin-bottom: 14px;
+      color: #ffffff;
+      font-style: normal;
+      font-weight: 900;
+      background: var(--accent);
+      border-radius: 12px;
+    }
+
+    .info-card:nth-child(2) em,
+    .info-card:nth-child(5) em {
+      background: var(--accent-2);
+    }
+
+    .info-card:nth-child(3) em,
+    .info-card:nth-child(6) em {
+      background: var(--accent-3);
+    }
+
+    .risk-table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .risk-table th,
+    .risk-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #e5edf7;
+      text-align: left;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .risk-table th {
+      color: #334155;
+      background: #f8fafc;
+    }
+
+    .footer-note {
+      margin: 20px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    @media print {
+      body {
+        min-width: auto;
+        background: #ffffff;
+      }
+
+      .book {
+        width: 100%;
+        padding: 0;
+      }
+
+      .cover,
+      .sheet {
+        break-after: page;
+        box-shadow: none;
+        border-radius: 0;
+      }
+    }
+
+    body.export-mode .cover,
+    body.export-mode .sheet {
+      display: none;
+    }
+
+    body.export-mode .export-visible {
+      display: block;
+      margin-bottom: 0;
+    }
+  </style>
+</head>
+<body>
+  <main class="book">
+    <section class="cover" data-export="cover">
+      <div>
+        <p class="eyebrow">Course Design · 前期工作补充</p>
+        <h1>机票抓取与自动更新系统</h1>
+        <p class="subtitle">以当前代码实现为基准，整理产品流程图、低保真产品原型图和可行性分析，用于课程报告正文和答辩 PPT 截图。</p>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-card"><strong>前端</strong><span>Vue 3 / Vite / Element Plus / ECharts</span></div>
+        <div class="meta-card"><strong>后端</strong><span>Spring Boot 3.3.5 / JDBC / REST API</span></div>
+        <div class="meta-card"><strong>爬虫</strong><span>Scrapy / PyMySQL / Docker Compose 调度</span></div>
+        <div class="meta-card"><strong>数据库</strong><span>MySQL：航班、采集任务、收藏、搜索历史</span></div>
+      </div>
+    </section>
+
+    <section class="sheet" data-export="flow">
+      <div class="sheet-head">
+        <div>
+          <h2>一、产品流程图</h2>
+          <p>围绕普通用户、管理员和爬虫三条主线组织流程，形成“采集数据、查询展示、用户操作、任务追踪”的完整闭环。</p>
+        </div>
+        <span class="tag">业务闭环</span>
+      </div>
+      <div class="flow-layout">
+        <div class="flow-panel">
+          <div class="flow-title"><h3>用户端查询与收藏</h3><span class="tag">User</span></div>
+          <div class="flow-stack">
+            <div class="flow-node"><div class="num">1</div><div><strong>登录/注册</strong><span>保存 token 与用户信息，进入受保护页面。</span></div></div>
+            <div class="flow-node"><div class="num">2</div><div><strong>筛选航班</strong><span>选择出发地、到达地、日期、数据源、航空公司等条件。</span></div></div>
+            <div class="flow-node"><div class="num">3</div><div><strong>查看结果</strong><span>后端查询 flight 表，返回航班列表并记录搜索历史。</span></div></div>
+            <div class="flow-node"><div class="num">4</div><div><strong>详情与价格</strong><span>查看航班详情和 flight_price_snapshot 价格历史。</span></div></div>
+            <div class="flow-node"><div class="num">5</div><div><strong>收藏管理</strong><span>写入或删除 favorite 表，收藏页展示关注航班。</span></div></div>
+          </div>
+        </div>
+        <div class="flow-panel">
+          <div class="flow-title"><h3>管理端采集任务</h3><span class="tag">Admin</span></div>
+          <div class="flow-stack">
+            <div class="flow-node"><div class="num">1</div><div><strong>查看数据源状态</strong><span>确认 API Key、爬虫命令和数据源配置是否可用。</span></div></div>
+            <div class="flow-node"><div class="num">2</div><div><strong>提交采集参数</strong><span>填写数据源、出发地、到达地、日期、乘客数和结果数。</span></div></div>
+            <div class="flow-node"><div class="num">3</div><div><strong>后端调度爬虫</strong><span>Spring Boot 通过 CrawlService 调用 Docker Compose。</span></div></div>
+            <div class="flow-node"><div class="num">4</div><div><strong>爬虫采集入库</strong><span>Scrapy 获取数据，pipeline 清洗、校验、写入 MySQL。</span></div></div>
+            <div class="flow-node"><div class="num">5</div><div><strong>任务状态回显</strong><span>更新 crawl_job 状态、成功条数、失败条数和完成时间。</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="loop">
+        <svg viewBox="0 0 1280 210" role="img" aria-label="数据更新闭环">
+          <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L9,3 z" fill="#2563eb"></path>
+            </marker>
+          </defs>
+          <g fill="#fff" stroke="#d7e0ec" stroke-width="2">
+            <rect x="20" y="56" width="150" height="84" rx="16"></rect>
+            <rect x="214" y="56" width="150" height="84" rx="16"></rect>
+            <rect x="408" y="56" width="150" height="84" rx="16"></rect>
+            <rect x="602" y="56" width="150" height="84" rx="16"></rect>
+            <rect x="796" y="56" width="150" height="84" rx="16"></rect>
+            <rect x="990" y="56" width="150" height="84" rx="16"></rect>
+          </g>
+          <g stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)">
+            <line x1="170" y1="98" x2="214" y2="98"></line>
+            <line x1="364" y1="98" x2="408" y2="98"></line>
+            <line x1="558" y1="98" x2="602" y2="98"></line>
+            <line x1="752" y1="98" x2="796" y2="98"></line>
+            <line x1="946" y1="98" x2="990" y2="98"></line>
+            <path d="M1065 140 C1065 188 96 188 96 143" fill="none"></path>
+          </g>
+          <g font-family="Microsoft YaHei, Arial" text-anchor="middle">
+            <text x="95" y="91" font-size="18" font-weight="800" fill="#162033">前端同步</text>
+            <text x="95" y="118" font-size="14" fill="#5f6f86">用户/管理员入口</text>
+            <text x="289" y="91" font-size="18" font-weight="800" fill="#162033">后端接口</text>
+            <text x="289" y="118" font-size="14" fill="#5f6f86">参数校验与调度</text>
+            <text x="483" y="91" font-size="18" font-weight="800" fill="#162033">Scrapy</text>
+            <text x="483" y="118" font-size="14" fill="#5f6f86">外部数据采集</text>
+            <text x="677" y="91" font-size="18" font-weight="800" fill="#162033">Pipeline</text>
+            <text x="677" y="118" font-size="14" fill="#5f6f86">清洗校验</text>
+            <text x="871" y="91" font-size="18" font-weight="800" fill="#162033">MySQL</text>
+            <text x="871" y="118" font-size="14" fill="#5f6f86">航班与快照</text>
+            <text x="1065" y="91" font-size="18" font-weight="800" fill="#162033">查询展示</text>
+            <text x="1065" y="118" font-size="14" fill="#5f6f86">列表/详情/图表</text>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <section class="sheet" data-export="prototype">
+      <div class="sheet-head">
+        <div>
+          <h2>二、产品原型图</h2>
+          <p>原型图采用低保真线框表达页面结构和功能入口，页面范围与当前 Vue 路由和组件实现保持一致。</p>
+        </div>
+        <span class="tag">Wireframe</span>
+      </div>
+      <div class="prototype-grid">
+        <div class="prototype-card">
+          <h3>登录 / 注册页</h3>
+          <div class="wire auth-wire">
+            <div>
+              <div class="line mid"></div>
+              <div class="line short"></div>
+              <div class="line"></div>
+            </div>
+            <div class="auth-card-wire">
+              <div class="pill-row"><div class="pill"></div><div class="pill"></div></div>
+              <div class="line"></div>
+              <div class="wire-input"></div>
+              <div style="height:10px"></div>
+              <div class="wire-input"></div>
+              <div style="height:14px"></div>
+              <div class="wire-button"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prototype-card">
+          <h3>航班查询工作台</h3>
+          <div class="wire">
+            <div class="wire-nav"></div>
+            <div class="wire-row">
+              <div class="wire-input"></div><div class="wire-input"></div><div class="wire-input"></div><div class="wire-button"></div>
+            </div>
+            <div class="wire-main">
+              <div class="wire-table">
+                <div class="line"></div><div class="line mid"></div><div class="line"></div><div class="line short"></div><div class="line"></div>
+              </div>
+              <div class="wire-panel">
+                <div class="line short"></div><div class="line"></div><div class="line mid"></div><div class="wire-chart"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prototype-card">
+          <h3>收藏与搜索历史</h3>
+          <div class="wire list-wire">
+            <div class="list-item"><div class="line mid"></div><div class="line short"></div></div>
+            <div class="list-item"><div class="line"></div><div class="line short"></div></div>
+            <div class="list-item"><div class="line mid"></div><div class="line"></div></div>
+            <div class="list-item"><div class="line short"></div><div class="line mid"></div></div>
+          </div>
+        </div>
+
+        <div class="prototype-card">
+          <h3>采集任务管理</h3>
+          <div class="wire admin-wire">
+            <div class="wire-nav"></div>
+            <div class="admin-form">
+              <div class="wire-input"></div><div class="wire-input"></div><div class="wire-input"></div><div class="wire-input"></div><div class="wire-input"></div><div class="wire-input"></div><div class="wire-button"></div>
+            </div>
+            <div class="wire-table">
+              <div class="line"></div><div class="line mid"></div><div class="line"></div><div class="line short"></div><div class="line mid"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prototype-card">
+          <h3>数据源状态页</h3>
+          <div class="wire">
+            <div class="wire-nav"></div>
+            <div class="status-grid">
+              <div class="status-box"><div class="status-dot"></div><div class="line mid"></div><div class="line short"></div></div>
+              <div class="status-box"><div class="status-dot"></div><div class="line"></div><div class="line short"></div></div>
+              <div class="status-box"><div class="status-dot" style="background:#dc2626"></div><div class="line mid"></div><div class="line short"></div></div>
+            </div>
+            <div style="height:14px"></div>
+            <div class="wire-table">
+              <div class="line"></div><div class="line mid"></div><div class="line short"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prototype-card">
+          <h3>航班详情与价格历史</h3>
+          <div class="wire">
+            <div class="wire-panel" style="height:96px">
+              <div class="line short"></div><div class="line"></div><div class="line mid"></div>
+            </div>
+            <div style="height:12px"></div>
+            <div class="wire-chart" style="height:126px"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet" data-export="feasibility">
+      <div class="sheet-head">
+        <div>
+          <h2>三、可行性分析</h2>
+          <p>围绕当前已实现系统，从技术、经济、操作、数据、时间和风险六个角度判断项目是否适合作为课程设计交付。</p>
+        </div>
+        <span class="tag">Feasibility</span>
+      </div>
+      <div class="analysis-grid">
+        <div class="info-card"><em>技</em><strong>技术可行</strong><span>Vue、Spring Boot、Scrapy、MySQL 均为成熟开源技术，当前代码已经形成前端、后端、爬虫、数据库闭环。</span></div>
+        <div class="info-card"><em>经</em><strong>经济可行</strong><span>课程开发主要依赖本地环境和开源组件，除外部数据 API Key 外无明显额外成本。</span></div>
+        <div class="info-card"><em>操</em><strong>操作可行</strong><span>普通用户和管理员页面职责清晰，适合按登录、查询、同步、收藏、管理任务顺序演示。</span></div>
+        <div class="info-card"><em>数</em><strong>数据可行</strong><span>flight、crawl_job、price_snapshot、favorite、search_history 等表可以支撑当前主线功能。</span></div>
+        <div class="info-card"><em>时</em><strong>时间可行</strong><span>核心功能已经落地，后续重点是演示数据、报告整理、截图和答辩材料制作。</span></div>
+        <div class="info-card"><em>险</em><strong>风险可控</strong><span>外部接口、环境启动和数据量不足是主要风险，可通过样例数据和演示前验证降低影响。</span></div>
+      </div>
+      <table class="risk-table">
+        <thead><tr><th>主要风险</th><th>可能影响</th><th>应对方式</th></tr></thead>
+        <tbody>
+          <tr><td>外部 API 未配置</td><td>采集任务无法返回真实数据</td><td>提前准备样例数据，并通过数据源状态页说明配置情况</td></tr>
+          <tr><td>本地依赖较多</td><td>演示启动链路较长</td><td>按 MySQL、后端、前端、爬虫顺序提前验证</td></tr>
+          <tr><td>数据量不足</td><td>列表和图表展示效果弱</td><td>演示前手动触发同步或导入样例航班数据</td></tr>
+        </tbody>
+      </table>
+      <p class="footer-note">说明：AI/chat 模块在当前代码中保留，但本图册以当前主线功能为准，仅将其作为后续扩展方向，不纳入核心流程。</p>
+    </section>
+  </main>
+  <script>
+    const exportMap = {
+      '#cover': 'cover',
+      '#flow': 'flow',
+      '#prototype': 'prototype',
+      '#feasibility': 'feasibility'
+    }
+
+    const target = exportMap[window.location.hash]
+    if (target) {
+      document.body.classList.add('export-mode')
+      document.querySelector(`[data-export="${target}"]`)?.classList.add('export-visible')
+    }
+  </script>
+</body>
+</html>

@@ -972,6 +972,8 @@ async function submitSearch() {
   resetPagination()
 
   try {
+    // Main flight query path: UI filters -> /api/flights -> flight table.
+    // The backend records search history when at least one filter is present.
     const rows = await fetchFlights(buildQueryParams())
     if (requestId !== activeSearchRequestId) return
 
@@ -1010,6 +1012,7 @@ async function selectFlight(flight) {
   historyLoading.value = true
   errorMessage.value = ''
 
+  // Selecting a row loads the canonical flight detail and its snapshot history together.
   const [detailResult, historyResult] = await Promise.allSettled([
     fetchFlight(flight.id),
     fetchPriceHistory(flight.id)
@@ -1060,6 +1063,8 @@ async function submitSync() {
   syncError.value = ''
 
   try {
+    // This does not write flights directly from the browser.
+    // The backend starts the Dockerized Scrapy crawler, and the crawler writes MySQL.
     const result = await syncFlights({ airportCode, date })
     syncResult.value = result ?? null
     if (isFailedSyncResult(result)) {
@@ -1113,6 +1118,7 @@ async function applySuccessfulSync(date) {
   filters.dataSource = 'aerodatabox'
   resetPagination()
   if (date) filters.date = date
+  // After crawler success, re-query flights so the newly inserted/updated rows appear.
   await submitSearch()
 }
 
