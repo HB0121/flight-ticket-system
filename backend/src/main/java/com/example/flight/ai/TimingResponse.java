@@ -1,7 +1,7 @@
 package com.example.flight.ai;
 
-import com.example.flight.flight.Flight;
-import com.example.flight.flight.FlightPriceSnapshot;
+import com.example.flight.flight.model.Flight;
+import com.example.flight.flight.model.FlightPriceSnapshot;
 
 import java.util.List;
 

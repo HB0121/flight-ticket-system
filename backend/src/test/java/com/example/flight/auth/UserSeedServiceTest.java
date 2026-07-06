@@ -1,5 +1,9 @@
 package com.example.flight.auth;
 
+import com.example.flight.auth.dto.RegisterRequest;
+import com.example.flight.auth.repository.UserRepository;
+import com.example.flight.auth.service.AuthService;
+import com.example.flight.auth.service.UserSeedService;
 import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.mock;

@@ -1,6 +1,6 @@
 package com.example.flight.ai;
 
-import com.example.flight.flight.Flight;
+import com.example.flight.flight.model.Flight;
 
 import java.util.List;
 

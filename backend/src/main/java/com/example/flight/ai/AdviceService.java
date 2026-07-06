@@ -1,10 +1,10 @@
 package com.example.flight.ai;
 
-import com.example.flight.crawl.FlightSyncPort;
-import com.example.flight.crawl.FlightSyncResult;
-import com.example.flight.flight.Flight;
-import com.example.flight.flight.FlightSearchCriteria;
-import com.example.flight.flight.FlightSearchPort;
+import com.example.flight.crawl.model.FlightSyncResult;
+import com.example.flight.crawl.port.FlightSyncPort;
+import com.example.flight.flight.dto.FlightSearchCriteria;
+import com.example.flight.flight.model.Flight;
+import com.example.flight.flight.repository.FlightSearchPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

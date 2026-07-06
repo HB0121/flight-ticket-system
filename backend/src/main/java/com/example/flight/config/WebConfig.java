@@ -1,6 +1,6 @@
 package com.example.flight.config;
 
-import com.example.flight.auth.LoginInterceptor;
+import com.example.flight.auth.web.LoginInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
