@@ -1,7 +1,6 @@
 package com.example.flight.ai;
 
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.Comparator;
 import java.util.List;
 
@@ -11,7 +10,7 @@ final class HolidayProximityCalculator {
     }
 
     /**
-     * Major Chinese holidays for 2026–2027 with date ranges.
+     * Major Chinese holidays for 2026-2027 with date ranges.
      */
     private static final List<HolidaySpan> HOLIDAYS = List.of(
             new HolidaySpan("元旦", LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 3)),
@@ -52,7 +51,7 @@ final class HolidayProximityCalculator {
         }
         int days = nearest.daysFrom(departDate);
         if (days == 0) {
-            return "出发日期正值" + nearest.name() + "假期，属于出行高峰期，票价较高，建议提前购买。";
+            return "出发日期正在" + nearest.name() + "假期，属于出行高峰期，票价较高，建议提前购买。";
         }
         if (days <= 3) {
             return "距离" + nearest.name() + "仅剩" + days + "天，属于出行高峰期前后，票价可能持续上涨。";

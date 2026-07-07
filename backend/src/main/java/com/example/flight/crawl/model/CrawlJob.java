@@ -3,6 +3,9 @@ package com.example.flight.crawl.model;
 import java.time.LocalDateTime;
 
 public record CrawlJob(
+        /**
+         * 爬虫任务记录
+         */
         Long id,
         String status,
         LocalDateTime startedAt,

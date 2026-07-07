@@ -1,5 +1,6 @@
 <template>
   <section class="data-source-status-page">
+    <!-- 数据源配置状态页，用于确认外部 API key 是否可用。 -->
     <header class="data-source-status-page__header">
       <div>
         <p class="data-source-status-page__eyebrow">{{ t('admin.dataSources.eyebrow') }}</p>
@@ -15,6 +16,7 @@
 
     <p v-if="errorMessage" class="data-source-status-page__error">{{ errorMessage }}</p>
 
+    <!-- 每张卡片对应一个后端支持的数据源。 -->
     <section class="data-source-status-page__grid">
       <article v-for="status in statuses" :key="status.code" class="data-source-status-page__card">
         <div class="data-source-status-page__row">
@@ -45,6 +47,7 @@ onMounted(() => {
   loadStatuses()
 })
 
+// 数据源状态来自后端配置检查，用于提示外部 API key 是否可用。
 async function loadStatuses() {
   loading.value = true
   errorMessage.value = ''

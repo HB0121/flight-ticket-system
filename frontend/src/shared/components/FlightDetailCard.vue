@@ -1,5 +1,6 @@
 <template>
   <section class="flight-detail-card">
+    <!-- 详情卡片展示选中航班的完整字段，并复用收藏按钮。 -->
     <header class="flight-detail-card__header">
       <div>
         <p class="flight-detail-card__eyebrow">{{ t('flights.detail.eyebrow') }}</p>
@@ -16,6 +17,7 @@
       <strong class="flight-detail-card__price">¥{{ formatPrice(flight.price) }}</strong>
     </header>
 
+    <!-- 使用 dl 展示字段名和值，便于快速比对航班属性。 -->
     <dl class="flight-detail-card__grid">
       <div>
         <dt>{{ t('flights.detail.airline') }}</dt>
@@ -67,6 +69,7 @@ const props = defineProps({
   favoriteId: { type: Number, default: null }
 })
 
+// 详情卡片不直接维护收藏列表，只把收藏变化通知父页面同步状态。
 const emit = defineEmits(['favorite-toggled'])
 </script>
 

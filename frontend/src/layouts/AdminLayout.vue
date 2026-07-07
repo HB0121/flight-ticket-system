@@ -1,5 +1,6 @@
 <template>
   <main class="route-layout">
+    <!-- 管理端公共头部：爬虫任务和数据源状态页面共用这一套导航。 -->
     <header class="route-layout__header">
       <div>
         <p class="route-layout__eyebrow">{{ t('layout.shell.phase') }}</p>
@@ -18,6 +19,7 @@
     </header>
 
     <section class="route-layout__content">
+      <!-- 管理端子路由出口。 -->
       <RouterView />
     </section>
   </main>
@@ -30,6 +32,7 @@ import UserMenu from '../shared/components/UserMenu.vue'
 
 const { locale, t } = useI18n()
 
+// 管理端和用户端共用同一套语言存储逻辑。
 function switchLocale(nextLocale) {
   locale.value = nextLocale
   setStoredLocale(nextLocale)

@@ -1,4 +1,5 @@
 <template>
+  <!-- 只有读取到本地用户信息时才显示用户菜单。 -->
   <div v-if="displayName" class="user-menu">
     <span class="user-menu__greeting" :title="displayName">
       <span class="user-menu__icon" aria-hidden="true">👤</span>
@@ -27,6 +28,7 @@ const { t } = useI18n()
 const router = useRouter()
 const displayName = ref('')
 
+// 用户基本信息在登录成功后写入 localStorage，这里只负责读取展示名。
 onMounted(() => {
   try {
     const raw = localStorage.getItem('user')
@@ -39,6 +41,7 @@ onMounted(() => {
   }
 })
 
+// 登出分两步：先尽量通知后端清 token，再清理前端本地状态并回到登录页。
 async function handleLogout() {
   try {
     await ElMessageBox.confirm(

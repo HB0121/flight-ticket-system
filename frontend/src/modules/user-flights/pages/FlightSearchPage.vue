@@ -1,6 +1,8 @@
 <template>
   <section class="flight-search-page">
+    <!-- 顶部控制区：左侧触发后端同步，右侧查询本地航班数据。 -->
     <section data-testid="dashboard-controls" class="flight-search-page__controls">
+      <!-- 同步表单会调用后端接口，由后端启动爬虫并写入数据库。 -->
       <section
         ref="syncSectionRef"
         class="flight-search-page__card flight-search-page__control-card flight-search-page__control-card--sync"
@@ -74,6 +76,7 @@
         </div>
       </section>
 
+      <!-- 查询表单只查询本地 MySQL 中已有的航班快照。 -->
       <section
         ref="searchSectionRef"
         class="flight-search-page__card flight-search-page__control-card flight-search-page__control-card--search"
@@ -213,6 +216,7 @@
       </section>
     </section>
 
+    <!-- 同步结果条：展示最近一次同步任务的状态、成功数、失败数和详情。 -->
     <section
       data-testid="dashboard-sync-strip"
       :class="['flight-search-page__sync-strip', { 'flight-search-page__sync-strip--failed': syncStatus === 'FAILED' }]"
@@ -295,6 +299,7 @@
       </dl>
     </section>
 
+    <!-- 主工作区：左侧是航班结果表，右侧是选中航班的详情和价格历史。 -->
     <section ref="resultsSectionRef" data-testid="dashboard-workspace" class="flight-search-page__workspace flight-search-page__console">
       <section class="flight-search-page__results-pane">
         <section class="flight-search-page__card flight-search-page__results-card">
@@ -308,6 +313,7 @@
           </div>
 
           <div class="flight-search-page__table-shell">
+            <!-- 表格选择航班后，会触发 selectFlight 加载详情和价格历史。 -->
             <FlightTable
               :flights="pagedFlights"
               :loading="loading"
@@ -324,6 +330,7 @@
           </div>
 
           <div class="flight-search-page__results-footer">
+            <!-- 本页使用前端本地分页，后端一次返回当前筛选条件下的结果集。 -->
             <div class="flight-search-page__results-summary">
               <span data-testid="pagination-total-label">
                 {{ paginationText.total(totalCount) }}
@@ -379,6 +386,7 @@
       </section>
 
       <aside class="flight-search-page__inspector-pane">
+        <!-- 详情面板展示当前选中的航班，未选中时显示空状态。 -->
         <section class="flight-search-page__card flight-search-page__detail-card">
           <div class="flight-search-page__inspector-head">
             <div>
@@ -412,6 +420,7 @@
           </div>
         </section>
 
+        <!-- 价格历史面板根据选中航班的快照记录绘制趋势。 -->
         <section class="flight-search-page__card flight-search-page__history-card">
           <div class="flight-search-page__inspector-head">
             <div>
@@ -431,6 +440,7 @@
       </aside>
     </section>
 
+    <!-- AI 建议区：根据自然语言需求调用后端建议接口并展示解析结果。 -->
     <section data-testid="dashboard-ai" class="flight-search-page__ai-section">
       <div class="flight-search-page__card-head">
         <div>
@@ -473,6 +483,7 @@
       </p>
 
       <div v-if="aiResult" class="flight-search-page__ai-result">
+        <!-- AI 返回内容分为意图、候选航班和最终建议三块。 -->
         <div data-testid="ai-intent" class="flight-search-page__ai-panel">
           <strong>{{ aiText.intentTitle }}</strong>
           <p>{{ aiResult.intent?.from || '-' }} -> {{ aiResult.intent?.to || '-' }}</p>
@@ -557,7 +568,7 @@ const syncSectionRef = ref(null)
 const searchSectionRef = ref(null)
 const resultsSectionRef = ref(null)
 
-// Favorite status map: flightId -> { isFavorited, favoriteId }
+// 收藏状态映射：flightId -> { isFavorited, favoriteId }
 const favoriteStatusMap = ref(new Map())
 
 function updateFavoriteStatus(flightsList) {
@@ -577,7 +588,7 @@ function onFavoriteToggled({ flightId, isFavorited, favoriteId }) {
   saveSearchState()
 }
 
-// Computed favorite state for the currently selected flight
+// 当前选中航班的收藏状态
 const selectedFavoriteState = computed(() => {
   const flight = selectedFlight.value
   if (!flight) return { isFavorited: false, favoriteId: null }
@@ -600,13 +611,13 @@ const syncForm = reactive({
   date: getTodayDateString()
 })
 
-// ── sessionStorage persistence ──
-// Saves/restores search state so navigating to Favorites/History and back preserves results.
+// sessionStorage 持久化
+// 保存和恢复搜索状态，保证从收藏或历史页面返回后仍保留结果。
 const PERSIST_KEY = 'flightSearchPage_v1'
 
 function saveSearchState() {
-  // Never persist search state when the user has already logged out.
-  // (onBeforeUnmount fires after clearStoredSession during logout navigation.)
+  // 用户已退出时不再保存搜索状态。
+  // 登出跳转过程中，onBeforeUnmount 可能在 clearStoredSession 之后触发。
   if (!getAuthToken()) return
 
   const favEntries = []
@@ -649,28 +660,28 @@ function restoreSearchState() {
       selectedFlightId.value = state.selectedFlightId
     }
     return true
-  } catch { /* corrupt or missing — start fresh */ }
+  } catch { /* 缓存缺失或内容异常时重新开始 */ }
   return false
 }
 
-// Restore saved search state on first mount (handles both KeepAlive and no-KeepAlive paths)
+// 首次挂载时恢复搜索状态，兼容 KeepAlive 和非 KeepAlive 场景。
 onMounted(() => {
   restoreSearchState()
 })
 
-// Save state when KeepAlive deactivates this component (tab switch)
+// KeepAlive 停用组件时保存状态。
 onDeactivated(() => {
   saveSearchState()
 })
 
-// Save state when component is truly destroyed (no-KeepAlive fallback)
+// 组件真正销毁时保存状态，作为非 KeepAlive 场景的兜底。
 onBeforeUnmount(() => {
   saveSearchState()
 })
 
-// Refresh data from API when reactivated (e.g. returning from Favorites after changes)
+// 组件重新激活时刷新接口数据，例如从收藏页修改后返回。
 onActivated(() => {
-  // Re-fetch price history for currently selected flight
+  // 重新获取当前选中航班的价格历史。
   if (selectedFlightId.value) {
     fetchPriceHistory(selectedFlightId.value).then(rows => {
       priceHistory.value = Array.isArray(rows) ? rows : []
@@ -972,8 +983,8 @@ async function submitSearch() {
   resetPagination()
 
   try {
-    // Main flight query path: UI filters -> /api/flights -> flight table.
-    // The backend records search history when at least one filter is present.
+    // 航班查询主流程：页面筛选条件 -> /api/flights -> 航班表格。
+    // 至少存在一个筛选条件时，后端会记录搜索历史。
     const rows = await fetchFlights(buildQueryParams())
     if (requestId !== activeSearchRequestId) return
 
@@ -1012,7 +1023,7 @@ async function selectFlight(flight) {
   historyLoading.value = true
   errorMessage.value = ''
 
-  // Selecting a row loads the canonical flight detail and its snapshot history together.
+  // 选择表格行时，同时加载航班详情和价格快照历史。
   const [detailResult, historyResult] = await Promise.allSettled([
     fetchFlight(flight.id),
     fetchPriceHistory(flight.id)
@@ -1063,8 +1074,8 @@ async function submitSync() {
   syncError.value = ''
 
   try {
-    // This does not write flights directly from the browser.
-    // The backend starts the Dockerized Scrapy crawler, and the crawler writes MySQL.
+    // 浏览器不直接写入航班数据。
+    // 后端负责启动 Docker 中的 Scrapy 爬虫，爬虫再写入 MySQL。
     const result = await syncFlights({ airportCode, date })
     syncResult.value = result ?? null
     if (isFailedSyncResult(result)) {
@@ -1118,7 +1129,7 @@ async function applySuccessfulSync(date) {
   filters.dataSource = 'aerodatabox'
   resetPagination()
   if (date) filters.date = date
-  // After crawler success, re-query flights so the newly inserted/updated rows appear.
+  // 爬虫成功后重新查询航班，让新增或更新的数据出现在列表中。
   await submitSearch()
 }
 
@@ -1918,7 +1929,7 @@ watch(pagedFlights, rows => {
   }
 }
 
-/* Workbench rewrite overrides */
+/* 工作台布局覆盖样式 */
 .flight-search-page {
   gap: 8px;
   padding: 0 0 12px;

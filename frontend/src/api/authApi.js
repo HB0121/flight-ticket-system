@@ -1,5 +1,6 @@
 import { http } from './http.js'
 
+// 登录接口兼容两种调用方式：传对象，或传 username/password 两个参数。
 function normalizeLoginPayload(input, password) {
   if (typeof input === 'object' && input !== null) {
     return input
@@ -11,6 +12,7 @@ function normalizeLoginPayload(input, password) {
   }
 }
 
+// 注册接口同样兼容对象参数和分散参数，便于页面和测试复用。
 function normalizeRegisterPayload(input, password, nickname) {
   if (typeof input === 'object' && input !== null) {
     return input

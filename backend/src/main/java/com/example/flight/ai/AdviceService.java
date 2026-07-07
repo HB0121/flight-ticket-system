@@ -80,7 +80,7 @@ public class AdviceService {
 
         if (recommended.isEmpty()) {
             String route = routeText(intent);
-            log.info("出行建议: 未找到匹配航班, route={}", route);
+            log.info("出行建议: 未找到匹配航班 route={}", route);
             return new AdviceResponse(
                     buildNoMatchSummary(route, syncResult, syncAttempted),
                     intentView,
@@ -259,7 +259,7 @@ public class AdviceService {
         try {
             return aiTextClient.generate(systemPrompt, userPrompt);
         } catch (RuntimeException ex) {
-            log.warn("出行建议: AI 调用失败，回退到规则建议: {}", ex.getMessage());
+            log.warn("出行建议: AI 调用失败，回退到规则建议 {}", ex.getMessage());
             return Optional.empty();
         }
     }
@@ -290,7 +290,7 @@ public class AdviceService {
         String budgetText = intent.budget() == null ? "当前最低价" : "预算内";
         String summary = "推荐 " + flight.flightNo() + "，" + flight.fromCity() + "到" + flight.toCity()
                 + "，" + flight.departTime().toLocalDate() + " " + flight.departTime().toLocalTime()
-                + " 起飞，价格" + flight.price().stripTrailingZeros().toPlainString()
+                + " 起飞，价格 " + flight.price().stripTrailingZeros().toPlainString()
                 + " 元，属于" + budgetText + "选择。价格为系统本地价格快照，仅供课程设计演示参考。";
         return withTimePreferenceNote(summary, intent, message, timePreferenceMatched);
     }
@@ -302,12 +302,12 @@ public class AdviceService {
         return String.join("\n",
                 "用户需求：" + message,
                 "解析结果：" + intent.fromCity() + " -> " + intent.toCity()
-                        + "，日期" + intent.date() + "，预算" + budget + "，时间偏好" + timePreference,
+                        + "，日期 " + intent.date() + "，预算 " + budget + "，时间偏好 " + timePreference,
                 "时间偏好满足情况：" + (timePreferenceMatched ? "已匹配到符合时间偏好的航班" : buildTimePreferenceFallbackNote(intent, message)),
                 "推荐航班：" + recommended.flightNo() + "，"
                         + recommended.fromAirport() + " -> " + recommended.toAirport()
-                        + "，起飞" + recommended.departTime() + "，到达" + recommended.arriveTime()
-                        + "，价格" + recommended.price().stripTrailingZeros().toPlainString()
+                        + "，起飞 " + recommended.departTime() + "，到达 " + recommended.arriveTime()
+                        + "，价格 " + recommended.price().stripTrailingZeros().toPlainString()
                         + " 元，余票 " + recommended.seatsLeft(),
                 "候选航班数量：" + candidates.size(),
                 "请只基于这些候选航班，用80字以内给出推荐理由和购票建议。"
@@ -330,13 +330,13 @@ public class AdviceService {
                 "",
                 "当前用户需求：" + message,
                 "解析结果：" + intent.fromCity() + " -> " + intent.toCity()
-                        + "，日期" + intent.date() + "，预算" + budget + "，时间偏好" + timePreference,
+                        + "，日期 " + intent.date() + "，预算 " + budget + "，时间偏好 " + timePreference,
                 "时间偏好满足情况：" + (timePreferenceMatched ? "已匹配到符合时间偏好的航班" : buildTimePreferenceFallbackNote(intent, message)),
                 "推荐航班：" + recommended.flightNo() + "，"
                         + recommended.fromAirport() + " -> " + recommended.toAirport()
-                        + "，起飞" + recommended.departTime()
-                        + "，到达" + recommended.arriveTime()
-                        + "，价格" + recommended.price().stripTrailingZeros().toPlainString()
+                        + "，起飞 " + recommended.departTime()
+                        + "，到达 " + recommended.arriveTime()
+                        + "，价格 " + recommended.price().stripTrailingZeros().toPlainString()
                         + " 元，余票 " + recommended.seatsLeft(),
                 "候选航班数量：" + candidates.size(),
                 "请只基于候选航班和对话历史，用100字以内给出连贯的中文建议。"

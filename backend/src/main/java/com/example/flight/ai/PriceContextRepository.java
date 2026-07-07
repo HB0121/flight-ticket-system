@@ -36,7 +36,7 @@ public class PriceContextRepository {
                     (rs, rowNum) -> rs.getString("context_text"),
                     fromCity, fromCity, toCity, toCity);
         } catch (Exception e) {
-            log.warn("价格上下文检索失败，使用空结果: {}", e.getMessage());
+            log.warn("价格上下文检索失败，使用空结果 {}", e.getMessage());
             return List.of();
         }
     }

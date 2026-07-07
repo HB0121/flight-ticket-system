@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>数据库物理结构汇总</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#fff;font-family:"SimSun","Microsoft YaHei",sans-serif;color:#111}
+    .page{width:1240px;min-height:1754px;padding:44px 58px;background:
+      linear-gradient(90deg,rgba(184,31,53,.07) 1px,transparent 1px),
+      linear-gradient(180deg,rgba(184,31,53,.045) 1px,transparent 1px),#fff;background-size:34px 34px}
+    h1{text-align:center;margin:0 0 18px;font-size:30px}
+    .note{font-size:22px;line-height:1.55;text-indent:2em;margin:0 0 18px}
+    table{width:100%;border-collapse:collapse;background:#fff;margin-bottom:22px;border:2px solid #1b1b1b;box-shadow:0 0 0 3px rgba(184,31,53,.08)}
+    caption{caption-side:top;font-size:24px;font-weight:700;padding:8px 0 10px}
+    th,td{border:1.3px solid #1b1b1b;padding:8px 10px;font-size:17px;line-height:1.35;vertical-align:top;word-break:break-all}
+    th{background:#e6e6e6;text-align:left}
+    .table-name{width:170px;font-weight:700}
+    .desc{width:230px}
+    .fields{width:auto}
+    .key{width:180px}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <h1>数据库物理结构设计</h1>
+    <p class="note">数据库名称：flight_demo。说明：PK 表示主键，FK 表示外键，UK 表示唯一约束，Not null 表示字段不能为空。系统数据库各表字段含义如下。</p>
+    <table>
+      <caption>表 4.1 系统数据库物理结构汇总表</caption>
+      <thead><tr><th class="table-name">表名</th><th class="desc">表说明</th><th class="fields">主要字段及含义</th><th class="key">主键/约束</th></tr></thead>
+      <tbody>
+        <tr><td>flight</td><td>航班信息表，保存航班基础数据。</td><td>id：航班记录编号；flight_no：航班号；airline_name：航空公司；from_city/to_city：出发/到达城市；from_airport/to_airport：出发/到达机场；depart_time/arrive_time：起飞/到达时间；price：价格；seats_left：余票；data_source：数据来源；collected_at：采集时间。</td><td>PK：id；UK：flight_no + depart_time + data_source；索引：航线日期、价格。</td></tr>
+        <tr><td>app_user</td><td>用户表，保存普通用户账号信息。</td><td>id：用户编号；username：用户名；password：密码；nickname：昵称；created_at：创建时间。</td><td>PK：id；UK：username。</td></tr>
+        <tr><td>user_token</td><td>登录令牌表，保存用户登录状态。</td><td>id：令牌编号；user_id：用户编号；token：登录令牌；created_at：创建时间；expires_at：过期时间。</td><td>PK：id；UK：token；索引：token、user_id。</td></tr>
+        <tr><td>favorite</td><td>收藏表，保存用户收藏航班记录。</td><td>id：收藏编号；user_id：用户编号；flight_id：航班编号；created_at：收藏时间。</td><td>PK：id；FK：user_id、flight_id；UK：user_id + flight_id。</td></tr>
+        <tr><td>crawl_job</td><td>采集任务表，记录爬虫任务执行情况。</td><td>id：任务编号；status：任务状态；started_at：开始时间；finished_at：结束时间；success_count：成功数量；failed_count：失败数量；error_message：错误信息；source：数据源；request_params：请求参数。</td><td>PK：id；索引：started_at。</td></tr>
+        <tr><td>flight_price_snapshot</td><td>价格快照表，保存航班价格历史。</td><td>id：快照编号；flight_id：航班编号；flight_no：航班号；from_city/to_city：航线城市；depart_time：起飞时间；price：快照价格；seats_left：快照余票；data_source：数据来源；observed_at：观测时间。</td><td>PK：id；索引：flight_id + observed_at、航线日期。</td></tr>
+        <tr><td>flight_validation_failure</td><td>校验失败记录表，保存采集时被拒绝的数据。</td><td>id：失败记录编号；crawl_job_id：采集任务编号；flight_no：航班号；from_city/to_city：航线城市；depart_time：起飞时间；price：价格；seats_left：余票；failure_reason：失败原因；rejected_at：拒绝时间。</td><td>PK：id；索引：crawl_job_id + rejected_at。</td></tr>
+        <tr><td>price_context</td><td>价格上下文表，保存价格趋势文本。</td><td>id：上下文编号；from_city/to_city：航线城市；depart_date：出发日期；context_text：上下文文本；context_type：上下文类型；created_at：创建时间。</td><td>PK：id；索引：航线；全文索引：context_text。</td></tr>
+        <tr><td>conversation_session</td><td>会话表，保留 AI 会话基础信息。</td><td>id：会话编号；title：会话标题；created_at：创建时间；updated_at：更新时间。</td><td>PK：id。</td></tr>
+        <tr><td>conversation_message</td><td>会话消息表，保留会话内容。</td><td>id：消息编号；session_id：会话编号；role：消息角色；content：消息内容；created_at：创建时间。</td><td>PK：id；索引：session_id + created_at。</td></tr>
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>

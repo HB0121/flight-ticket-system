@@ -1,5 +1,6 @@
 <template>
   <section class="admin-crawl-page">
+    <!-- 管理员创建爬虫任务的入口页面。 -->
     <header class="admin-crawl-page__header">
       <div>
         <p class="admin-crawl-page__eyebrow">{{ t('admin.crawlJobs.eyebrow') }}</p>
@@ -10,6 +11,7 @@
       </div>
     </header>
 
+    <!-- 爬虫任务表单：只创建任务，真实抓取由后端调度。 -->
     <form class="admin-crawl-page__form" @submit.prevent="submitJob">
       <label>
         <span>{{ t('admin.crawlJobs.form.source') }}</span>
@@ -51,6 +53,7 @@
     <p v-if="errorMessage" class="admin-crawl-page__error">{{ errorMessage }}</p>
     <p v-else-if="!canSubmit && unavailableReason" class="admin-crawl-page__error">{{ unavailableReason }}</p>
 
+    <!-- 最近任务列表用于查看爬虫运行结果和失败数量。 -->
     <section class="admin-crawl-page__panel">
       <div class="admin-crawl-page__panel-header">
         <h3>{{ t('admin.crawlJobs.recentJobs.title') }}</h3>
@@ -115,6 +118,7 @@ onMounted(() => {
   loadJobs()
 })
 
+// 读取后端暴露的数据源配置状态，未配置的数据源不能提交爬虫任务。
 async function loadStatuses() {
   loadingStatuses.value = true
 
@@ -132,6 +136,7 @@ async function loadStatuses() {
   }
 }
 
+// 最近任务列表用于观察爬虫是否成功、失败数量和启动时间。
 async function loadJobs() {
   loadingJobs.value = true
   errorMessage.value = ''
@@ -147,6 +152,7 @@ async function loadJobs() {
   }
 }
 
+// 提交任务只创建后端 crawl_job，实际爬虫执行由后端调度。
 async function submitJob() {
   if (!canSubmit.value) {
     errorMessage.value = unavailableReason.value || t('admin.crawlJobs.errors.noConfiguredSource')
@@ -173,6 +179,7 @@ async function submitJob() {
   }
 }
 
+// 空字符串统一转为 null，避免后端把空字符串当作有效筛选条件。
 function normalizeOptional(value) {
   return typeof value === 'string' && value.trim() ? value.trim() : null
 }
@@ -183,6 +190,7 @@ const unavailableReason = computed(() => (
   configuredStatuses.value.find(status => status.code === form.source && !status.configured)?.detail ?? ''
 ))
 
+// 数字输入兜底，防止非法值传给后端。
 function normalizePositiveInt(value, fallback) {
   return Number.isInteger(value) && value > 0 ? value : fallback
 }

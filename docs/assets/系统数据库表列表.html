@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>系统数据库各表列表</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #fff;
+      color: #111;
+      font-family: "SimSun", "Microsoft YaHei", sans-serif;
+    }
+    .page {
+      width: 1240px;
+      min-height: 980px;
+      padding: 48px 64px 56px;
+      background:
+        linear-gradient(90deg, rgba(184,31,53,.07) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(184,31,53,.045) 1px, transparent 1px),
+        #fff;
+      background-size: 34px 34px;
+      position: relative;
+    }
+    .page::before {
+      content: "";
+      position: absolute;
+      top: 34px;
+      right: 88px;
+      width: 110px;
+      height: 36px;
+      border: 2px solid rgba(184,31,53,.42);
+      border-radius: 50%;
+      background: rgba(255,248,191,.55);
+      transform: rotate(-7deg);
+    }
+    h1 {
+      margin: 0 0 18px;
+      text-align: center;
+      font-size: 30px;
+      font-weight: 700;
+    }
+    .intro {
+      margin: 0 0 20px;
+      font-size: 23px;
+      line-height: 1.6;
+      text-indent: 2em;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(255,255,255,.98);
+      border: 2px solid #1b1b1b;
+      box-shadow: 0 0 0 3px rgba(184,31,53,.08);
+    }
+    caption {
+      caption-side: top;
+      padding: 8px 0 12px;
+      font-size: 25px;
+      font-weight: 700;
+    }
+    th, td {
+      border: 1.4px solid #1b1b1b;
+      padding: 11px 12px;
+      font-size: 20px;
+      line-height: 1.42;
+      vertical-align: middle;
+      word-break: break-all;
+    }
+    th {
+      background: #e6e6e6;
+      text-align: left;
+      font-weight: 700;
+    }
+    .idx { width: 70px; text-align: center; }
+    .name { width: 260px; font-family: Consolas, "Courier New", monospace; }
+    .cn { width: 180px; }
+    .module { width: 170px; }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <h1>系统数据库各表列表</h1>
+    <p class="intro">本系统数据库名称为 flight_demo，数据库表主要围绕航班信息、用户认证、收藏管理、数据采集、价格历史和会话保留等业务进行设计。系统数据库各表的列表如下。</p>
+    <table>
+      <caption>表 4.1 系统数据库各表列表</caption>
+      <thead>
+        <tr>
+          <th class="idx">序号</th>
+          <th class="name">表名</th>
+          <th class="cn">中文名称</th>
+          <th>主要用途</th>
+          <th class="module">所属模块</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="idx">1</td><td class="name">flight</td><td class="cn">航班信息表</td><td>保存航班号、航空公司、起降城市、起降时间、价格、余票和数据来源等航班基础数据。</td><td class="module">航班信息管理</td></tr>
+        <tr><td class="idx">2</td><td class="name">app_user</td><td class="cn">用户表</td><td>保存普通用户账号、密码、昵称和创建时间等用户基础信息。</td><td class="module">普通用户管理</td></tr>
+        <tr><td class="idx">3</td><td class="name">user_token</td><td class="cn">登录令牌表</td><td>保存用户登录后的 token、创建时间和过期时间，用于接口身份校验。</td><td class="module">用户认证</td></tr>
+        <tr><td class="idx">4</td><td class="name">favorite</td><td class="cn">收藏表</td><td>保存用户与航班之间的收藏关系，避免同一用户重复收藏同一航班。</td><td class="module">收藏管理</td></tr>
+        <tr><td class="idx">5</td><td class="name">crawl_job</td><td class="cn">采集任务表</td><td>记录爬虫采集任务的状态、开始时间、结束时间、成功数量、失败数量和错误信息。</td><td class="module">采集任务管理</td></tr>
+        <tr><td class="idx">6</td><td class="name">flight_price_snapshot</td><td class="cn">价格快照表</td><td>保存航班在不同时间点的价格和余票数据，用于展示价格历史变化。</td><td class="module">价格历史管理</td></tr>
+        <tr><td class="idx">7</td><td class="name">flight_validation_failure</td><td class="cn">校验失败记录表</td><td>保存采集过程中被校验规则拒绝的航班数据及失败原因。</td><td class="module">数据采集管理</td></tr>
+        <tr><td class="idx">8</td><td class="name">price_context</td><td class="cn">价格上下文表</td><td>保存航线价格趋势相关文本，为价格分析或保留 AI 模块提供上下文数据。</td><td class="module">价格分析保留</td></tr>
+        <tr><td class="idx">9</td><td class="name">conversation_session</td><td class="cn">会话表</td><td>保存会话标题、创建时间和更新时间，属于系统保留能力。</td><td class="module">AI 会话保留</td></tr>
+        <tr><td class="idx">10</td><td class="name">conversation_message</td><td class="cn">会话消息表</td><td>保存会话消息角色、内容和创建时间，属于系统保留能力。</td><td class="module">AI 会话保留</td></tr>
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>

@@ -1,5 +1,6 @@
 <template>
   <div class="flight-table">
+    <!-- 航班表只负责展示和抛出事件，查询、分页、收藏状态由父页面维护。 -->
     <el-table
       :data="flights"
       :empty-text="loading ? t('common.status.loadingFlights') : t('flights.table.empty')"
@@ -62,6 +63,7 @@
 
       <el-table-column :label="t('common.actions.favorite')" width="54" align="center">
         <template #default="{ row }">
+          <!-- 收藏按钮的结果会一路回传到父页面，更新 favoriteStatusMap。 -->
           <FavoriteButton
             :flight-id="row.id"
             :is-favorited="favoriteState(row.id).isFavorited"
@@ -103,14 +105,17 @@ const props = defineProps({
 
 const emit = defineEmits(['select', 'favorite-toggled'])
 
+// 收藏状态由父页面统一维护，表格只负责按 flightId 读取当前行状态。
 function favoriteState(flightId) {
   return props.favoriteStatusMap.get(flightId) || { isFavorited: false, favoriteId: null }
 }
 
+// 子组件 FavoriteButton 只知道收藏结果，表格补上 flightId 后继续抛给父页面。
 function onFavoriteToggled(flightId, isFavorited, favoriteId) {
   emit('favorite-toggled', { flightId, isFavorited, favoriteId })
 }
 
+// i18n 文案缺失时提供兜底，避免表头直接显示 key。
 const statusColumnLabel = computed(() => {
   if (te('flights.table.columns.status')) {
     return t('flights.table.columns.status')
@@ -119,6 +124,7 @@ const statusColumnLabel = computed(() => {
   return locale.value === 'zh-CN' ? '状态' : 'Status'
 })
 
+// 后端状态为空或未翻译时，统一显示可读的未知状态。
 const unknownStatusLabel = computed(() => {
   if (te('flights.table.unknownStatus')) {
     return t('flights.table.unknownStatus')
@@ -127,10 +133,12 @@ const unknownStatusLabel = computed(() => {
   return locale.value === 'zh-CN' ? '未知' : 'Unknown'
 })
 
+// Element Plus 表格通过行 class 标出当前选中的航班。
 function rowClassName({ row }) {
   return row.id === props.selectedFlightId ? 'flight-table__row--selected' : ''
 }
 
+// 后端返回完整日期时间，表格中只展示 HH:mm，减少列宽占用。
 function formatTimeOnly(value) {
   if (!value) return '-'
   const text = String(value).replace('T', ' ')

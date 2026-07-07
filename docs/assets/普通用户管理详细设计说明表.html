@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>普通用户管理详细设计说明表</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #ffffff;
+      color: #202020;
+      font-family: "SimSun", "Songti SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .sheet {
+      display: none;
+      width: 1280px;
+      min-height: 760px;
+      padding: 44px 64px 54px;
+      background:
+        linear-gradient(90deg, rgba(184, 31, 53, 0.07) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(184, 31, 53, 0.045) 1px, transparent 1px),
+        #fff;
+      background-size: 34px 34px;
+      position: relative;
+    }
+
+    #register:target,
+    #login:target,
+    #query:target {
+      display: block;
+    }
+
+    body:not(:has(.sheet:target)) #register {
+      display: block;
+    }
+
+    .sheet::before,
+    .sheet::after {
+      content: "";
+      position: absolute;
+      border: 2px solid rgba(184, 31, 53, 0.45);
+      background: rgba(255, 248, 191, 0.55);
+      border-radius: 50%;
+      opacity: 0.25;
+    }
+
+    .sheet::before {
+      top: 28px;
+      right: 76px;
+      width: 112px;
+      height: 36px;
+      transform: rotate(-7deg);
+    }
+
+    .sheet::after {
+      left: 68px;
+      bottom: 34px;
+      width: 84px;
+      height: 28px;
+      transform: rotate(5deg);
+    }
+
+    .intro {
+      margin: 0 0 18px;
+      font-size: 26px;
+      line-height: 1.6;
+      text-indent: 2em;
+    }
+
+    h1 {
+      margin: 0 0 18px;
+      text-align: center;
+      font-size: 30px;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      background: rgba(255, 255, 255, 0.97);
+      border: 2px solid #1d1d1d;
+      box-shadow: 0 0 0 3px rgba(184, 31, 53, 0.08);
+    }
+
+    td {
+      border: 1.5px solid #1d1d1d;
+      padding: 14px 16px;
+      font-size: 23px;
+      line-height: 1.62;
+      vertical-align: middle;
+      word-break: break-all;
+    }
+
+    .label {
+      width: 210px;
+      background: #e5e5e5;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    .value {
+      background: #ffffff;
+    }
+
+    .half-label {
+      width: 200px;
+      background: #e5e5e5;
+      font-weight: 700;
+    }
+
+    .half-value {
+      width: 370px;
+    }
+
+    .note {
+      color: #b81f35;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <section id="register" class="sheet">
+    <p class="intro">用户注册详细说明如表 3.1 所示：</p>
+    <h1>表 3.1 用户注册详细设计说明</h1>
+    <table>
+      <tbody>
+        <tr>
+          <td class="label">功能名称</td>
+          <td class="value" colspan="3">用户注册</td>
+        </tr>
+        <tr>
+          <td class="label">涉及数据表</td>
+          <td class="value" colspan="3">app_user 用户表</td>
+        </tr>
+        <tr>
+          <td class="label">功能表述</td>
+          <td class="value" colspan="3">普通用户填写用户名和密码，系统完成账号创建。注册成功后，用户可以使用该账号登录系统并使用航班查询、收藏和搜索历史等功能。</td>
+        </tr>
+        <tr>
+          <td class="label">输入项</td>
+          <td class="value" colspan="3">用户名、密码</td>
+        </tr>
+        <tr>
+          <td class="label">业务处理描述</td>
+          <td class="value" colspan="3">用户提交注册信息后，系统首先校验用户名和密码是否为空，再校验用户名是否已经存在。若信息合法，则将用户信息写入 app_user 表；若用户名重复或信息不完整，则返回错误提示，要求用户重新填写。</td>
+        </tr>
+        <tr>
+          <td class="half-label">输出项（正确）</td>
+          <td class="half-value">注册成功，返回用户基础信息</td>
+          <td class="half-label">输出项（错误）</td>
+          <td class="half-value">提示用户名已存在或填写内容不完整</td>
+        </tr>
+        <tr>
+          <td class="label">界面要求</td>
+          <td class="value" colspan="3">Web 页面，需提供用户名和密码输入框、注册按钮以及错误提示信息。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="login" class="sheet">
+    <p class="intro">用户登录详细说明如表 3.2 所示：</p>
+    <h1>表 3.2 用户登录详细设计说明</h1>
+    <table>
+      <tbody>
+        <tr>
+          <td class="label">功能名称</td>
+          <td class="value" colspan="3">用户登录</td>
+        </tr>
+        <tr>
+          <td class="label">涉及数据表</td>
+          <td class="value" colspan="3">app_user 用户表、user_token 登录令牌表</td>
+        </tr>
+        <tr>
+          <td class="label">功能表述</td>
+          <td class="value" colspan="3">普通用户输入用户名和密码进行登录。登录成功后，系统生成 token，并通过该 token 识别用户身份，使用户可以访问个人收藏、搜索历史等功能。</td>
+        </tr>
+        <tr>
+          <td class="label">输入项</td>
+          <td class="value" colspan="3">用户名、密码</td>
+        </tr>
+        <tr>
+          <td class="label">业务处理描述</td>
+          <td class="value" colspan="3">系统根据用户名查询 app_user 表，并校验密码是否正确。若校验成功，则生成登录 token，写入 user_token 表并返回给前端；若校验失败，则返回登录失败提示，不生成 token。</td>
+        </tr>
+        <tr>
+          <td class="half-label">输出项（正确）</td>
+          <td class="half-value">登录成功，返回 token 和用户信息</td>
+          <td class="half-label">输出项（错误）</td>
+          <td class="half-value">提示用户名或密码错误</td>
+        </tr>
+        <tr>
+          <td class="label">界面要求</td>
+          <td class="value" colspan="3">Web 页面，需提供用户名、密码输入框和登录按钮；登录成功后跳转至航班查询页面。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="query" class="sheet">
+    <p class="intro">航班查询与收藏详细说明如表 3.3 所示：</p>
+    <h1>表 3.3 航班查询与收藏详细设计说明</h1>
+    <table>
+      <tbody>
+        <tr>
+          <td class="label">功能名称</td>
+          <td class="value" colspan="3">航班查询与收藏</td>
+        </tr>
+        <tr>
+          <td class="label">涉及数据表</td>
+          <td class="value" colspan="3">flight 航班表、flight_price_snapshot 价格快照表、favorite 收藏表</td>
+        </tr>
+        <tr>
+          <td class="label">功能表述</td>
+          <td class="value" colspan="3">用户根据出发地、目的地和日期查询航班信息，查看航班详情及价格历史，并可将感兴趣的航班加入个人收藏列表。</td>
+        </tr>
+        <tr>
+          <td class="label">输入项</td>
+          <td class="value" colspan="3">出发地、目的地、出发日期、航班编号、收藏操作指令</td>
+        </tr>
+        <tr>
+          <td class="label">业务处理描述</td>
+          <td class="value" colspan="3">系统接收查询条件后，从 flight 表中筛选航班数据并返回列表。用户查看详情时，系统读取航班基础信息和价格快照数据。用户点击收藏时，系统先判断 favorite 表中是否已有记录，未收藏则写入收藏记录，已收藏则返回提示。</td>
+        </tr>
+        <tr>
+          <td class="half-label">输出项（正确）</td>
+          <td class="half-value">返回航班列表、详情、价格历史或收藏成功信息</td>
+          <td class="half-label">输出项（错误）</td>
+          <td class="half-value">提示暂无数据、航班不存在或已收藏</td>
+        </tr>
+        <tr>
+          <td class="label">界面要求</td>
+          <td class="value" colspan="3">Web 页面，需提供查询条件输入区、航班列表、详情展示区、价格历史图表和收藏操作按钮。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</body>
+</html>

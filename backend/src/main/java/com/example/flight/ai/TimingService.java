@@ -73,30 +73,30 @@ public class TimingService {
 
     private Trend analyzeTrend(List<FlightPriceSnapshot> history) {
         if (history.size() < 2) {
-            return new Trend("MEDIUM", "建议继续采集 2-3 次后再判断", "样本不足");
+            return new Trend("MEDIUM", "建议继续采集 2-3 次后再判断。", "样本不足");
         }
         int first = history.get(0).price();
         int last = history.get(history.size() - 1).price();
         if (last < first) {
-            return new Trend("LOW", "建议 3 天内重点关注，低于当前价可购买", "下降");
+            return new Trend("LOW", "建议 3 天内重点关注，低于当前价可购买。", "下降");
         }
         if (last > first) {
             return new Trend("HIGH", "价格已有上涨迹象，刚需出行建议尽快购买", "上涨");
         }
-        return new Trend("MEDIUM", "价格暂时平稳，可继续观察 1-2 天", "平稳");
+        return new Trend("MEDIUM", "价格暂时平稳，可继续观察 1-2 天。", "平稳");
     }
 
     private String buildLocalSummary(Flight flight, Trend trend, List<FlightPriceSnapshot> history,
                                       List<String> ragContexts, String holidayInfo) {
         StringBuilder sb = new StringBuilder();
         sb.append("本地分析：").append(flight.flightNo())
-                .append(" ").append(flight.fromCity()).append("→").append(flight.toCity())
+                .append(" ").append(flight.fromCity()).append("到").append(flight.toCity())
                 .append("，当前价 ").append(flight.price().stripTrailingZeros().toPlainString()).append(" 元。");
 
         if (history.size() < 2) {
             sb.append("价格样本不足，建议再采集2-3次。");
         } else {
-            sb.append("价格正在").append(trend.direction()).append("，风险等级").append(trend.riskLevel()).append("。");
+            sb.append("价格正在").append(trend.direction()).append("，风险等级 ").append(trend.riskLevel()).append("。");
         }
 
         if (!holidayInfo.isBlank()) {

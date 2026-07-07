@@ -1,7 +1,7 @@
 import { http } from './http.js'
 export { login, register, logout, getMe } from './authApi.js'
 
-// Compatibility barrel only. New domain APIs should live in dedicated modules.
+// 兼容旧引用的统一出口。新增接口应放到对应业务 API 模块中。
 const CRAWLER_TIMEOUT_MS = 130000
 
 export async function fetchFlights(params = {}) {
@@ -39,7 +39,7 @@ export async function requestTiming(message) {
   return response.data
 }
 
-// Conversation APIs
+// AI 会话接口
 export async function createConversation(title) {
   const response = await http.post('/api/ai/conversations', { title })
   return response.data

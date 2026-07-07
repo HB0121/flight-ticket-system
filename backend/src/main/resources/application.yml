@@ -1,4 +1,4 @@
-server:
+﻿server:
   port: 8080
 
 spring:
@@ -20,13 +20,13 @@ spring:
 aerodatabox:
   host: ${AERODATABOX_HOST:aerodatabox.p.rapidapi.com}
   base-url: ${AERODATABOX_BASE_URL:https://aerodatabox.p.rapidapi.com}
-  key: ${AERODATABOX_KEY:your-aerodatabox-key}
+  key: ${AERODATABOX_KEY:63e9fa3695msh30ec55407e89c9ep171059jsn3b2d60a7082b}
 
 app:
   crawler:
     command: docker compose -f ../infra/docker-compose.yml run --rm crawler
     timeout-seconds: 120
   deepseek:
-    api-key: ${DEEPSEEK_API_KEY:your-deepseek-api-key}
+    api-key: ${DEEPSEEK_API_KEY:}
     base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com}
     model: ${DEEPSEEK_MODEL:deepseek-v4-flash}

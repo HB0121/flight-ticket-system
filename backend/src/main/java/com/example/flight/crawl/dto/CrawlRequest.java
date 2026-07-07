@@ -53,9 +53,9 @@ public record CrawlRequest(
         args.add("crawl");
         args.add(spiderName);
         args.add("-a");
-        args.add("from_city=" + valueOrDefault(fromCity, "涓婃捣"));
+        args.add("from_city=" + valueOrDefault(fromCity, "Shanghai"));
         args.add("-a");
-        args.add("to_city=" + valueOrDefault(toCity, "鍖椾含"));
+        args.add("to_city=" + valueOrDefault(toCity, "Beijing"));
         args.add("-a");
         args.add("date=" + effectiveDate());
         args.add("-a");
@@ -86,8 +86,8 @@ public record CrawlRequest(
                     + ", date=" + effectiveDate();
         }
         return "source=" + normalizedSource()
-                + ", fromCity=" + valueOrDefault(fromCity, "涓婃捣")
-                + ", toCity=" + valueOrDefault(toCity, "鍖椾含")
+                + ", fromCity=" + valueOrDefault(fromCity, "Shanghai")
+                + ", toCity=" + valueOrDefault(toCity, "Beijing")
                 + ", date=" + effectiveDate()
                 + ", adults=" + (adults == null || adults < 1 ? 1 : adults)
                 + ", maxResults=" + (maxResults == null || maxResults < 1 ? 5 : maxResults);

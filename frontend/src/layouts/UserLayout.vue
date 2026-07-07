@@ -1,5 +1,6 @@
 <template>
   <main class="user-shell">
+    <!-- 用户端公共头部：品牌、导航、语言切换和用户菜单都在这里复用。 -->
     <header class="user-shell__header">
       <div class="user-shell__brand">
         <div class="user-shell__logo" aria-hidden="true">
@@ -29,6 +30,7 @@
     </header>
 
     <section class="user-shell__content">
+      <!-- KeepAlive 保留用户页状态，例如航班查询结果、收藏页返回后的表单状态。 -->
       <RouterView v-slot="{ Component }">
         <KeepAlive>
           <component :is="Component" />
@@ -46,6 +48,7 @@ import UserMenu from '../shared/components/UserMenu.vue'
 
 const { locale, t } = useI18n()
 
+// 顶部徽标文字来自 i18n，切换语言后会自动重新计算。
 const badgeText = computed(() => (
   {
     dataSource: t('flights.console.badges.dataSource'),
@@ -53,6 +56,7 @@ const badgeText = computed(() => (
   }
 ))
 
+// 切换语言时同时写入 localStorage，刷新页面后仍使用上次选择。
 function switchLocale(nextLocale) {
   locale.value = nextLocale
   setStoredLocale(nextLocale)

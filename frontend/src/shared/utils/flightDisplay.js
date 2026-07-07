@@ -4,6 +4,7 @@ const SUCCESS_STATUSES = new Set(['scheduled', 'success'])
 const FAILED_STATUSES = new Set(['cancelled', 'failed'])
 const DELAYED_STATUSES = new Set(['delayed'])
 
+// 部分外部数据源只返回英文航司名，这里补充常见航司的中英文展示名。
 const AIRLINE_NAME_MAP = {
   'china southern': {
     zh: '中国南方航空',
@@ -63,6 +64,7 @@ const AIRLINE_NAME_MAP = {
   }
 }
 
+// 将后端或爬虫返回的状态归类成样式色调。
 export function normalizeStatusTone(status) {
   const normalizedStatus = String(status ?? '').trim().toLowerCase()
 
@@ -81,6 +83,7 @@ export function normalizeStatusTone(status) {
   return 'neutral'
 }
 
+// 根据当前语言返回航司展示名，未收录时保留原始名称。
 export function buildAirlineDisplayLabel(airlineName, locale = 'zh-CN') {
   const rawName = String(airlineName ?? '').trim()
 
@@ -96,6 +99,7 @@ export function buildAirlineDisplayLabel(airlineName, locale = 'zh-CN') {
   return locale === 'zh-CN' ? mapped.zh : mapped.en
 }
 
+// 航班数据进入表格前统一补充展示字段，避免模板里重复做格式化判断。
 export function normalizeFlightForDisplay(flight, locale = 'zh-CN') {
   const fromCode = String(flight?.fromAirport ?? '').trim().toUpperCase()
   const toCode = String(flight?.toAirport ?? '').trim().toUpperCase()
@@ -119,6 +123,7 @@ export function normalizeFlightForDisplay(flight, locale = 'zh-CN') {
   }
 }
 
+// 高级筛选使用出发小时段判断航班是否命中。
 export function matchesTimeSlot(flight, slot) {
   if (!slot) {
     return true

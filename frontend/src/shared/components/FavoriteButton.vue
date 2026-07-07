@@ -1,4 +1,5 @@
 <template>
+  <!-- 星标按钮会阻止冒泡，避免点击收藏时同时触发表格行选中。 -->
   <el-button
     :loading="loading"
     :aria-label="isFavorited ? t('common.actions.unfavorite') : t('common.actions.favorite')"
@@ -31,6 +32,7 @@ const emit = defineEmits(['toggled'])
 
 const loading = ref(false)
 
+// 点击星标时根据当前状态决定新增或取消收藏，并把结果回传给父组件。
 async function toggle() {
   loading.value = true
   try {

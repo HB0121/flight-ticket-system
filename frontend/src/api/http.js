@@ -17,11 +17,13 @@ function dispatchAuthLogout() {
   }
 }
 
+// 全项目共用的 axios 实例，所有业务 API 都通过它访问后端。
 export const http = axios.create({
   baseURL: API_BASE_URL,
   timeout: REQUEST_TIMEOUT_MS
 })
 
+// 请求发出前自动把本地 token 放到 Authorization 头里。
 http.interceptors.request.use(config => {
   const token = getStorage()?.getItem('token')
 
@@ -44,6 +46,7 @@ http.interceptors.request.use(config => {
 http.interceptors.response.use(
   response => response,
   error => {
+    // 后端返回 401 说明登录态已失效，前端需要清空本地会话并通知界面更新。
     if (error.response?.status === 401) {
       clearStoredSession()
       markSessionAnonymous()

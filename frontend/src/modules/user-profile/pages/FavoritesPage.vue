@@ -1,5 +1,6 @@
 <template>
   <section class="profile-page">
+    <!-- 收藏页头部提供手动刷新入口，便于从其他页面修改收藏后重新同步。 -->
     <header class="profile-page__header">
       <div>
         <p class="profile-page__eyebrow">{{ t('favorites.eyebrow') }}</p>
@@ -16,6 +17,7 @@
     <div v-if="loading && !favorites.length" class="profile-page__empty">{{ t('common.status.loadingFavorites') }}</div>
     <div v-else-if="!favorites.length" class="profile-page__empty">{{ t('favorites.empty') }}</div>
 
+    <!-- 收藏列表由当前登录用户决定，删除按钮会调用个人中心接口。 -->
     <div v-else class="favorites-list">
       <article v-for="favorite in displayFavorites" :key="favorite.id" class="favorites-card">
         <div class="favorites-card__summary">
@@ -58,8 +60,8 @@ import { fetchFavorites, removeFavorite } from '../../../api/profileApi.js'
 
 defineOptions({ name: 'FavoritesPage' })
 import { formatDateTime } from '../../../lib/format.js'
-import { formatPrice } from '../../../shared/utils/price.js'
 import { normalizeFlightForDisplay } from '../../../shared/utils/flightDisplay.js'
+import { formatPrice } from '../../../shared/utils/price.js'
 
 const { t, locale } = useI18n()
 
@@ -79,6 +81,7 @@ onActivated(() => {
   loadFavorites()
 })
 
+// 页面挂载或从其他 KeepAlive 页面返回时，重新读取当前用户收藏。
 async function loadFavorites() {
   loading.value = true
   errorMessage.value = ''
@@ -94,6 +97,7 @@ async function loadFavorites() {
   }
 }
 
+// 删除收藏后重新拉取列表，确保页面和后端状态一致。
 async function remove(favoriteId) {
   removingId.value = favoriteId
   errorMessage.value = ''

@@ -1,5 +1,6 @@
 import { http } from './http.js'
 
+// 个人中心接口：收藏和搜索历史都依赖当前登录用户的 token。
 export async function fetchFavorites() {
   const response = await http.get('/api/me/favorites')
   return response.data

@@ -1,6 +1,7 @@
 <template>
   <section class="auth-page">
     <div class="auth-card auth-module-card">
+      <!-- 登录页也提供语言切换，方便未登录用户直接选择界面语言。 -->
       <div class="auth-locale-switch">
         <button type="button" @click="switchLocale('zh-CN')">{{ t('common.locales.zhCN') }}</button>
         <button type="button" @click="switchLocale('en-US')">{{ t('common.locales.enUS') }}</button>
@@ -10,6 +11,7 @@
       <h1>{{ t('auth.login.title') }}</h1>
       <p class="auth-subtitle">{{ t('auth.login.subtitle') }}</p>
 
+      <!-- 登录/注册模式切换，共用下方同一个表单。 -->
       <div class="auth-switcher">
         <button
           type="button"
@@ -27,6 +29,7 @@
         </button>
       </div>
 
+      <!-- 根据 mode 决定调用登录或注册接口。 -->
       <el-form label-position="top" @submit.prevent="submit">
         <el-form-item :label="t('auth.fields.username')" class="auth-input">
           <el-input
@@ -101,6 +104,7 @@ const form = reactive({
   nickname: ''
 })
 
+// 登录和注册共用同一个表单，切换模式时清空反馈信息。
 function switchMode(nextMode) {
   mode.value = nextMode
   errorMessage.value = ''
@@ -112,6 +116,7 @@ function switchLocale(nextLocale) {
   setStoredLocale(nextLocale)
 }
 
+// 后端登录/注册成功后必须返回 token 和用户基础信息。
 function isValidSessionPayload(payload) {
   return Boolean(
     payload
@@ -122,6 +127,7 @@ function isValidSessionPayload(payload) {
   )
 }
 
+// 登录态保存在 localStorage，后续 http 拦截器会自动读取 token。
 function persistSession(payload) {
   const safeNickname = payload.nickname ?? payload.username ?? ''
 
@@ -141,12 +147,14 @@ function getErrorMessage(error, fallback) {
     ?? fallback
 }
 
+// 登录后优先回到路由守卫记录的 redirect，否则进入航班查询页。
 function getPostAuthTarget() {
   return typeof route.query.redirect === 'string' && route.query.redirect
     ? route.query.redirect
     : { name: 'user-flights' }
 }
 
+// 提交时根据当前模式调用登录或注册接口，成功后写入会话并跳转。
 async function submit() {
   if (!form.username || !form.password) {
     errorMessage.value = t('auth.validation.missingCredentials')

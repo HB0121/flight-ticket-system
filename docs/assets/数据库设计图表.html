@@ -1,0 +1,361 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>鏁版嵁搴撹璁″浘琛?/title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #fff;
+      color: #202020;
+      font-family: "SimSun", "Songti SC", "Microsoft YaHei", sans-serif;
+    }
+    .sheet {
+      display: none;
+      width: 1600px;
+      min-height: 1050px;
+      padding: 38px 48px 42px;
+      position: relative;
+      background:
+        linear-gradient(90deg, rgba(184,31,53,.07) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(184,31,53,.045) 1px, transparent 1px),
+        #fff;
+      background-size: 34px 34px;
+      overflow: hidden;
+    }
+    #cdm:target, #pdm:target, #phys-core:target, #phys-crawl:target, #phys-chat:target { display: block; }
+    body:not(:has(.sheet:target)) #cdm { display: block; }
+    h1 {
+      margin: 0 0 22px;
+      text-align: center;
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+    .caption {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 24px;
+      text-align: center;
+      font-size: 28px;
+      font-weight: 600;
+    }
+    .plane {
+      position: absolute;
+      right: 70px;
+      top: 38px;
+      color: #b81f35;
+      font-size: 48px;
+      transform: rotate(-10deg);
+      opacity: .8;
+    }
+    .diagram {
+      position: relative;
+      height: 890px;
+    }
+    .card {
+      position: absolute;
+      width: 245px;
+      background: rgba(255, 252, 222, .98);
+      border: 2px solid #b81f35;
+      border-radius: 8px;
+      box-shadow: 0 8px 18px rgba(184, 31, 53, .08);
+      overflow: hidden;
+    }
+    .card h2 {
+      margin: 0;
+      padding: 10px 12px;
+      background: #fff7bf;
+      border-bottom: 2px solid #b81f35;
+      font-size: 23px;
+      text-align: center;
+      font-weight: 700;
+    }
+    .card ul {
+      margin: 0;
+      padding: 10px 16px 12px 28px;
+      font-size: 18px;
+      line-height: 1.48;
+    }
+    .pdm .card { width: 275px; }
+    .pdm .card ul { font-size: 16px; line-height: 1.45; padding-left: 22px; list-style: none; }
+    .pdm .card li::before { content: ""; }
+    .pdm.sheet { min-height: 1200px; }
+    .pdm .diagram { height: 1035px; }
+    svg.links {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .link {
+      stroke: #0b4bb3;
+      stroke-width: 2.4;
+      fill: none;
+      marker-end: url(#arrow);
+    }
+    .rel {
+      font-size: 18px;
+      fill: #b81f35;
+      font-weight: 700;
+    }
+    .crow {
+      font-size: 17px;
+      fill: #0b4bb3;
+      font-weight: 700;
+    }
+    .table-sheet {
+      width: 1240px;
+      min-height: 1754px;
+      padding: 44px 58px 54px;
+    }
+    .table-sheet h1 { margin-bottom: 18px; font-size: 30px; }
+    .note {
+      margin: 0 0 18px;
+      font-size: 22px;
+      line-height: 1.6;
+      text-indent: 2em;
+    }
+    table.db {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      margin: 0 0 26px;
+      background: rgba(255,255,255,.98);
+      border: 2px solid #1b1b1b;
+      box-shadow: 0 0 0 3px rgba(184,31,53,.08);
+    }
+    table.db caption {
+      caption-side: top;
+      padding: 8px 0 10px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+    table.db td, table.db th {
+      border: 1.4px solid #1b1b1b;
+      padding: 8px 10px;
+      font-size: 17px;
+      line-height: 1.35;
+      word-break: break-all;
+      vertical-align: middle;
+    }
+    table.db th {
+      background: #e6e6e6;
+      font-weight: 700;
+      text-align: left;
+    }
+    .meta {
+      background: #f7f7f7;
+      font-weight: 700;
+      width: 120px;
+    }
+    .field { width: 190px; }
+    .cn { width: 190px; }
+    .type { width: 160px; }
+    .key { width: 150px; }
+    .remark { width: auto; }
+  </style>
+</head>
+<body>
+  <section id="cdm" class="sheet">
+    <div class="plane">鉁?/div>
+    <h1>绯荤粺 CDM 姒傚康鏁版嵁妯″瀷</h1>
+    <div class="diagram">
+      <svg class="links" viewBox="0 0 1504 1035" preserveAspectRatio="none">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#0b4bb3" />
+          </marker>
+        </defs>
+        <path class="link" d="M388,180 C470,160 500,150 590,150" />
+        <text class="rel" x="465" y="140">鎷ユ湁</text><text class="crow" x="392" y="165">1</text><text class="crow" x="570" y="140">N</text>
+        <path class="link" d="M388,300 C510,330 550,345 690,360" />
+        <text class="rel" x="520" y="320">鏀惰棌</text><text class="crow" x="392" y="305">1</text><text class="crow" x="672" y="350">N</text>
+        <path class="link" d="M930,250 C890,300 850,330 805,360" />
+        <text class="rel" x="850" y="305">琚敹钘?/text><text class="crow" x="910" y="260">1</text><text class="crow" x="807" y="350">N</text>
+        <path class="link" d="M1065,250 C1130,265 1170,280 1225,305" />
+        <text class="rel" x="1130" y="270">浜х敓</text><text class="crow" x="1070" y="245">1</text><text class="crow" x="1200" y="300">N</text>
+        <path class="link" d="M1030,450 C1095,510 1130,545 1190,610" />
+        <text class="rel" x="1110" y="525">褰㈡垚</text>
+        <path class="link" d="M260,585 C410,600 550,620 710,650" />
+        <text class="rel" x="462" y="598">璁板綍澶辫触</text><text class="crow" x="265" y="570">1</text><text class="crow" x="690" y="638">N</text>
+        <path class="link" d="M355,760 C480,750 570,750 710,755" />
+        <text class="rel" x="500" y="735">鍖呭惈</text><text class="crow" x="360" y="744">1</text><text class="crow" x="690" y="742">N</text>
+      </svg>
+      <div class="card" style="left:90px;top:110px"><h2>鏅€氱敤鎴?/h2><ul><li>鐢ㄦ埛鍚?/li><li>瀵嗙爜</li><li>鏄电О</li><li>鍒涘缓鏃堕棿</li></ul></div>
+      <div class="card" style="left:590px;top:90px"><h2>鐧诲綍浠ょ墝</h2><ul><li>鐢ㄦ埛缂栧彿</li><li>Token</li><li>鍒涘缓鏃堕棿</li><li>杩囨湡鏃堕棿</li></ul></div>
+      <div class="card" style="left:700px;top:320px"><h2>鏀惰棌璁板綍</h2><ul><li>鐢ㄦ埛缂栧彿</li><li>鑸彮缂栧彿</li><li>鏀惰棌鏃堕棿</li></ul></div>
+      <div class="card" style="left:930px;top:105px;width:275px"><h2>鑸彮淇℃伅</h2><ul><li>鑸彮鍙?/li><li>鑸┖鍏徃</li><li>鍑哄彂鍦?鐩殑鍦?/li><li>璧烽檷鏃堕棿</li><li>浠锋牸涓庝綑绁?/li></ul></div>
+      <div class="card" style="left:1225px;top:265px"><h2>浠锋牸蹇収</h2><ul><li>鑸彮缂栧彿</li><li>蹇収浠锋牸</li><li>浣欑エ鏁伴噺</li><li>瑙傛祴鏃堕棿</li></ul></div>
+      <div class="card" style="left:80px;top:545px"><h2>閲囬泦浠诲姟</h2><ul><li>浠诲姟鐘舵€?/li><li>寮€濮嬫椂闂?/li><li>缁撴潫鏃堕棿</li><li>鎴愬姛/澶辫触鏁伴噺</li></ul></div>
+      <div class="card" style="left:710px;top:610px"><h2>鏍￠獙澶辫触璁板綍</h2><ul><li>浠诲姟缂栧彿</li><li>鑸彮鍙?/li><li>澶辫触鍘熷洜</li><li>鎷掔粷鏃堕棿</li></ul></div>
+      <div class="card" style="left:1190px;top:610px"><h2>浠锋牸涓婁笅鏂?/h2><ul><li>鍑哄彂鍦?/li><li>鐩殑鍦?/li><li>鏃ユ湡</li><li>瓒嬪娍鏂囨湰</li></ul></div>
+      <div class="card" style="left:110px;top:720px"><h2>浼氳瘽</h2><ul><li>浼氳瘽鏍囬</li><li>鍒涘缓鏃堕棿</li><li>鏇存柊鏃堕棿</li></ul></div>
+      <div class="card" style="left:710px;top:720px"><h2>浼氳瘽娑堟伅</h2><ul><li>浼氳瘽缂栧彿</li><li>瑙掕壊</li><li>鍐呭</li><li>鍒涘缓鏃堕棿</li></ul></div>
+    </div>
+    <div class="caption">鍥?4.2 绯荤粺 CDM 鍥?/div>
+  </section>
+
+  <section id="pdm" class="sheet pdm">
+    <div class="plane">鉁?/div>
+    <h1>绯荤粺 PDM 鐗╃悊鏁版嵁妯″瀷</h1>
+    <div class="diagram">
+      <svg class="links" viewBox="0 0 1504 890" preserveAspectRatio="none">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#0b4bb3" />
+          </marker>
+        </defs>
+        <path class="link" d="M350,210 C480,210 520,210 650,210" />
+        <text class="rel" x="455" y="195">FK user_id</text>
+        <path class="link" d="M350,340 C510,360 560,370 650,400" />
+        <text class="rel" x="460" y="345">FK user_id</text>
+        <path class="link" d="M1035,260 C950,315 870,360 795,400" />
+        <text class="rel" x="905" y="330">FK flight_id</text>
+        <path class="link" d="M1035,285 C1150,305 1210,330 1260,365" />
+        <text class="rel" x="1135" y="300">flight_id</text>
+        <path class="link" d="M350,640 C485,650 570,660 700,675" />
+        <text class="rel" x="490" y="640">crawl_job_id</text>
+        <path class="link" d="M350,930 C500,920 560,920 700,915" />
+        <text class="rel" x="505" y="900">session_id</text>
+      </svg>
+      <div class="card" style="left:75px;top:95px"><h2>app_user</h2><ul><li>PK id bigint</li><li>username varchar(32) UK</li><li>password varchar(128)</li><li>nickname varchar(32)</li><li>created_at datetime</li></ul></div>
+      <div class="card" style="left:650px;top:110px"><h2>user_token</h2><ul><li>PK id bigint</li><li>FK user_id bigint</li><li>token varchar(64) UK</li><li>created_at datetime</li><li>expires_at datetime</li></ul></div>
+      <div class="card" style="left:650px;top:350px"><h2>favorite</h2><ul><li>PK id bigint</li><li>FK user_id bigint</li><li>FK flight_id bigint</li><li>created_at datetime</li><li>UK(user_id, flight_id)</li></ul></div>
+      <div class="card" style="left:1035px;top:80px;width:325px"><h2>flight</h2><ul><li>PK id bigint</li><li>flight_no varchar(20)</li><li>airline_name varchar(64)</li><li>from_city / to_city varchar(32)</li><li>depart_time / arrive_time datetime</li><li>price decimal(10,2)</li><li>seats_left int</li><li>data_source varchar(32)</li></ul></div>
+      <div class="card" style="left:1190px;top:350px;width:300px"><h2>flight_price_snapshot</h2><ul><li>PK id bigint</li><li>flight_id bigint</li><li>flight_no varchar(20)</li><li>route fields</li><li>price decimal(10,2)</li><li>observed_at datetime</li></ul></div>
+      <div class="card" style="left:75px;top:545px;width:300px"><h2>crawl_job</h2><ul><li>PK id bigint</li><li>status varchar(16)</li><li>started_at datetime</li><li>finished_at datetime</li><li>success_count int</li><li>failed_count int</li><li>error_message varchar(1000)</li></ul></div>
+      <div class="card" style="left:700px;top:620px;width:310px"><h2>flight_validation_failure</h2><ul><li>PK id bigint</li><li>crawl_job_id bigint</li><li>flight_no varchar(20)</li><li>route fields</li><li>failure_reason varchar(500)</li><li>rejected_at datetime</li></ul></div>
+      <div class="card" style="left:1115px;top:610px;width:300px"><h2>price_context</h2><ul><li>PK id bigint</li><li>from_city varchar(32)</li><li>to_city varchar(32)</li><li>depart_date date</li><li>context_text text</li><li>context_type varchar(32)</li><li>created_at datetime</li></ul></div>
+      <div class="card" style="left:75px;top:850px;width:300px"><h2>conversation_session</h2><ul><li>PK id varchar(36)</li><li>title varchar(128)</li><li>created_at datetime</li><li>updated_at datetime</li></ul></div>
+      <div class="card" style="left:700px;top:845px;width:300px"><h2>conversation_message</h2><ul><li>PK id bigint</li><li>session_id varchar(36)</li><li>role varchar(16)</li><li>content text</li><li>created_at datetime</li></ul></div>
+    </div>
+    <div class="caption">鍥?4.3 绯荤粺 PDM 鍥?/div>
+  </section>
+
+  <section id="phys-core" class="sheet table-sheet">
+    <h1>鏁版嵁搴撶墿鐞嗙粨鏋勮璁★紙涓€锛夋牳蹇冧笟鍔¤〃</h1>
+    <p class="note">鏁版嵁搴撳悕绉帮細flight_demo銆傝鏄庯細PK 琛ㄧず涓婚敭锛孎K 琛ㄧず澶栭敭锛孶K 琛ㄧず鍞竴绾︽潫锛孨ot null 琛ㄧず瀛楁涓嶈兘涓虹┖銆?/p>
+    <table class="db">
+      <caption>琛?4.1 鑸彮淇℃伅琛?flight</caption>
+      <tr><td class="meta">琛ㄥ悕</td><td colspan="4">flight</td></tr>
+      <tr><td class="meta">鎻忚堪</td><td colspan="4">瀛樺偍鑸彮鍩虹淇℃伅銆佷环鏍笺€佷綑绁ㄥ拰鏁版嵁鏉ユ簮銆?/td></tr>
+      <tr><th class="field">瀛楁鍚?/th><th class="cn">涓枃鍚箟</th><th class="type">绫诲瀷</th><th class="key">涓婚敭/澶栭敭</th><th class="remark">澶囨敞</th></tr>
+      <tr><td>id</td><td>鑸彮璁板綍缂栧彿</td><td>bigint</td><td>PK</td><td>鑷涓婚敭</td></tr>
+      <tr><td>flight_no</td><td>鑸彮鍙?/td><td>varchar(20)</td><td>UK 缁勫悎</td><td>涓嶈兘涓虹┖</td></tr>
+      <tr><td>airline_name</td><td>鑸┖鍏徃</td><td>varchar(64)</td><td></td><td>涓嶈兘涓虹┖</td></tr>
+      <tr><td>from_city / to_city</td><td>鍑哄彂鍩庡競 / 鍒拌揪鍩庡競</td><td>varchar(32)</td><td>绱㈠紩</td><td>鐢ㄤ簬鑸嚎鏌ヨ</td></tr>
+      <tr><td>from_airport / to_airport</td><td>鍑哄彂鏈哄満 / 鍒拌揪鏈哄満</td><td>varchar(64)</td><td></td><td>涓嶈兘涓虹┖</td></tr>
+      <tr><td>depart_time / arrive_time</td><td>璧烽鏃堕棿 / 鍒拌揪鏃堕棿</td><td>datetime</td><td>UK 缁勫悎</td><td>涓嶈兘涓虹┖</td></tr>
+      <tr><td>price</td><td>鏈虹エ浠锋牸</td><td>decimal(10,2)</td><td>绱㈠紩</td><td>涓嶈兘涓虹┖</td></tr>
+      <tr><td>seats_left</td><td>鍓╀綑搴т綅鏁?/td><td>int</td><td></td><td>榛樿 0</td></tr>
+      <tr><td>data_source</td><td>鏁版嵁鏉ユ簮</td><td>varchar(32)</td><td>UK 缁勫悎</td><td>涓嶈兘涓虹┖</td></tr>
+      <tr><td>collected_at</td><td>閲囬泦鏃堕棿</td><td>datetime</td><td></td><td>涓嶈兘涓虹┖</td></tr>
+    </table>
+    <table class="db">
+      <caption>琛?4.2 鐢ㄦ埛琛?app_user</caption>
+      <tr><td class="meta">琛ㄥ悕</td><td colspan="4">app_user</td></tr>
+      <tr><td class="meta">鎻忚堪</td><td colspan="4">瀛樺偍绯荤粺鏅€氱敤鎴疯处鍙蜂俊鎭€?/td></tr>
+      <tr><th>瀛楁鍚?/th><th>涓枃鍚箟</th><th>绫诲瀷</th><th>涓婚敭/澶栭敭</th><th>澶囨敞</th></tr>
+      <tr><td>id</td><td>鐢ㄦ埛缂栧彿</td><td>bigint</td><td>PK</td><td>鑷涓婚敭</td></tr>
+      <tr><td>username</td><td>鐢ㄦ埛鍚?/td><td>varchar(32)</td><td>UK</td><td>涓嶈兘涓虹┖锛屽敮涓€</td></tr>
+      <tr><td>password</td><td>瀵嗙爜</td><td>varchar(128)</td><td></td><td>涓嶈兘涓虹┖</td></tr>
+      <tr><td>nickname</td><td>鏄电О</td><td>varchar(32)</td><td></td><td>鍙负绌?/td></tr>
+      <tr><td>created_at</td><td>鍒涘缓鏃堕棿</td><td>datetime</td><td></td><td>涓嶈兘涓虹┖</td></tr>
+    </table>
+    <table class="db">
+      <caption>琛?4.3 鐧诲綍浠ょ墝琛?user_token</caption>
+      <tr><th>瀛楁鍚?/th><th>涓枃鍚箟</th><th>绫诲瀷</th><th>涓婚敭/澶栭敭</th><th>澶囨敞</th></tr>
+      <tr><td>id</td><td>浠ょ墝缂栧彿</td><td>bigint</td><td>PK</td><td>鑷涓婚敭</td></tr>
+      <tr><td>user_id</td><td>鐢ㄦ埛缂栧彿</td><td>bigint</td><td>绱㈠紩</td><td>瀵瑰簲 app_user.id</td></tr>
+      <tr><td>token</td><td>鐧诲綍浠ょ墝</td><td>varchar(64)</td><td>UK</td><td>涓嶈兘涓虹┖锛屽敮涓€</td></tr>
+      <tr><td>created_at</td><td>鍒涘缓鏃堕棿</td><td>datetime</td><td></td><td>涓嶈兘涓虹┖</td></tr>
+      <tr><td>expires_at</td><td>杩囨湡鏃堕棿</td><td>datetime</td><td></td><td>涓嶈兘涓虹┖</td></tr>
+    </table>
+    <table class="db">
+      <caption>琛?4.4 鏀惰棌琛?favorite</caption>
+      <tr><th>瀛楁鍚?/th><th>涓枃鍚箟</th><th>绫诲瀷</th><th>涓婚敭/澶栭敭</th><th>澶囨敞</th></tr>
+      <tr><td>id</td><td>鏀惰棌缂栧彿</td><td>bigint</td><td>PK</td><td>鑷涓婚敭</td></tr>
+      <tr><td>user_id</td><td>鐢ㄦ埛缂栧彿</td><td>bigint</td><td>FK</td><td>鍏宠仈 app_user.id</td></tr>
+      <tr><td>flight_id</td><td>鑸彮缂栧彿</td><td>bigint</td><td>FK</td><td>鍏宠仈 flight.id</td></tr>
+      <tr><td>created_at</td><td>鏀惰棌鏃堕棿</td><td>datetime</td><td></td><td>涓嶈兘涓虹┖</td></tr>
+    </table>
+  </section>
+
+  <section id="phys-crawl" class="sheet table-sheet">
+    <h1>鏁版嵁搴撶墿鐞嗙粨鏋勮璁★紙浜岋級閲囬泦涓庝环鏍艰〃</h1>
+    <p class="note">鏈粍鏁版嵁琛ㄤ富瑕佺敤浜庝繚瀛樼埇铏噰闆嗕换鍔°€佷环鏍煎揩鐓с€佹暟鎹牎楠屽け璐ヨ褰曚互鍙婁环鏍艰秼鍔夸笂涓嬫枃銆?/p>
+    <table class="db">
+      <caption>琛?4.5 閲囬泦浠诲姟琛?crawl_job</caption>
+      <tr><th>瀛楁鍚?/th><th>涓枃鍚箟</th><th>绫诲瀷</th><th>涓婚敭/澶栭敭</th><th>澶囨敞</th></tr>
+      <tr><td>id</td><td>浠诲姟缂栧彿</td><td>bigint</td><td>PK</td><td>鑷涓婚敭</td></tr>
+      <tr><td>status</td><td>浠诲姟鐘舵€?/td><td>varchar(16)</td><td></td><td>涓嶈兘涓虹┖</td></tr>
+      <tr><td>started_at / finished_at</td><td>寮€濮嬫椂闂?/ 缁撴潫鏃堕棿</td><td>datetime</td><td></td><td>缁撴潫鏃堕棿鍙负绌?/td></tr>
+      <tr><td>success_count / failed_count</td><td>鎴愬姛鏁?/ 澶辫触鏁?/td><td>int</td><td></td><td>榛樿 0</td></tr>
+      <tr><td>error_message</td><td>閿欒淇℃伅</td><td>varchar(1000)</td><td></td><td>鍙负绌?/td></tr>
+      <tr><td>source</td><td>鏁版嵁鏉ユ簮</td><td>varchar(32)</td><td></td><td>鍙负绌?/td></tr>
+      <tr><td>request_params</td><td>璇锋眰鍙傛暟</td><td>varchar(500)</td><td></td><td>鍙负绌?/td></tr>
+    </table>
+    <table class="db">
+      <caption>琛?4.6 浠锋牸蹇収琛?flight_price_snapshot</caption>
+      <tr><th>瀛楁鍚?/th><th>涓枃鍚箟</th><th>绫诲瀷</th><th>涓婚敭/澶栭敭</th><th>澶囨敞</th></tr>
+      <tr><td>id</td><td>蹇収缂栧彿</td><td>bigint</td><td>PK</td><td>鑷涓婚敭</td></tr>
+      <tr><td>flight_id</td><td>鑸彮缂栧彿</td><td>bigint</td><td>绱㈠紩</td><td>瀵瑰簲 flight.id</td></tr>
+      <tr><td>flight_no</td><td>鑸彮鍙?/td><td>varchar(20)</td><td></td><td>涓嶈兘涓虹┖</td></tr>
+      <tr><td>from_city / to_city</td><td>鍑哄彂鍩庡競 / 鍒拌揪鍩庡競</td><td>varchar(32)</td><td>绱㈠紩</td><td>鐢ㄤ簬鑸嚎鏌ヨ</td></tr>
+      <tr><td>depart_time</td><td>璧烽鏃堕棿</td><td>datetime</td><td></td><td>涓嶈兘涓虹┖</td></tr>
+      <tr><td>price</td><td>蹇収浠锋牸</td><td>decimal(10,2)</td><td></td><td>涓嶈兘涓虹┖</td></tr>
+      <tr><td>seats_left</td><td>蹇収浣欑エ</td><td>int</td><td></td><td>榛樿 0</td></tr>
+      <tr><td>observed_at</td><td>瑙傛祴鏃堕棿</td><td>datetime</td><td>绱㈠紩</td><td>涓嶈兘涓虹┖</td></tr>
+    </table>
+    <table class="db">
+      <caption>琛?4.7 鏍￠獙澶辫触璁板綍琛?flight_validation_failure</caption>
+      <tr><th>瀛楁鍚?/th><th>涓枃鍚箟</th><th>绫诲瀷</th><th>涓婚敭/澶栭敭</th><th>澶囨敞</th></tr>
+      <tr><td>id</td><td>澶辫触璁板綍缂栧彿</td><td>bigint</td><td>PK</td><td>鑷涓婚敭</td></tr>
+      <tr><td>crawl_job_id</td><td>閲囬泦浠诲姟缂栧彿</td><td>bigint</td><td>绱㈠紩</td><td>鍙负绌?/td></tr>
+      <tr><td>flight_no</td><td>鑸彮鍙?/td><td>varchar(20)</td><td></td><td>鍙负绌?/td></tr>
+      <tr><td>failure_reason</td><td>澶辫触鍘熷洜</td><td>varchar(500)</td><td></td><td>涓嶈兘涓虹┖</td></tr>
+      <tr><td>rejected_at</td><td>鎷掔粷鏃堕棿</td><td>datetime</td><td>绱㈠紩</td><td>涓嶈兘涓虹┖</td></tr>
+    </table>
+    <table class="db">
+      <caption>琛?4.8 浠锋牸涓婁笅鏂囪〃 price_context</caption>
+      <tr><th>瀛楁鍚?/th><th>涓枃鍚箟</th><th>绫诲瀷</th><th>涓婚敭/澶栭敭</th><th>澶囨敞</th></tr>
+      <tr><td>id</td><td>涓婁笅鏂囩紪鍙?/td><td>bigint</td><td>PK</td><td>鑷涓婚敭</td></tr>
+      <tr><td>from_city / to_city</td><td>鍑哄彂鍩庡競 / 鍒拌揪鍩庡競</td><td>varchar(32)</td><td>绱㈠紩</td><td>涓嶈兘涓虹┖</td></tr>
+      <tr><td>depart_date</td><td>鍑哄彂鏃ユ湡</td><td>date</td><td></td><td>鍙负绌?/td></tr>
+      <tr><td>context_text</td><td>涓婁笅鏂囨枃鏈?/td><td>text</td><td>鍏ㄦ枃绱㈠紩</td><td>涓嶈兘涓虹┖</td></tr>
+      <tr><td>context_type</td><td>涓婁笅鏂囩被鍨?/td><td>varchar(32)</td><td></td><td>榛樿 PRICE_TREND</td></tr>
+      <tr><td>created_at</td><td>鍒涘缓鏃堕棿</td><td>datetime</td><td></td><td>涓嶈兘涓虹┖</td></tr>
+    </table>
+  </section>
+
+  <section id="phys-chat" class="sheet table-sheet">
+    <h1>鏁版嵁搴撶墿鐞嗙粨鏋勮璁★紙涓夛級浼氳瘽淇濈暀琛?/h1>
+    <p class="note">鏈粍鏁版嵁琛ㄤ负绯荤粺淇濈暀鐨?AI/浼氳瘽鐩稿叧鏁版嵁缁撴瀯锛屽綋鍓嶄笉鏄牳蹇冧氦浠樹笟鍔★紝浣嗘暟鎹簱涓粛淇濈暀瀵瑰簲琛ㄧ粨鏋勩€?/p>
+    <table class="db">
+      <caption>琛?4.9 浼氳瘽琛?conversation_session</caption>
+      <tr><td class="meta">琛ㄥ悕</td><td colspan="4">conversation_session</td></tr>
+      <tr><td class="meta">鎻忚堪</td><td colspan="4">淇濆瓨浼氳瘽鍩烘湰淇℃伅銆?/td></tr>
+      <tr><th>瀛楁鍚?/th><th>涓枃鍚箟</th><th>绫诲瀷</th><th>涓婚敭/澶栭敭</th><th>澶囨敞</th></tr>
+      <tr><td>id</td><td>浼氳瘽缂栧彿</td><td>varchar(36)</td><td>PK</td><td>涓婚敭</td></tr>
+      <tr><td>title</td><td>浼氳瘽鏍囬</td><td>varchar(128)</td><td></td><td>鍙负绌?/td></tr>
+      <tr><td>created_at</td><td>鍒涘缓鏃堕棿</td><td>datetime</td><td></td><td>涓嶈兘涓虹┖</td></tr>
+      <tr><td>updated_at</td><td>鏇存柊鏃堕棿</td><td>datetime</td><td></td><td>涓嶈兘涓虹┖</td></tr>
+    </table>
+    <table class="db">
+      <caption>琛?4.10 浼氳瘽娑堟伅琛?conversation_message</caption>
+      <tr><td class="meta">琛ㄥ悕</td><td colspan="4">conversation_message</td></tr>
+      <tr><td class="meta">鎻忚堪</td><td colspan="4">淇濆瓨浼氳瘽涓殑娑堟伅鍐呭銆?/td></tr>
+      <tr><th>瀛楁鍚?/th><th>涓枃鍚箟</th><th>绫诲瀷</th><th>涓婚敭/澶栭敭</th><th>澶囨敞</th></tr>
+      <tr><td>id</td><td>娑堟伅缂栧彿</td><td>bigint</td><td>PK</td><td>鑷涓婚敭</td></tr>
+      <tr><td>session_id</td><td>浼氳瘽缂栧彿</td><td>varchar(36)</td><td>绱㈠紩</td><td>瀵瑰簲 conversation_session.id</td></tr>
+      <tr><td>role</td><td>娑堟伅瑙掕壊</td><td>varchar(16)</td><td></td><td>涓嶈兘涓虹┖</td></tr>
+      <tr><td>content</td><td>娑堟伅鍐呭</td><td>text</td><td></td><td>涓嶈兘涓虹┖</td></tr>
+      <tr><td>created_at</td><td>鍒涘缓鏃堕棿</td><td>datetime</td><td></td><td>涓嶈兘涓虹┖</td></tr>
+    </table>
+  </section>
+</body>
+</html>

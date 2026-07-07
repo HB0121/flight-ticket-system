@@ -1,5 +1,6 @@
 <template>
   <section class="profile-page">
+    <!-- 搜索历史只展示后端记录，记录来源是航班查询接口。 -->
     <header class="profile-page__header">
       <div>
         <p class="profile-page__eyebrow">{{ t('history.eyebrow') }}</p>
@@ -15,6 +16,7 @@
     <div v-if="loading && !rows.length" class="profile-page__empty">{{ t('common.status.loadingHistory') }}</div>
     <div v-else-if="!rows.length" class="profile-page__empty">{{ t('history.empty') }}</div>
 
+    <!-- 每张卡片对应一次历史查询条件。 -->
     <div v-else class="history-list">
       <article v-for="row in rows" :key="row.id" class="history-card">
         <div class="history-card__route">
@@ -63,6 +65,7 @@ onActivated(() => {
   loadHistory()
 })
 
+// 搜索历史由后端根据当前登录用户返回，前端只负责展示。
 async function loadHistory() {
   loading.value = true
   errorMessage.value = ''

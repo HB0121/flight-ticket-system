@@ -1,5 +1,6 @@
 <template>
   <section class="price-history-chart">
+    <!-- 价格历史区：上方显示摘要和统计值，下方显示趋势图与明细列表。 -->
     <header class="price-history-chart__header">
       <div>
         <h3>{{ t('flights.history.title') }}</h3>
@@ -29,6 +30,7 @@
     </div>
     <div v-else class="price-history-chart__body">
       <div class="price-history-chart__plot">
+        <!-- 这里用轻量 SVG 绘制趋势线，避免为了单个小图额外初始化 ECharts。 -->
         <svg viewBox="0 0 320 170" preserveAspectRatio="none" class="price-history-chart__svg" aria-hidden="true">
           <g class="price-history-chart__grid">
             <line
@@ -51,6 +53,7 @@
         </div>
       </div>
 
+      <!-- 明细列表和折线图使用同一组 chartEntries。 -->
       <div class="price-history-chart__list">
         <article
           v-for="entry in chartEntries"
@@ -82,6 +85,7 @@ const props = defineProps({
   }
 })
 
+// 价格历史只展示最近 10 条，避免图表点过密影响阅读。
 const chartEntries = computed(() => {
   const rows = Array.isArray(props.history) ? [...props.history].slice(-10) : []
   return rows.map((entry, index) => {
@@ -109,6 +113,7 @@ const minPrice = computed(() => (prices.value.length ? Math.min(...prices.value)
 const maxPrice = computed(() => (prices.value.length ? Math.max(...prices.value) : 0))
 const currentPrice = computed(() => (prices.value.length ? prices.value[prices.value.length - 1] : 0))
 
+// 将价格映射到 SVG 坐标，价格越高 y 值越靠上。
 const chartPoints = computed(() => {
   const entries = chartEntries.value
   if (!entries.length) return []
@@ -133,10 +138,12 @@ const chartPoints = computed(() => {
   })
 })
 
+// polyline 需要 "x,y x,y" 字符串格式。
 const polylinePoints = computed(() =>
   chartPoints.value.map(point => `${point.x},${point.y}`).join(' ')
 )
 
+// 背景网格固定为 4 条横线，用于辅助观察价格变化幅度。
 const gridLines = computed(() => {
   const top = 18
   const bottom = 130
@@ -155,6 +162,7 @@ const gridLines = computed(() => {
   })
 })
 
+// 摘要文案跟随语言变化，数值来自同一组 chartEntries。
 const summary = computed(() => {
   if (!chartEntries.value.length) {
     return t('flights.history.waiting')

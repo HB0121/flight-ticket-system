@@ -1,5 +1,6 @@
 import { http } from './http.js'
 
+// 爬虫任务可能运行较久，单独放宽请求超时时间。
 const CRAWLER_TIMEOUT_MS = 130000
 
 export async function createCrawlJob(payload = {}) {

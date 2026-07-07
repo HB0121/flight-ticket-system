@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>系统PDM图</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#fff;font-family:"SimSun","Microsoft YaHei",sans-serif;color:#111}
+    .page{width:1600px;height:1120px;padding:42px 56px;position:relative;overflow:hidden;background:
+      linear-gradient(90deg,rgba(184,31,53,.07) 1px,transparent 1px),
+      linear-gradient(180deg,rgba(184,31,53,.045) 1px,transparent 1px),#fff;background-size:34px 34px}
+    h1{text-align:center;margin:0 0 24px;font-size:34px}
+    .plane{position:absolute;right:70px;top:40px;color:#b81f35;font-size:48px;transform:rotate(-10deg)}
+    .card{position:absolute;width:275px;background:#fff9cf;border:2px solid #b81f35;border-radius:8px;overflow:hidden;box-shadow:0 8px 18px rgba(184,31,53,.08)}
+    .card h2{margin:0;padding:9px 10px;background:#fff3a8;border-bottom:2px solid #b81f35;text-align:center;font-size:23px}
+    .card ul{margin:0;padding:10px 18px 12px;list-style:none;font-family:Consolas,"Courier New",monospace;font-size:15px;line-height:1.45}
+    .links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+    .link{stroke:#0b4bb3;stroke-width:2.5;fill:none}
+    .rel{font-family:Consolas,"Courier New",monospace;font-size:18px;fill:#b81f35;font-weight:700}
+    .caption{position:absolute;bottom:24px;left:0;right:0;text-align:center;font-size:28px;font-weight:700}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="plane">✈</div>
+    <h1>系统 PDM 物理数据模型</h1>
+    <svg class="links" viewBox="0 0 1600 1120">
+      <path class="link" d="M340 245 L650 245"/><text class="rel" x="465" y="228">FK user_id</text>
+      <path class="link" d="M340 365 C470 385 540 410 650 430"/><text class="rel" x="465" y="377">FK user_id</text>
+      <path class="link" d="M920 430 L1110 320"/><text class="rel" x="955" y="385">FK flight_id</text>
+      <path class="link" d="M1305 350 L1305 455"/><text class="rel" x="1322" y="410">flight_id</text>
+      <path class="link" d="M360 685 L720 720"/><text class="rel" x="500" y="680">crawl_job_id</text>
+      <path class="link" d="M360 900 L720 900"/><text class="rel" x="510" y="882">session_id</text>
+    </svg>
+    <section class="card" style="left:92px;top:150px"><h2>app_user</h2><ul><li>PK id bigint</li><li>username varchar(32) UK</li><li>password varchar(128)</li><li>nickname varchar(32)</li><li>created_at datetime</li></ul></section>
+    <section class="card" style="left:650px;top:150px"><h2>user_token</h2><ul><li>PK id bigint</li><li>user_id bigint</li><li>token varchar(64) UK</li><li>created_at datetime</li><li>expires_at datetime</li></ul></section>
+    <section class="card" style="left:650px;top:370px"><h2>favorite</h2><ul><li>PK id bigint</li><li>user_id bigint</li><li>flight_id bigint</li><li>created_at datetime</li><li>UK(user_id, flight_id)</li></ul></section>
+    <section class="card" style="left:1110px;top:135px;width:340px"><h2>flight</h2><ul><li>PK id bigint</li><li>flight_no varchar(20)</li><li>airline_name varchar(64)</li><li>from_city / to_city varchar(32)</li><li>depart_time / arrive_time datetime</li><li>price decimal(10,2)</li><li>seats_left int</li><li>data_source varchar(32)</li></ul></section>
+    <section class="card" style="left:1160px;top:455px;width:330px"><h2>flight_price_snapshot</h2><ul><li>PK id bigint</li><li>flight_id bigint</li><li>flight_no varchar(20)</li><li>route fields</li><li>price decimal(10,2)</li><li>observed_at datetime</li></ul></section>
+    <section class="card" style="left:92px;top:585px;width:300px"><h2>crawl_job</h2><ul><li>PK id bigint</li><li>status varchar(16)</li><li>started_at datetime</li><li>finished_at datetime</li><li>success_count int</li><li>failed_count int</li></ul></section>
+    <section class="card" style="left:720px;top:650px;width:330px"><h2>flight_validation_failure</h2><ul><li>PK id bigint</li><li>crawl_job_id bigint</li><li>flight_no varchar(20)</li><li>failure_reason varchar(500)</li><li>rejected_at datetime</li></ul></section>
+    <section class="card" style="left:1130px;top:730px;width:330px"><h2>price_context</h2><ul><li>PK id bigint</li><li>from_city / to_city varchar(32)</li><li>depart_date date</li><li>context_text text</li><li>context_type varchar(32)</li></ul></section>
+    <section class="card" style="left:92px;top:825px;width:300px"><h2>conversation_session</h2><ul><li>PK id varchar(36)</li><li>title varchar(128)</li><li>created_at datetime</li><li>updated_at datetime</li></ul></section>
+    <section class="card" style="left:720px;top:825px;width:330px"><h2>conversation_message</h2><ul><li>PK id bigint</li><li>session_id varchar(36)</li><li>role varchar(16)</li><li>content text</li><li>created_at datetime</li></ul></section>
+    <div class="caption">图 4.3 系统 PDM 图</div>
+  </main>
+</body>
+</html>
