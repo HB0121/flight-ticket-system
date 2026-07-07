@@ -121,12 +121,23 @@ describe('FavoritesPage', () => {
     expect(wrapper.text()).toContain('MU1001')
     expect(wrapper.get('.favorites-card__route').text()).toBe('Shanghai -> Beijing')
     expect(wrapper.get('.favorites-card__price').text()).toBe('CNY 880')
-    expect(wrapper.text()).toContain('PVG -> PEK')
+    expect(wrapper.text()).toContain('Shanghai Pudong PVG -> Beijing Capital PEK')
     await wrapper.findAll('button')[1].trigger('click')
     await flushPromises()
 
     expect(mocks.removeFavorite).toHaveBeenCalledWith(1)
     expect(wrapper.text()).toContain('No saved flights yet.')
+  })
+
+  it('renders readable airport labels for favorite records in Chinese', async () => {
+    mocks.fetchFavorites.mockResolvedValueOnce([
+      { id: 2, flightId: 8, flightNo: 'GS7432', fromCity: 'Changsha', toCity: 'Chongqing', fromAirport: 'CSX', toAirport: 'CKG', departTime: '2026-06-19T16:30:00', price: 500, dataSource: 'aerodatabox' }
+    ])
+
+    const wrapper = createWrapper('zh-CN')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('长沙黄花 CSX -> 重庆江北 CKG')
   })
 
   it('renders localized favorites copy', () => {

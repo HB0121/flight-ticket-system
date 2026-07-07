@@ -99,8 +99,8 @@ export function buildAirlineDisplayLabel(airlineName, locale = 'zh-CN') {
 export function normalizeFlightForDisplay(flight, locale = 'zh-CN') {
   const fromCode = String(flight?.fromAirport ?? '').trim().toUpperCase()
   const toCode = String(flight?.toAirport ?? '').trim().toUpperCase()
-  const fromAirportLabel = buildAirportOptionLabel(fromCode || flight?.fromAirport || '-', locale)
-  const toAirportLabel = buildAirportOptionLabel(toCode || flight?.toAirport || '-', locale)
+  const fromAirportLabel = buildAirportOptionLabel(fromCode || flight?.fromAirport || '-', locale, flight?.fromCity)
+  const toAirportLabel = buildAirportOptionLabel(toCode || flight?.toAirport || '-', locale, flight?.toCity)
   const airlineRawName = String(flight?.airlineName ?? '').trim()
   const airlineLabel = buildAirlineDisplayLabel(airlineRawName, locale)
 

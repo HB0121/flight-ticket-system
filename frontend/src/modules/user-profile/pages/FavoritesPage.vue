@@ -17,7 +17,7 @@
     <div v-else-if="!favorites.length" class="profile-page__empty">{{ t('favorites.empty') }}</div>
 
     <div v-else class="favorites-list">
-      <article v-for="favorite in favorites" :key="favorite.id" class="favorites-card">
+      <article v-for="favorite in displayFavorites" :key="favorite.id" class="favorites-card">
         <div class="favorites-card__summary">
           <div>
             <p class="favorites-card__flight">{{ favorite.flightNo || '-' }}</p>
@@ -35,7 +35,7 @@
           </div>
           <div>
             <dt>{{ t('common.labels.airports') }}</dt>
-            <dd>{{ favorite.fromAirport || '-' }} -> {{ favorite.toAirport || '-' }}</dd>
+            <dd>{{ favorite.fromAirportLabel || favorite.fromAirport || '-' }} -> {{ favorite.toAirportLabel || favorite.toAirport || '-' }}</dd>
           </div>
           <div>
             <dt>{{ t('common.labels.source') }}</dt>
@@ -52,20 +52,25 @@
 </template>
 
 <script setup>
-import { onActivated, onMounted, ref } from 'vue'
+import { computed, onActivated, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { fetchFavorites, removeFavorite } from '../../../api/profileApi.js'
 
 defineOptions({ name: 'FavoritesPage' })
 import { formatDateTime } from '../../../lib/format.js'
 import { formatPrice } from '../../../shared/utils/price.js'
+import { normalizeFlightForDisplay } from '../../../shared/utils/flightDisplay.js'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const favorites = ref([])
 const loading = ref(false)
 const removingId = ref(null)
 const errorMessage = ref('')
+
+const displayFavorites = computed(() =>
+  favorites.value.map(favorite => normalizeFlightForDisplay(favorite, locale.value))
+)
 
 onMounted(() => {
   loadFavorites()

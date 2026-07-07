@@ -497,8 +497,8 @@ describe('FlightSearchPage', () => {
       {
         id: 1,
         flightNo: 'MU5101',
-        fromAirport: 'CKG',
-        toAirport: 'PEK',
+        fromAirport: 'CSX',
+        toAirport: 'CKG',
         departTime: '2026-06-19T08:30:00',
         airlineName: 'China Eastern',
         status: 'Scheduled',
@@ -515,8 +515,8 @@ describe('FlightSearchPage', () => {
     const wrapper = createWrapper('zh-CN')
     await submitSearch(wrapper)
 
+    expect(wrapper.text()).toContain('长沙黄花 CSX')
     expect(wrapper.text()).toContain('重庆江北 CKG')
-    expect(wrapper.text()).toContain('北京首都 PEK')
     expect(wrapper.text()).toContain('Scheduled')
     expect(wrapper.find('[data-testid="status-tag-1"]').classes()).toContain('flight-table__status--success')
   })
@@ -567,10 +567,15 @@ describe('FlightSearchPage', () => {
     expect(AIRPORT_OPTIONS.some(option => option.code === 'CKG')).toBe(true)
     expect(AIRPORT_OPTIONS.some(option => option.code === 'SHE')).toBe(true)
     expect(AIRPORT_OPTIONS.some(option => option.code === 'UYN')).toBe(true)
+    expect(AIRPORT_OPTIONS.some(option => option.code === 'CSX')).toBe(true)
+    expect(AIRPORT_OPTIONS.some(option => option.code === 'SJW')).toBe(true)
     expect(buildAirportOptionLabel('CKG', 'zh-CN')).toContain('重庆江北')
     expect(buildAirportOptionLabel('SHE', 'zh-CN')).toContain('沈阳桃仙')
+    expect(buildAirportOptionLabel('CSX', 'zh-CN')).toContain('长沙黄花')
+    expect(buildAirportOptionLabel('SJW', 'zh-CN')).toContain('石家庄正定')
     expect(buildAirportOptionLabel('PEK', 'en-US')).toContain('Beijing Capital')
     expect(buildAirportOptionLabel('NNG', 'en-US')).toContain('Nanning Wuxu')
+    expect(buildAirportOptionLabel('CSX', 'en-US')).toContain('Changsha Huanghua')
     expect(buildAirlineDisplayLabel('China Southern', 'zh-CN')).toBe('中国南方航空')
     expect(buildAirlineDisplayLabel('Sichuan Airlines', 'en-US')).toBe('Sichuan Airlines')
     expect(buildAirlineDisplayLabel('Unknown Demo Air', 'zh-CN')).toBe('Unknown Demo Air')
@@ -589,6 +594,19 @@ describe('FlightSearchPage', () => {
     expect(normalized.routeLabel).toContain('北京首都 PEK')
     expect(normalized.airlineLabel).toBe('中国东方航空')
     expect(matchesTimeSlot(normalized, 'morning')).toBe(true)
+
+    const unknownAirport = normalizeFlightForDisplay({
+      id: 2,
+      flightNo: 'XX1000',
+      fromCity: 'Demo City',
+      toCity: '重庆',
+      fromAirport: 'XXX',
+      toAirport: 'CKG',
+      airlineName: 'Unknown Demo Air'
+    }, 'zh-CN')
+
+    expect(unknownAirport.routeLabel).toContain('Demo City XXX')
+    expect(unknownAirport.routeLabel).toContain('重庆江北 CKG')
   })
 
   it('exposes the syncFlights API symbol through the page mock surface', async () => {
